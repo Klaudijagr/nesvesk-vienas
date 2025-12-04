@@ -20,7 +20,17 @@ Default to using Bun instead of Node.js.
 
 ## Testing
 
-Use `bun test` to run tests.
+**Convex backend tests:** Use `bun test` which runs vitest (required for convex-test edge-runtime).
+
+```bash
+bun test           # Run all tests
+bun test:run       # Run once without watch
+bun test:coverage  # With coverage report
+```
+
+Tests are in `convex/__tests__/`. Vitest is used because `convex-test` requires edge-runtime environment.
+
+**Frontend/unit tests:** Can use bun:test directly.
 
 ```ts#index.test.ts
 import { test, expect } from "bun:test";

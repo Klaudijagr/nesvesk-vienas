@@ -12,96 +12,96 @@ export function ListingCard({ profile, onInvite }: ListingCardProps) {
   const isGuest = profile.role === 'guest' || profile.role === 'both';
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full group">
+    <div className="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
       <Link
+        className="relative block h-48 overflow-hidden bg-gray-200"
         to={`/profile/${profile.userId}`}
-        className="block relative h-48 bg-gray-200 overflow-hidden"
       >
         <img
+          alt={profile.firstName}
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           src={
             profile.photoUrl ||
             `https://api.dicebear.com/7.x/initials/svg?seed=${profile.firstName}`
           }
-          alt={profile.firstName}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
         {profile.verified && (
-          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1 text-xs font-medium text-green-700 shadow-sm">
-            <ShieldCheck className="w-3 h-3" />
+          <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 font-medium text-green-700 text-xs shadow-sm backdrop-blur-sm">
+            <ShieldCheck className="h-3 w-3" />
             Verified
           </div>
         )}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-          <h3 className="text-white font-bold text-xl">
+        <div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+          <h3 className="font-bold text-white text-xl">
             {profile.firstName}
             {!isHost && profile.age ? `, ${profile.age}` : ''}
           </h3>
-          <div className="flex items-center text-white/90 text-sm">
-            <MapPin className="w-3 h-3 mr-1" />
+          <div className="flex items-center text-sm text-white/90">
+            <MapPin className="mr-1 h-3 w-3" />
             {profile.city}
           </div>
         </div>
       </Link>
 
-      <div className="p-4 flex-grow flex flex-col gap-3">
+      <div className="flex flex-grow flex-col gap-3 p-4">
         {/* Badges */}
         <div className="flex flex-wrap gap-2">
           {isHost && (
-            <span className="bg-purple-50 text-purple-700 px-2 py-1 rounded-md text-xs font-medium uppercase tracking-wider flex items-center gap-1">
-              <Users className="w-3 h-3" /> Host ({profile.capacity})
+            <span className="flex items-center gap-1 rounded-md bg-purple-50 px-2 py-1 font-medium text-purple-700 text-xs uppercase tracking-wider">
+              <Users className="h-3 w-3" /> Host ({profile.capacity})
             </span>
           )}
           {isGuest && (
-            <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-xs font-medium uppercase tracking-wider flex items-center gap-1">
-              <User className="w-3 h-3" /> Guest
+            <span className="flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 font-medium text-blue-700 text-xs uppercase tracking-wider">
+              <User className="h-3 w-3" /> Guest
             </span>
           )}
           {isHost && profile.concept && (
-            <span className="bg-orange-50 text-orange-700 px-2 py-1 rounded-md text-xs font-medium">
+            <span className="rounded-md bg-orange-50 px-2 py-1 font-medium text-orange-700 text-xs">
               {profile.concept}
             </span>
           )}
         </div>
 
         {/* Bio */}
-        <Link to={`/profile/${profile.userId}`} className="block">
-          <p className="text-gray-600 text-sm line-clamp-2 italic hover:text-gray-900 transition-colors">
+        <Link className="block" to={`/profile/${profile.userId}`}>
+          <p className="line-clamp-2 text-gray-600 text-sm italic transition-colors hover:text-gray-900">
             "{profile.bio}"
           </p>
         </Link>
 
         {/* Details */}
-        <div className="space-y-2 mt-2">
-          <div className="flex items-start gap-2 text-sm text-gray-500">
-            <Calendar className="w-4 h-4 mt-0.5 text-red-500" />
+        <div className="mt-2 space-y-2">
+          <div className="flex items-start gap-2 text-gray-500 text-sm">
+            <Calendar className="mt-0.5 h-4 w-4 text-red-500" />
             <div className="flex flex-wrap gap-1">
               {profile.availableDates.map((d) => (
-                <span key={d} className="bg-gray-100 px-1.5 rounded text-xs text-gray-700">
+                <span className="rounded bg-gray-100 px-1.5 text-gray-700 text-xs" key={d}>
                   {d}
                 </span>
               ))}
             </div>
           </div>
 
-          <div className="flex items-start gap-2 text-sm text-gray-500">
-            <MessageCircle className="w-4 h-4 mt-0.5 text-red-500" />
+          <div className="flex items-start gap-2 text-gray-500 text-sm">
+            <MessageCircle className="mt-0.5 h-4 w-4 text-red-500" />
             <span className="text-xs">{profile.languages.join(', ')}</span>
           </div>
         </div>
       </div>
 
-      <div className="p-4 border-t border-gray-100 mt-auto flex gap-2">
+      <div className="mt-auto flex gap-2 border-gray-100 border-t p-4">
         <Link
+          className="flex-1 rounded-lg bg-gray-50 px-4 py-2 text-center font-medium text-gray-700 text-sm transition-colors hover:bg-gray-100"
           to={`/profile/${profile.userId}`}
-          className="flex-1 bg-gray-50 text-gray-700 text-center py-2 px-4 rounded-lg font-medium hover:bg-gray-100 transition-colors text-sm"
         >
           View Details
         </Link>
         {onInvite && (
           <button
-            type="button"
+            className="flex-1 rounded-lg border border-red-600 bg-white px-4 py-2 font-medium text-red-600 text-sm transition-colors hover:bg-red-600 hover:text-white"
             onClick={() => onInvite(profile.userId)}
-            className="flex-1 bg-white border border-red-600 text-red-600 hover:bg-red-600 hover:text-white py-2 px-4 rounded-lg font-medium transition-colors text-sm"
+            type="button"
           >
             Connect
           </button>

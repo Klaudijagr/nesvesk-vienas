@@ -45,7 +45,7 @@ export default defineSchema({
     firstName: v.string(),
     lastName: v.optional(v.string()),
     age: v.optional(v.number()),
-    city: city,
+    city,
     bio: v.string(),
     photoUrl: v.optional(v.string()),
     verified: v.boolean(),

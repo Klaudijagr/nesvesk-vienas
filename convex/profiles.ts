@@ -37,7 +37,7 @@ export const getProfile = query({
     // TODO: Check if matched to show contact info
     const isMatched = false;
 
-    if (!isOwner && !isMatched) {
+    if (!(isOwner || isMatched)) {
       return {
         ...profile,
         lastName: undefined,
@@ -147,9 +147,8 @@ export const upsertProfile = mutation({
     if (existing) {
       await ctx.db.patch(existing._id, profileData);
       return existing._id;
-    } else {
-      return await ctx.db.insert('profiles', profileData);
     }
+    return await ctx.db.insert('profiles', profileData);
   },
 });
 

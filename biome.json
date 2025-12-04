@@ -6,18 +6,12 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": [
-      "src/**/*.ts",
-      "src/**/*.tsx",
-      "convex/**/*.ts"
-    ],
+    "includes": ["src/**/*.ts", "src/**/*.tsx", "convex/**/*.ts"],
     "ignoreUnknown": true
   },
   "overrides": [
     {
-      "includes": [
-        "convex/_generated/**"
-      ],
+      "includes": ["convex/_generated/**"],
       "linter": {
         "enabled": false
       },
@@ -65,8 +59,5 @@
       }
     }
   },
-  "extends": [
-    "ultracite/core",
-    "ultracite/react"
-  ]
+  "extends": ["ultracite/core", "ultracite/react"]
 }

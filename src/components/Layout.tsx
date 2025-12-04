@@ -22,88 +22,88 @@ export function Layout({ children }: LayoutProps) {
       : 'text-gray-600 hover:text-red-600 hover:bg-gray-50';
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 font-sans">
+    <div className="flex min-h-screen flex-col bg-gray-50 font-sans">
       {/* Navigation */}
-      <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
+      <nav className="sticky top-0 z-50 border-gray-100 border-b bg-white">
         <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
+          <div className="flex h-16 justify-between">
             <div className="flex items-center gap-8">
-              <Link to="/" className="flex-shrink-0 flex items-center gap-2 group">
-                <div className="bg-red-100 p-1.5 rounded-lg group-hover:bg-red-200 transition-colors">
+              <Link className="group flex flex-shrink-0 items-center gap-2" to="/">
+                <div className="rounded-lg bg-red-100 p-1.5 transition-colors group-hover:bg-red-200">
                   <Gift className="h-6 w-6 text-red-600" />
                 </div>
-                <span className="font-bold text-xl text-gray-900 tracking-tight">
+                <span className="font-bold text-gray-900 text-xl tracking-tight">
                   Nešvęsk Vienas
                 </span>
               </Link>
 
               {/* Desktop Nav */}
-              <div className="hidden md:flex items-center gap-1">
+              <div className="hidden items-center gap-1 md:flex">
                 <Link
+                  className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/')}`}
                   to="/"
-                  className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${isActive('/')}`}
                 >
-                  <Home className="w-4 h-4" /> Home
+                  <Home className="h-4 w-4" /> Home
                 </Link>
                 <Link
+                  className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/browse')}`}
                   to="/browse"
-                  className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${isActive('/browse')}`}
                 >
-                  <Search className="w-4 h-4" /> Find a Host
+                  <Search className="h-4 w-4" /> Find a Host
                 </Link>
                 {isAuthenticated && (
                   <Link
+                    className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${isActive('/dashboard')}`}
                     to="/dashboard"
-                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${isActive('/dashboard')}`}
                   >
-                    <Inbox className="w-4 h-4" /> Inbox
+                    <Inbox className="h-4 w-4" /> Inbox
                   </Link>
                 )}
               </div>
             </div>
 
             {/* Right Side */}
-            <div className="hidden md:flex items-center space-x-6">
-              <div className="flex items-center gap-1 text-xs text-gray-500 border-r pr-6">
-                <span className="cursor-pointer hover:text-black font-bold px-1">EN</span>
-                <span className="cursor-pointer hover:text-black px-1">LT</span>
-                <span className="cursor-pointer hover:text-black px-1">UA</span>
-                <span className="cursor-pointer hover:text-black px-1">RU</span>
+            <div className="hidden items-center space-x-6 md:flex">
+              <div className="flex items-center gap-1 border-r pr-6 text-gray-500 text-xs">
+                <span className="cursor-pointer px-1 font-bold hover:text-black">EN</span>
+                <span className="cursor-pointer px-1 hover:text-black">LT</span>
+                <span className="cursor-pointer px-1 hover:text-black">UA</span>
+                <span className="cursor-pointer px-1 hover:text-black">RU</span>
               </div>
 
               {isLoading ? (
-                <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+                <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
               ) : isAuthenticated && profile ? (
                 <div className="flex items-center gap-3">
                   <Link
+                    className="flex items-center gap-3 rounded-full border border-transparent p-1 pr-3 transition-all hover:border-gray-200 hover:bg-gray-50"
                     to="/profile/me"
-                    className="flex items-center gap-3 hover:bg-gray-50 p-1 pr-3 rounded-full border border-transparent hover:border-gray-200 transition-all"
                   >
                     <img
+                      alt="Profile"
+                      className="h-8 w-8 rounded-full object-cover"
                       src={
                         profile.photoUrl ||
                         `https://api.dicebear.com/7.x/initials/svg?seed=${profile.firstName}`
                       }
-                      alt="Profile"
-                      className="w-8 h-8 rounded-full object-cover"
                     />
-                    <span className="text-sm font-medium text-gray-700">{profile.firstName}</span>
+                    <span className="font-medium text-gray-700 text-sm">{profile.firstName}</span>
                   </Link>
                   <button
-                    type="button"
+                    className="p-2 text-gray-400 transition-colors hover:text-gray-600"
                     onClick={() => signOut()}
-                    className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
                     title="Sign out"
+                    type="button"
                   >
-                    <LogOut className="w-4 h-4" />
+                    <LogOut className="h-4 w-4" />
                   </button>
                 </div>
               ) : (
                 <Link
+                  className="flex items-center gap-2 rounded-full bg-red-600 px-5 py-2 font-bold text-sm text-white shadow-sm transition-all hover:bg-red-700 hover:shadow-md"
                   to="/login"
-                  className="flex items-center gap-2 px-5 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-full transition-all shadow-sm hover:shadow-md"
                 >
-                  <LogIn className="w-4 h-4" />
+                  <LogIn className="h-4 w-4" />
                   Login / Join
                 </Link>
               )}
@@ -112,9 +112,9 @@ export function Layout({ children }: LayoutProps) {
             {/* Mobile menu button */}
             <div className="flex items-center md:hidden">
               <button
-                type="button"
+                className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none"
+                type="button"
               >
                 {isMenuOpen ? <X className="block h-6 w-6" /> : <Menu className="block h-6 w-6" />}
               </button>
@@ -124,47 +124,47 @@ export function Layout({ children }: LayoutProps) {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-100 absolute w-full shadow-lg">
-            <div className="pt-2 pb-3 space-y-1 px-4">
+          <div className="absolute w-full border-gray-100 border-t bg-white shadow-lg md:hidden">
+            <div className="space-y-1 px-4 pt-2 pb-3">
               <Link
-                to="/"
+                className="block rounded-md px-3 py-3 font-medium text-base text-gray-700 hover:bg-gray-50 hover:text-red-600"
                 onClick={() => setIsMenuOpen(false)}
-                className="block py-3 px-3 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-50"
+                to="/"
               >
                 Home
               </Link>
               <Link
-                to="/browse"
+                className="block rounded-md px-3 py-3 font-medium text-base text-gray-700 hover:bg-gray-50 hover:text-red-600"
                 onClick={() => setIsMenuOpen(false)}
-                className="block py-3 px-3 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-50"
+                to="/browse"
               >
                 Find a Host
               </Link>
               {isAuthenticated && (
                 <Link
-                  to="/dashboard"
+                  className="block rounded-md px-3 py-3 font-medium text-base text-gray-700 hover:bg-gray-50 hover:text-red-600"
                   onClick={() => setIsMenuOpen(false)}
-                  className="block py-3 px-3 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-50"
+                  to="/dashboard"
                 >
                   Inbox
                 </Link>
               )}
               {isAuthenticated ? (
                 <button
-                  type="button"
+                  className="block w-full rounded-md px-3 py-3 text-left font-medium text-base text-gray-700 hover:bg-gray-50 hover:text-red-600"
                   onClick={() => {
                     signOut();
                     setIsMenuOpen(false);
                   }}
-                  className="block w-full text-left py-3 px-3 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-50"
+                  type="button"
                 >
                   Sign Out
                 </button>
               ) : (
                 <Link
-                  to="/login"
+                  className="block rounded-md px-3 py-3 font-medium text-base text-gray-700 hover:bg-gray-50 hover:text-red-600"
                   onClick={() => setIsMenuOpen(false)}
-                  className="block py-3 px-3 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-50"
+                  to="/login"
                 >
                   Login / Join
                 </Link>
@@ -178,37 +178,37 @@ export function Layout({ children }: LayoutProps) {
       <main className="flex-grow">{children}</main>
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-white py-12 border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <footer className="border-gray-800 border-t bg-slate-900 py-12 text-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
             <div className="col-span-1 lg:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
+              <div className="mb-4 flex items-center gap-2">
                 <Gift className="h-6 w-6 text-red-500" />
                 <span className="font-bold text-lg">Nešvęsk Vienas</span>
               </div>
-              <p className="text-gray-400 text-sm max-w-sm leading-relaxed">
+              <p className="max-w-sm text-gray-400 text-sm leading-relaxed">
                 A non-profit initiative connecting people for the holidays. Whether you're a host
                 with an extra chair or a guest looking for company, you belong here.
               </p>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4 text-white">Platform</h3>
+              <h3 className="mb-4 font-semibold text-white">Platform</h3>
               <ul className="space-y-2 text-gray-400 text-sm">
                 <li>
-                  <Link to="/browse" className="hover:text-amber-400 transition-colors">
+                  <Link className="transition-colors hover:text-amber-400" to="/browse">
                     Find a Host
                   </Link>
                 </li>
                 <li>
-                  <Link to="/register?role=host" className="hover:text-amber-400 transition-colors">
+                  <Link className="transition-colors hover:text-amber-400" to="/register?role=host">
                     Become a Host
                   </Link>
                 </li>
                 <li>
                   <Link
+                    className="transition-colors hover:text-amber-400"
                     to="/register?role=guest"
-                    className="hover:text-amber-400 transition-colors"
                   >
                     Guest Sign Up
                   </Link>
@@ -217,27 +217,27 @@ export function Layout({ children }: LayoutProps) {
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4 text-white">Legal & Safety</h3>
+              <h3 className="mb-4 font-semibold text-white">Legal & Safety</h3>
               <ul className="space-y-2 text-gray-400 text-sm">
                 <li>
-                  <Link to="/terms" className="hover:text-amber-400 transition-colors">
+                  <Link className="transition-colors hover:text-amber-400" to="/terms">
                     Safety Guidelines
                   </Link>
                 </li>
                 <li>
-                  <Link to="/terms" className="hover:text-amber-400 transition-colors">
+                  <Link className="transition-colors hover:text-amber-400" to="/terms">
                     Terms of Service
                   </Link>
                 </li>
                 <li>
-                  <Link to="/terms" className="hover:text-amber-400 transition-colors">
+                  <Link className="transition-colors hover:text-amber-400" to="/terms">
                     Privacy Policy
                   </Link>
                 </li>
               </ul>
             </div>
           </div>
-          <div className="mt-12 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm flex flex-col md:flex-row justify-between items-center">
+          <div className="mt-12 flex flex-col items-center justify-between border-gray-800 border-t pt-8 text-center text-gray-500 text-sm md:flex-row">
             <span>© {new Date().getFullYear()} Nešvęsk Vienas. All rights reserved.</span>
             <span className="mt-2 md:mt-0">Made with love for Lithuania</span>
           </div>

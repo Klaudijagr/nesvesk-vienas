@@ -43,7 +43,5 @@ export const saveProfilePhoto = mutation({
 // Get URL for a storage ID
 export const getUrl = query({
   args: { storageId: v.id('_storage') },
-  handler: async (ctx, args) => {
-    return await ctx.storage.getUrl(args.storageId);
-  },
+  handler: async (ctx, args) => await ctx.storage.getUrl(args.storageId),
 });

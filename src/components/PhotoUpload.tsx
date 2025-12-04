@@ -86,49 +86,49 @@ export function PhotoUpload({ currentPhotoUrl, onPhotoUploaded }: PhotoUploadPro
     <div className="space-y-4">
       {displayUrl ? (
         <div className="relative inline-block">
-          <img src={displayUrl} alt="Profile" className="w-32 h-32 rounded-xl object-cover" />
+          <img alt="Profile" className="h-32 w-32 rounded-xl object-cover" src={displayUrl} />
           {!uploading && (
             <button
-              type="button"
+              className="-top-2 -right-2 absolute rounded-full bg-red-600 p-1 text-white hover:bg-red-700"
               onClick={handleRemovePhoto}
-              className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700"
+              type="button"
             >
-              <X className="w-4 h-4" />
+              <X className="h-4 w-4" />
             </button>
           )}
           {uploading && (
-            <div className="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center">
-              <Loader2 className="w-6 h-6 text-white animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/50">
+              <Loader2 className="h-6 w-6 animate-spin text-white" />
             </div>
           )}
         </div>
       ) : (
         <button
-          type="button"
-          className="w-32 h-32 rounded-xl bg-gray-100 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors"
+          className="flex h-32 w-32 cursor-pointer flex-col items-center justify-center rounded-xl bg-gray-100 transition-colors hover:bg-gray-200"
           onClick={() => fileInputRef.current?.click()}
+          type="button"
         >
-          <Camera className="w-8 h-8 text-gray-400" />
-          <span className="text-xs text-gray-500 mt-1">Add photo</span>
+          <Camera className="h-8 w-8 text-gray-400" />
+          <span className="mt-1 text-gray-500 text-xs">Add photo</span>
         </button>
       )}
 
       <input
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileSelect}
         ref={fileInputRef}
         type="file"
-        accept="image/*"
-        onChange={handleFileSelect}
-        className="hidden"
       />
 
       {displayUrl && !uploading && (
         <Button
+          onClick={() => fileInputRef.current?.click()}
+          size="sm"
           type="button"
           variant="outline"
-          size="sm"
-          onClick={() => fileInputRef.current?.click()}
         >
-          <Camera className="w-4 h-4 mr-2" />
+          <Camera className="mr-2 h-4 w-4" />
           Change Photo
         </Button>
       )}

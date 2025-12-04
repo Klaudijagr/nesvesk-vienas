@@ -100,13 +100,13 @@ export function RegisterPage() {
   const totalSteps = isHost ? 4 : 3;
 
   // Redirect if not authenticated
-  if (!authLoading && !isAuthenticated) {
-    return <Navigate to="/login?redirect=/register" replace />;
+  if (!(authLoading || isAuthenticated)) {
+    return <Navigate replace to="/login?redirect=/register" />;
   }
 
   // Redirect if already has profile
   if (existingProfile) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate replace to="/dashboard" />;
   }
 
   const toggleArrayValue = (
@@ -147,32 +147,32 @@ export function RegisterPage() {
 
   if (authLoading || existingProfile === undefined) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-red-600" />
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gray-50 px-4 py-12">
+      <div className="mx-auto max-w-2xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
-            <Gift className="w-8 h-8 text-red-600" />
+        <div className="mb-8 text-center">
+          <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+            <Gift className="h-8 w-8 text-red-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Create Your Profile</h1>
-          <p className="text-gray-600 mt-2">Join the community and find your holiday connection</p>
+          <h1 className="font-bold text-3xl text-gray-900">Create Your Profile</h1>
+          <p className="mt-2 text-gray-600">Join the community and find your holiday connection</p>
         </div>
 
         {/* Progress */}
-        <div className="flex items-center justify-center gap-2 mb-8">
+        <div className="mb-8 flex items-center justify-center gap-2">
           {Array.from({ length: totalSteps }).map((_, i) => (
             <div
-              key={`step-${i}`}
               className={`h-2 w-12 rounded-full transition-colors ${
                 i + 1 <= step ? 'bg-red-600' : 'bg-gray-200'
               }`}
+              key={`step-${i}`}
             />
           ))}
         </div>
@@ -196,17 +196,17 @@ export function RegisterPage() {
                       { value: 'both', label: 'Both', desc: 'Host & visit' },
                     ].map((option) => (
                       <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => setValue('role', option.value as 'host' | 'guest' | 'both')}
-                        className={`p-4 rounded-lg border-2 text-center transition-all ${
+                        className={`rounded-lg border-2 p-4 text-center transition-all ${
                           role === option.value
                             ? 'border-red-600 bg-red-50'
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
+                        key={option.value}
+                        onClick={() => setValue('role', option.value as 'host' | 'guest' | 'both')}
+                        type="button"
                       >
                         <div className="font-medium">{option.label}</div>
-                        <div className="text-xs text-gray-500">{option.desc}</div>
+                        <div className="text-gray-500 text-xs">{option.desc}</div>
                       </button>
                     ))}
                   </div>
@@ -222,7 +222,7 @@ export function RegisterPage() {
                       placeholder="Your first name"
                     />
                     {errors.firstName && (
-                      <p className="text-sm text-red-600">{errors.firstName.message}</p>
+                      <p className="text-red-600 text-sm">{errors.firstName.message}</p>
                     )}
                   </div>
                   <div className="space-y-2">
@@ -241,14 +241,14 @@ export function RegisterPage() {
                       {...register('age', { valueAsNumber: true })}
                       placeholder="18+"
                     />
-                    {errors.age && <p className="text-sm text-red-600">{errors.age.message}</p>}
+                    {errors.age && <p className="text-red-600 text-sm">{errors.age.message}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="city">City *</Label>
                     <select
                       id="city"
                       {...register('city')}
-                      className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     >
                       {CITIES.map((city) => (
                         <option key={city} value={city}>
@@ -265,11 +265,11 @@ export function RegisterPage() {
                   <textarea
                     id="bio"
                     {...register('bio')}
-                    rows={4}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none"
+                    className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm"
                     placeholder="Tell others about yourself, what you're looking for..."
+                    rows={4}
                   />
-                  {errors.bio && <p className="text-sm text-red-600">{errors.bio.message}</p>}
+                  {errors.bio && <p className="text-red-600 text-sm">{errors.bio.message}</p>}
                 </div>
               </CardContent>
             </Card>
@@ -289,21 +289,21 @@ export function RegisterPage() {
                   <div className="flex flex-wrap gap-2">
                     {LANGUAGES.map((lang) => (
                       <button
-                        key={lang}
-                        type="button"
-                        onClick={() => toggleArrayValue('languages', lang)}
-                        className={`px-4 py-2 rounded-full text-sm transition-all ${
+                        className={`rounded-full px-4 py-2 text-sm transition-all ${
                           languages.includes(lang)
                             ? 'bg-red-600 text-white'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
+                        key={lang}
+                        onClick={() => toggleArrayValue('languages', lang)}
+                        type="button"
                       >
                         {lang}
                       </button>
                     ))}
                   </div>
                   {errors.languages && (
-                    <p className="text-sm text-red-600">{errors.languages.message}</p>
+                    <p className="text-red-600 text-sm">{errors.languages.message}</p>
                   )}
                 </div>
 
@@ -313,21 +313,21 @@ export function RegisterPage() {
                   <div className="flex flex-wrap gap-2">
                     {HOLIDAY_DATES.map((date) => (
                       <button
-                        key={date}
-                        type="button"
-                        onClick={() => toggleArrayValue('availableDates', date)}
-                        className={`px-4 py-2 rounded-full text-sm transition-all ${
+                        className={`rounded-full px-4 py-2 text-sm transition-all ${
                           availableDates.includes(date)
                             ? 'bg-red-600 text-white'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
+                        key={date}
+                        onClick={() => toggleArrayValue('availableDates', date)}
+                        type="button"
                       >
                         {date}
                       </button>
                     ))}
                   </div>
                   {errors.availableDates && (
-                    <p className="text-sm text-red-600">{errors.availableDates.message}</p>
+                    <p className="text-red-600 text-sm">{errors.availableDates.message}</p>
                   )}
                 </div>
 
@@ -337,14 +337,14 @@ export function RegisterPage() {
                   <div className="flex flex-wrap gap-2">
                     {DIETARY_OPTIONS.map((diet) => (
                       <button
-                        key={diet}
-                        type="button"
-                        onClick={() => toggleArrayValue('dietaryInfo', diet)}
-                        className={`px-3 py-1.5 rounded-full text-sm transition-all ${
+                        className={`rounded-full px-3 py-1.5 text-sm transition-all ${
                           dietaryInfo.includes(diet)
-                            ? 'bg-orange-100 text-orange-700 border border-orange-300'
+                            ? 'border border-orange-300 bg-orange-100 text-orange-700'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
+                        key={diet}
+                        onClick={() => toggleArrayValue('dietaryInfo', diet)}
+                        type="button"
                       >
                         {diet}
                       </button>
@@ -354,20 +354,20 @@ export function RegisterPage() {
 
                 {/* Boolean preferences */}
                 <div className="grid grid-cols-2 gap-4">
-                  <label className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50">
-                    <input type="checkbox" {...register('smokingAllowed')} className="w-4 h-4" />
+                  <label className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 hover:bg-gray-50">
+                    <input type="checkbox" {...register('smokingAllowed')} className="h-4 w-4" />
                     <span className="text-sm">Smoking OK</span>
                   </label>
-                  <label className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50">
-                    <input type="checkbox" {...register('drinkingAllowed')} className="w-4 h-4" />
+                  <label className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 hover:bg-gray-50">
+                    <input type="checkbox" {...register('drinkingAllowed')} className="h-4 w-4" />
                     <span className="text-sm">Alcohol OK</span>
                   </label>
-                  <label className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50">
-                    <input type="checkbox" {...register('petsAllowed')} className="w-4 h-4" />
+                  <label className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 hover:bg-gray-50">
+                    <input type="checkbox" {...register('petsAllowed')} className="h-4 w-4" />
                     <span className="text-sm">Pets welcome</span>
                   </label>
-                  <label className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50">
-                    <input type="checkbox" {...register('hasPets')} className="w-4 h-4" />
+                  <label className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 hover:bg-gray-50">
+                    <input type="checkbox" {...register('hasPets')} className="h-4 w-4" />
                     <span className="text-sm">I have pets</span>
                   </label>
                 </div>
@@ -389,14 +389,14 @@ export function RegisterPage() {
                   <div className="flex flex-wrap gap-2">
                     {VIBES_OPTIONS.map((vibe) => (
                       <button
-                        key={vibe}
-                        type="button"
-                        onClick={() => toggleArrayValue('vibes', vibe)}
-                        className={`px-4 py-2 rounded-full text-sm transition-all ${
+                        className={`rounded-full px-4 py-2 text-sm transition-all ${
                           vibes.includes(vibe)
-                            ? 'bg-purple-100 text-purple-700 border border-purple-300'
+                            ? 'border border-purple-300 bg-purple-100 text-purple-700'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
+                        key={vibe}
+                        onClick={() => toggleArrayValue('vibes', vibe)}
+                        type="button"
                       >
                         {vibe}
                       </button>
@@ -412,14 +412,14 @@ export function RegisterPage() {
                       <div className="grid grid-cols-3 gap-3">
                         {CONCEPTS.map((concept) => (
                           <button
-                            key={concept}
-                            type="button"
-                            onClick={() => setValue('concept', concept)}
-                            className={`p-3 rounded-lg border-2 text-center transition-all ${
+                            className={`rounded-lg border-2 p-3 text-center transition-all ${
                               watch('concept') === concept
                                 ? 'border-red-600 bg-red-50'
                                 : 'border-gray-200 hover:border-gray-300'
                             }`}
+                            key={concept}
+                            onClick={() => setValue('concept', concept)}
+                            type="button"
                           >
                             {concept}
                           </button>
@@ -434,9 +434,9 @@ export function RegisterPage() {
                         id="capacity"
                         type="number"
                         {...register('capacity', { valueAsNumber: true })}
-                        placeholder="e.g., 4"
-                        min={1}
                         max={50}
+                        min={1}
+                        placeholder="e.g., 4"
                       />
                     </div>
                   </>
@@ -459,14 +459,14 @@ export function RegisterPage() {
                   <div className="flex flex-wrap gap-2">
                     {AMENITIES_OPTIONS.map((amenity) => (
                       <button
-                        key={amenity}
-                        type="button"
-                        onClick={() => toggleArrayValue('amenities', amenity)}
-                        className={`px-3 py-1.5 rounded-full text-sm transition-all ${
+                        className={`rounded-full px-3 py-1.5 text-sm transition-all ${
                           amenities.includes(amenity)
-                            ? 'bg-green-100 text-green-700 border border-green-300'
+                            ? 'border border-green-300 bg-green-100 text-green-700'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
+                        key={amenity}
+                        onClick={() => toggleArrayValue('amenities', amenity)}
+                        type="button"
                       >
                         {amenity}
                       </button>
@@ -480,14 +480,14 @@ export function RegisterPage() {
                   <div className="flex flex-wrap gap-2">
                     {HOUSE_RULES_OPTIONS.map((rule) => (
                       <button
-                        key={rule}
-                        type="button"
-                        onClick={() => toggleArrayValue('houseRules', rule)}
-                        className={`px-3 py-1.5 rounded-full text-sm transition-all ${
+                        className={`rounded-full px-3 py-1.5 text-sm transition-all ${
                           houseRules.includes(rule)
-                            ? 'bg-blue-100 text-blue-700 border border-blue-300'
+                            ? 'border border-blue-300 bg-blue-100 text-blue-700'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
+                        key={rule}
+                        onClick={() => toggleArrayValue('houseRules', rule)}
+                        type="button"
                       >
                         {rule}
                       </button>
@@ -499,26 +499,26 @@ export function RegisterPage() {
           )}
 
           {/* Navigation */}
-          <div className="flex justify-between mt-6">
+          <div className="mt-6 flex justify-between">
             <Button
+              className="gap-2"
+              disabled={step === 1}
+              onClick={prevStep}
               type="button"
               variant="outline"
-              onClick={prevStep}
-              disabled={step === 1}
-              className="gap-2"
             >
-              <ChevronLeft className="w-4 h-4" /> Back
+              <ChevronLeft className="h-4 w-4" /> Back
             </Button>
 
             {step < totalSteps ? (
-              <Button type="button" onClick={nextStep} className="gap-2">
-                Next <ChevronRight className="w-4 h-4" />
+              <Button className="gap-2" onClick={nextStep} type="button">
+                Next <ChevronRight className="h-4 w-4" />
               </Button>
             ) : (
-              <Button type="submit" disabled={isSubmitting} className="gap-2">
+              <Button className="gap-2" disabled={isSubmitting} type="submit">
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Creating...
+                    <Loader2 className="h-4 w-4 animate-spin" /> Creating...
                   </>
                 ) : (
                   'Create Profile'

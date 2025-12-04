@@ -44,7 +44,7 @@ export function ProfilePage() {
   const isHost = profile?.role === 'host' || profile?.role === 'both';
 
   const handleSendInvitation = async () => {
-    if (!id || !selectedDate) return;
+    if (!(id && selectedDate)) return;
 
     setIsSending(true);
     try {
@@ -62,7 +62,7 @@ export function ProfilePage() {
   };
 
   const handleSendMessage = async () => {
-    if (!id || !message.trim()) return;
+    if (!(id && message.trim())) return;
 
     setIsSending(true);
     try {
@@ -82,16 +82,16 @@ export function ProfilePage() {
 
   if (profile === undefined) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-red-600" />
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
       </div>
     );
   }
 
   if (profile === null) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Profile not found</h1>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+        <h1 className="font-bold text-2xl text-gray-900">Profile not found</h1>
         <Button onClick={() => navigate('/browse')}>Browse profiles</Button>
       </div>
     );
@@ -100,37 +100,37 @@ export function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Back button */}
-      <div className="bg-white border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+      <div className="border-b bg-white">
+        <div className="mx-auto max-w-4xl px-4 py-4">
           <button
-            type="button"
-            onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            onClick={() => navigate(-1)}
+            type="button"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="h-5 w-5" />
             Back
           </button>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="mx-auto max-w-4xl px-4 py-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6 lg:col-span-2">
             {/* Hero Card */}
             <Card className="overflow-hidden">
               <div className="relative h-64 bg-gradient-to-br from-red-100 to-orange-100">
                 <img
+                  alt={profile.firstName}
+                  className="h-full w-full object-cover"
                   src={
                     profile.photoUrl ||
                     `https://api.dicebear.com/7.x/initials/svg?seed=${profile.firstName}&backgroundColor=f87171`
                   }
-                  alt={profile.firstName}
-                  className="w-full h-full object-cover"
                 />
                 {profile.verified && (
-                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 text-sm font-medium text-green-700 shadow">
-                    <ShieldCheck className="w-4 h-4" />
+                  <div className="absolute top-4 right-4 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 font-medium text-green-700 text-sm shadow backdrop-blur-sm">
+                    <ShieldCheck className="h-4 w-4" />
                     Verified
                   </div>
                 )}
@@ -139,21 +139,21 @@ export function ProfilePage() {
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-900">
+                    <h1 className="font-bold text-3xl text-gray-900">
                       {profile.firstName}
                       {profile.lastName && ` ${profile.lastName}`}
                       {profile.age && (
-                        <span className="text-gray-500 font-normal">, {profile.age}</span>
+                        <span className="font-normal text-gray-500">, {profile.age}</span>
                       )}
                     </h1>
-                    <div className="flex items-center gap-4 mt-2 text-gray-600">
+                    <div className="mt-2 flex items-center gap-4 text-gray-600">
                       <span className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
+                        <MapPin className="h-4 w-4" />
                         {profile.city}
                       </span>
                       {profile.lastActive && (
                         <span className="flex items-center gap-1 text-sm">
-                          <Clock className="w-4 h-4" />
+                          <Clock className="h-4 w-4" />
                           Active recently
                         </span>
                       )}
@@ -162,13 +162,13 @@ export function ProfilePage() {
 
                   <div className="flex gap-2">
                     {isHost && (
-                      <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1">
-                        <Users className="w-4 h-4" />
+                      <span className="flex items-center gap-1 rounded-full bg-purple-100 px-3 py-1 font-medium text-purple-700 text-sm">
+                        <Users className="h-4 w-4" />
                         Host
                       </span>
                     )}
                     {(profile.role === 'guest' || profile.role === 'both') && (
-                      <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+                      <span className="rounded-full bg-blue-100 px-3 py-1 font-medium text-blue-700 text-sm">
                         Guest
                       </span>
                     )}
@@ -187,15 +187,15 @@ export function ProfilePage() {
               <CardContent className="space-y-6">
                 {/* Languages */}
                 <div>
-                  <h3 className="font-medium text-gray-900 flex items-center gap-2 mb-2">
-                    <Globe className="w-4 h-4 text-gray-500" />
+                  <h3 className="mb-2 flex items-center gap-2 font-medium text-gray-900">
+                    <Globe className="h-4 w-4 text-gray-500" />
                     Languages
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {profile.languages.map((lang) => (
                       <span
+                        className="rounded-full bg-gray-100 px-3 py-1 text-gray-700 text-sm"
                         key={lang}
-                        className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
                       >
                         {lang}
                       </span>
@@ -205,15 +205,15 @@ export function ProfilePage() {
 
                 {/* Available Dates */}
                 <div>
-                  <h3 className="font-medium text-gray-900 flex items-center gap-2 mb-2">
-                    <Calendar className="w-4 h-4 text-gray-500" />
+                  <h3 className="mb-2 flex items-center gap-2 font-medium text-gray-900">
+                    <Calendar className="h-4 w-4 text-gray-500" />
                     Available Dates
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {profile.availableDates.map((date) => (
                       <span
+                        className="rounded-full bg-red-50 px-3 py-1 font-medium text-red-700 text-sm"
                         key={date}
-                        className="bg-red-50 text-red-700 px-3 py-1 rounded-full text-sm font-medium"
                       >
                         {date}
                       </span>
@@ -224,12 +224,12 @@ export function ProfilePage() {
                 {/* Dietary */}
                 {profile.dietaryInfo.length > 0 && (
                   <div>
-                    <h3 className="font-medium text-gray-900 mb-2">Dietary Requirements</h3>
+                    <h3 className="mb-2 font-medium text-gray-900">Dietary Requirements</h3>
                     <div className="flex flex-wrap gap-2">
                       {profile.dietaryInfo.map((diet) => (
                         <span
+                          className="rounded-full bg-orange-50 px-3 py-1 text-orange-700 text-sm"
                           key={diet}
-                          className="bg-orange-50 text-orange-700 px-3 py-1 rounded-full text-sm"
                         >
                           {diet}
                         </span>
@@ -241,12 +241,12 @@ export function ProfilePage() {
                 {/* Vibes */}
                 {profile.vibes.length > 0 && (
                   <div>
-                    <h3 className="font-medium text-gray-900 mb-2">Vibes</h3>
+                    <h3 className="mb-2 font-medium text-gray-900">Vibes</h3>
                     <div className="flex flex-wrap gap-2">
                       {profile.vibes.map((vibe) => (
                         <span
+                          className="rounded-full bg-purple-50 px-3 py-1 text-purple-700 text-sm"
                           key={vibe}
-                          className="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm"
                         >
                           {vibe}
                         </span>
@@ -257,35 +257,35 @@ export function ProfilePage() {
 
                 {/* Preferences */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2 text-gray-600 text-sm">
                     {profile.smokingAllowed ? (
-                      <Check className="w-4 h-4 text-green-600" />
+                      <Check className="h-4 w-4 text-green-600" />
                     ) : (
-                      <X className="w-4 h-4 text-red-600" />
+                      <X className="h-4 w-4 text-red-600" />
                     )}
                     Smoking
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2 text-gray-600 text-sm">
                     {profile.drinkingAllowed ? (
-                      <Check className="w-4 h-4 text-green-600" />
+                      <Check className="h-4 w-4 text-green-600" />
                     ) : (
-                      <X className="w-4 h-4 text-red-600" />
+                      <X className="h-4 w-4 text-red-600" />
                     )}
                     Alcohol
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2 text-gray-600 text-sm">
                     {profile.petsAllowed ? (
-                      <Check className="w-4 h-4 text-green-600" />
+                      <Check className="h-4 w-4 text-green-600" />
                     ) : (
-                      <X className="w-4 h-4 text-red-600" />
+                      <X className="h-4 w-4 text-red-600" />
                     )}
                     Pets welcome
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2 text-gray-600 text-sm">
                     {profile.hasPets ? (
-                      <Check className="w-4 h-4 text-green-600" />
+                      <Check className="h-4 w-4 text-green-600" />
                     ) : (
-                      <X className="w-4 h-4 text-gray-400" />
+                      <X className="h-4 w-4 text-gray-400" />
                     )}
                     Has pets
                   </div>
@@ -303,13 +303,13 @@ export function ProfilePage() {
                   <div className="grid grid-cols-2 gap-4">
                     {profile.concept && (
                       <div>
-                        <h4 className="text-sm text-gray-500 mb-1">Event Type</h4>
+                        <h4 className="mb-1 text-gray-500 text-sm">Event Type</h4>
                         <p className="font-medium">{profile.concept}</p>
                       </div>
                     )}
                     {profile.capacity && (
                       <div>
-                        <h4 className="text-sm text-gray-500 mb-1">Capacity</h4>
+                        <h4 className="mb-1 text-gray-500 text-sm">Capacity</h4>
                         <p className="font-medium">{profile.capacity} guests</p>
                       </div>
                     )}
@@ -317,12 +317,12 @@ export function ProfilePage() {
 
                   {profile.amenities.length > 0 && (
                     <div>
-                      <h4 className="text-sm text-gray-500 mb-2">Amenities</h4>
+                      <h4 className="mb-2 text-gray-500 text-sm">Amenities</h4>
                       <div className="flex flex-wrap gap-2">
                         {profile.amenities.map((amenity) => (
                           <span
+                            className="rounded-full bg-green-50 px-3 py-1 text-green-700 text-sm"
                             key={amenity}
-                            className="bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm"
                           >
                             {amenity}
                           </span>
@@ -333,12 +333,12 @@ export function ProfilePage() {
 
                   {profile.houseRules.length > 0 && (
                     <div>
-                      <h4 className="text-sm text-gray-500 mb-2">House Rules</h4>
+                      <h4 className="mb-2 text-gray-500 text-sm">House Rules</h4>
                       <div className="flex flex-wrap gap-2">
                         {profile.houseRules.map((rule) => (
                           <span
+                            className="rounded-full bg-blue-50 px-3 py-1 text-blue-700 text-sm"
                             key={rule}
-                            className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm"
                           >
                             {rule}
                           </span>
@@ -361,20 +361,20 @@ export function ProfilePage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {areMatched ? (
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <Check className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                    <div className="rounded-lg bg-green-50 p-4 text-center">
+                      <Check className="mx-auto mb-2 h-8 w-8 text-green-600" />
                       <p className="font-medium text-green-700">You're matched!</p>
-                      <p className="text-sm text-green-600 mt-1">You can now message each other</p>
+                      <p className="mt-1 text-green-600 text-sm">You can now message each other</p>
                     </div>
                   ) : (
                     <>
                       {/* Send Invitation */}
                       <div className="space-y-2">
-                        <p className="text-sm text-gray-600">Send an invitation for:</p>
+                        <p className="text-gray-600 text-sm">Send an invitation for:</p>
                         <select
-                          value={selectedDate}
+                          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                           onChange={(e) => setSelectedDate(e.target.value)}
-                          className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                          value={selectedDate}
                         >
                           <option value="">Select a date...</option>
                           {profile.availableDates.map((date) => (
@@ -385,14 +385,14 @@ export function ProfilePage() {
                         </select>
                         <Button
                           className="w-full"
-                          onClick={handleSendInvitation}
                           disabled={!selectedDate || isSending}
+                          onClick={handleSendInvitation}
                         >
                           {isSending ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
                             <>
-                              <Send className="w-4 h-4 mr-2" />
+                              <Send className="mr-2 h-4 w-4" />
                               Send Invitation
                             </>
                           )}
@@ -416,35 +416,35 @@ export function ProfilePage() {
                       {showMessageBox ? (
                         <div className="space-y-2">
                           <textarea
-                            value={message}
+                            className="h-24 w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm"
                             onChange={(e) => setMessage(e.target.value)}
                             placeholder="Write a message..."
-                            className="w-full h-24 rounded-md border border-input bg-background px-3 py-2 text-sm resize-none"
+                            value={message}
                           />
                           <div className="flex gap-2">
                             <Button
-                              variant="outline"
                               className="flex-1"
                               onClick={() => setShowMessageBox(false)}
+                              variant="outline"
                             >
                               Cancel
                             </Button>
                             <Button
                               className="flex-1"
-                              onClick={handleSendMessage}
                               disabled={!message.trim() || isSending}
+                              onClick={handleSendMessage}
                             >
-                              {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send'}
+                              {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Send'}
                             </Button>
                           </div>
                         </div>
                       ) : (
                         <Button
-                          variant="outline"
                           className="w-full"
                           onClick={() => setShowMessageBox(true)}
+                          variant="outline"
                         >
-                          <MessageCircle className="w-4 h-4 mr-2" />
+                          <MessageCircle className="mr-2 h-4 w-4" />
                           Send Message
                         </Button>
                       )}
@@ -458,7 +458,7 @@ export function ProfilePage() {
             {!isAuthenticated && (
               <Card>
                 <CardContent className="p-6 text-center">
-                  <p className="text-gray-600 mb-4">Sign in to connect with {profile.firstName}</p>
+                  <p className="mb-4 text-gray-600">Sign in to connect with {profile.firstName}</p>
                   <Link to={`/login?redirect=/profile/${id}`}>
                     <Button className="w-full">Sign In</Button>
                   </Link>
@@ -470,9 +470,9 @@ export function ProfilePage() {
             {isOwnProfile && (
               <Card>
                 <CardContent className="p-6 text-center">
-                  <p className="text-gray-600 mb-4">This is your profile</p>
+                  <p className="mb-4 text-gray-600">This is your profile</p>
                   <Link to="/register">
-                    <Button variant="outline" className="w-full">
+                    <Button className="w-full" variant="outline">
                       Edit Profile
                     </Button>
                   </Link>

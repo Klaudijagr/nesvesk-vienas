@@ -57,11 +57,11 @@ function ToggleChip({
 }) {
   return (
     <button
-      type="button"
-      onClick={onToggle}
-      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+      className={`rounded-full px-3 py-1.5 font-medium text-sm transition-colors ${
         selected ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
       }`}
+      onClick={onToggle}
+      type="button"
     >
       {label}
     </button>
@@ -194,19 +194,19 @@ export function EditProfilePage() {
 
   if (profile === undefined) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-red-600" />
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
       </div>
     );
   }
 
   if (profile === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center">
         <Card className="max-w-md">
           <CardContent className="py-8 text-center">
-            <h2 className="text-xl font-bold mb-4">No Profile Found</h2>
-            <p className="text-gray-600 mb-4">Please create a profile first.</p>
+            <h2 className="mb-4 font-bold text-xl">No Profile Found</h2>
+            <p className="mb-4 text-gray-600">Please create a profile first.</p>
             <Link to="/register">
               <Button>Create Profile</Button>
             </Link>
@@ -220,22 +220,22 @@ export function EditProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-2xl mx-auto px-4">
+      <div className="mx-auto max-w-2xl px-4">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="mb-8 flex items-center gap-4">
           <Link to="/dashboard">
-            <Button variant="ghost" size="sm">
-              <ChevronLeft className="w-4 h-4 mr-1" />
+            <Button size="sm" variant="ghost">
+              <ChevronLeft className="mr-1 h-4 w-4" />
               Back
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Edit Profile</h1>
+            <h1 className="font-bold text-2xl text-gray-900">Edit Profile</h1>
             <p className="text-gray-600 text-sm">Update your information</p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
           {/* Basic Info */}
           <Card>
             <CardHeader>
@@ -253,17 +253,17 @@ export function EditProfilePage() {
               {/* Role */}
               <div>
                 <Label>I want to be a</Label>
-                <div className="flex gap-2 mt-2">
+                <div className="mt-2 flex gap-2">
                   {(['guest', 'host', 'both'] as const).map((r) => (
                     <button
-                      key={r}
-                      type="button"
-                      onClick={() => setValue('role', r)}
-                      className={`px-4 py-2 rounded-lg font-medium capitalize ${
+                      className={`rounded-lg px-4 py-2 font-medium capitalize ${
                         role === r
                           ? 'bg-red-600 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
+                      key={r}
+                      onClick={() => setValue('role', r)}
+                      type="button"
                     >
                       {r}
                     </button>
@@ -284,7 +284,7 @@ export function EditProfilePage() {
                 <div>
                   <Label htmlFor="lastName">Last Name</Label>
                   <Input id="lastName" {...register('lastName')} />
-                  <p className="text-xs text-gray-500 mt-1">Hidden until match</p>
+                  <p className="mt-1 text-gray-500 text-xs">Hidden until match</p>
                 </div>
               </div>
 
@@ -293,9 +293,9 @@ export function EditProfilePage() {
                 <Label htmlFor="age">Age</Label>
                 <Input
                   id="age"
-                  type="number"
-                  min={18}
                   max={120}
+                  min={18}
+                  type="number"
                   {...register('age', { valueAsNumber: true })}
                   className="w-24"
                 />
@@ -307,7 +307,7 @@ export function EditProfilePage() {
                 <select
                   id="city"
                   {...register('city')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2"
                 >
                   {CITIES.map((city) => (
                     <option key={city} value={city}>
@@ -323,9 +323,9 @@ export function EditProfilePage() {
                 <Textarea
                   id="bio"
                   {...register('bio', { required: 'Required' })}
+                  className={errors.bio ? 'border-red-500' : ''}
                   placeholder="Tell others about yourself..."
                   rows={4}
-                  className={errors.bio ? 'border-red-500' : ''}
                 />
               </div>
             </CardContent>
@@ -335,7 +335,7 @@ export function EditProfilePage() {
           <Card>
             <CardHeader>
               <CardTitle>Contact Information</CardTitle>
-              <p className="text-sm text-gray-500">Hidden until you match with someone</p>
+              <p className="text-gray-500 text-sm">Hidden until you match with someone</p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -360,8 +360,8 @@ export function EditProfilePage() {
                   <ToggleChip
                     key={lang}
                     label={lang}
-                    selected={languages.includes(lang)}
                     onToggle={() => toggleArrayValue('languages', lang, languages)}
+                    selected={languages.includes(lang)}
                   />
                 ))}
               </div>
@@ -379,8 +379,8 @@ export function EditProfilePage() {
                   <ToggleChip
                     key={date}
                     label={date}
-                    selected={availableDates.includes(date)}
                     onToggle={() => toggleArrayValue('availableDates', date, availableDates)}
+                    selected={availableDates.includes(date)}
                   />
                 ))}
               </div>
@@ -398,8 +398,8 @@ export function EditProfilePage() {
                   <ToggleChip
                     key={diet}
                     label={diet}
-                    selected={dietaryInfo.includes(diet)}
                     onToggle={() => toggleArrayValue('dietaryInfo', diet, dietaryInfo)}
+                    selected={dietaryInfo.includes(diet)}
                   />
                 ))}
               </div>
@@ -417,17 +417,17 @@ export function EditProfilePage() {
                   {/* Concept */}
                   <div>
                     <Label>Event Type</Label>
-                    <div className="flex gap-2 mt-2">
+                    <div className="mt-2 flex gap-2">
                       {CONCEPT_OPTIONS.map((c) => (
                         <button
-                          key={c}
-                          type="button"
-                          onClick={() => setValue('concept', c)}
-                          className={`px-4 py-2 rounded-lg font-medium ${
+                          className={`rounded-lg px-4 py-2 font-medium ${
                             watch('concept') === c
                               ? 'bg-red-600 text-white'
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
+                          key={c}
+                          onClick={() => setValue('concept', c)}
+                          type="button"
                         >
                           {c}
                         </button>
@@ -440,9 +440,9 @@ export function EditProfilePage() {
                     <Label htmlFor="capacity">Guest Capacity</Label>
                     <Input
                       id="capacity"
-                      type="number"
-                      min={1}
                       max={50}
+                      min={1}
+                      type="number"
                       {...register('capacity', { valueAsNumber: true })}
                       className="w-24"
                     />
@@ -451,21 +451,21 @@ export function EditProfilePage() {
                   {/* Guest Age Preference */}
                   <div>
                     <Label>Preferred Guest Age Range</Label>
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="mt-2 flex items-center gap-2">
                       <Input
-                        type="number"
-                        min={18}
                         max={120}
+                        min={18}
                         placeholder="Min"
+                        type="number"
                         {...register('preferredGuestAgeMin', { valueAsNumber: true })}
                         className="w-20"
                       />
                       <span>to</span>
                       <Input
-                        type="number"
-                        min={18}
                         max={120}
+                        min={18}
                         placeholder="Max"
+                        type="number"
                         {...register('preferredGuestAgeMax', { valueAsNumber: true })}
                         className="w-20"
                       />
@@ -485,8 +485,8 @@ export function EditProfilePage() {
                       <ToggleChip
                         key={amenity}
                         label={amenity}
-                        selected={amenities.includes(amenity)}
                         onToggle={() => toggleArrayValue('amenities', amenity, amenities)}
+                        selected={amenities.includes(amenity)}
                       />
                     ))}
                   </div>
@@ -504,8 +504,8 @@ export function EditProfilePage() {
                       <ToggleChip
                         key={vibe}
                         label={vibe}
-                        selected={vibes.includes(vibe)}
                         onToggle={() => toggleArrayValue('vibes', vibe, vibes)}
+                        selected={vibes.includes(vibe)}
                       />
                     ))}
                   </div>
@@ -523,8 +523,8 @@ export function EditProfilePage() {
                       <ToggleChip
                         key={rule}
                         label={rule}
-                        selected={houseRules.includes(rule)}
                         onToggle={() => toggleArrayValue('houseRules', rule, houseRules)}
+                        selected={houseRules.includes(rule)}
                       />
                     ))}
                   </div>
@@ -537,20 +537,20 @@ export function EditProfilePage() {
                   <CardTitle>Preferences</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" {...register('smokingAllowed')} className="w-4 h-4" />
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <input type="checkbox" {...register('smokingAllowed')} className="h-4 w-4" />
                     <span>Smoking allowed</span>
                   </label>
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" {...register('drinkingAllowed')} className="w-4 h-4" />
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <input type="checkbox" {...register('drinkingAllowed')} className="h-4 w-4" />
                     <span>Alcohol served</span>
                   </label>
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" {...register('petsAllowed')} className="w-4 h-4" />
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <input type="checkbox" {...register('petsAllowed')} className="h-4 w-4" />
                     <span>Guests can bring pets</span>
                   </label>
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" {...register('hasPets')} className="w-4 h-4" />
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <input type="checkbox" {...register('hasPets')} className="h-4 w-4" />
                     <span>I have pets at home</span>
                   </label>
                 </CardContent>
@@ -560,16 +560,16 @@ export function EditProfilePage() {
 
           {/* Submit */}
           <div className="flex gap-4">
-            <Link to="/dashboard" className="flex-1">
-              <Button variant="outline" className="w-full" type="button">
+            <Link className="flex-1" to="/dashboard">
+              <Button className="w-full" type="button" variant="outline">
                 Cancel
               </Button>
             </Link>
-            <Button type="submit" className="flex-1 gap-2" disabled={isSubmitting}>
+            <Button className="flex-1 gap-2" disabled={isSubmitting} type="submit">
               {isSubmitting ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Save className="w-4 h-4" />
+                <Save className="h-4 w-4" />
               )}
               Save Changes
             </Button>

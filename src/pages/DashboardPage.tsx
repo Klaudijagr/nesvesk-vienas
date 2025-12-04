@@ -24,7 +24,7 @@ export function DashboardPage() {
   const respondToInvitation = useMutation(api.invitations.respond);
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedConversation) return;
+    if (!(newMessage.trim() && selectedConversation)) return;
 
     try {
       await sendMessage({
@@ -50,26 +50,26 @@ export function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Your Dashboard</h1>
+      <div className="mx-auto max-w-6xl px-4 py-8">
+        <h1 className="mb-6 font-bold text-2xl text-gray-900">Your Dashboard</h1>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="mb-6 flex gap-2">
           <Button
-            variant={activeTab === 'messages' ? 'default' : 'outline'}
             onClick={() => setActiveTab('messages')}
+            variant={activeTab === 'messages' ? 'default' : 'outline'}
           >
-            <MessageCircle className="w-4 h-4 mr-2" />
+            <MessageCircle className="mr-2 h-4 w-4" />
             Messages
           </Button>
           <Button
-            variant={activeTab === 'invitations' ? 'default' : 'outline'}
             onClick={() => setActiveTab('invitations')}
+            variant={activeTab === 'invitations' ? 'default' : 'outline'}
           >
-            <Inbox className="w-4 h-4 mr-2" />
+            <Inbox className="mr-2 h-4 w-4" />
             Invitations
             {invitations?.received.filter((i) => i.status === 'pending').length ? (
-              <span className="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+              <span className="ml-2 rounded-full bg-red-500 px-2 py-0.5 text-white text-xs">
                 {invitations.received.filter((i) => i.status === 'pending').length}
               </span>
             ) : null}
@@ -78,7 +78,7 @@ export function DashboardPage() {
 
         {/* Messages Tab */}
         {activeTab === 'messages' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {/* Conversation List */}
             <Card className="md:col-span-1">
               <CardHeader>
@@ -93,32 +93,32 @@ export function DashboardPage() {
                   <div className="divide-y">
                     {conversations.map((conv) => (
                       <button
-                        type="button"
-                        key={conv.oderId}
-                        onClick={() => setSelectedConversation(conv.oderId)}
-                        className={`w-full p-4 text-left hover:bg-gray-50 transition-colors ${
+                        className={`w-full p-4 text-left transition-colors hover:bg-gray-50 ${
                           selectedConversation === conv.oderId ? 'bg-gray-100' : ''
                         }`}
+                        key={conv.oderId}
+                        onClick={() => setSelectedConversation(conv.oderId)}
+                        type="button"
                       >
                         <div className="flex items-center gap-3">
                           <img
+                            alt=""
+                            className="h-10 w-10 rounded-full"
                             src={
                               conv.profile?.photoUrl ||
                               `https://api.dicebear.com/7.x/initials/svg?seed=${conv.profile?.firstName || 'U'}`
                             }
-                            alt=""
-                            className="w-10 h-10 rounded-full"
                           />
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 truncate">
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-medium text-gray-900">
                               {conv.profile?.firstName || 'Unknown'}
                             </p>
-                            <p className="text-sm text-gray-500 truncate">
+                            <p className="truncate text-gray-500 text-sm">
                               {conv.lastMessage?.content || 'No messages'}
                             </p>
                           </div>
                           {conv.unreadCount > 0 && (
-                            <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                            <span className="rounded-full bg-red-500 px-2 py-0.5 text-white text-xs">
                               {conv.unreadCount}
                             </span>
                           )}
@@ -132,24 +132,20 @@ export function DashboardPage() {
 
             {/* Message Thread */}
             <Card className="md:col-span-2">
-              <CardContent className="p-0 h-[500px] flex flex-col">
-                {!selectedConversation ? (
-                  <div className="flex-1 flex items-center justify-center text-gray-500">
-                    Select a conversation to start messaging
-                  </div>
-                ) : (
+              <CardContent className="flex h-[500px] flex-col p-0">
+                {selectedConversation ? (
                   <>
                     {/* Messages */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    <div className="flex-1 space-y-4 overflow-y-auto p-4">
                       {messages?.map((msg) => (
                         <div
-                          key={msg._id}
                           className={`flex ${
                             msg.senderId === selectedConversation ? 'justify-start' : 'justify-end'
                           }`}
+                          key={msg._id}
                         >
                           <div
-                            className={`max-w-[70%] px-4 py-2 rounded-lg ${
+                            className={`max-w-[70%] rounded-lg px-4 py-2 ${
                               msg.senderId === selectedConversation
                                 ? 'bg-gray-100 text-gray-900'
                                 : 'bg-red-600 text-white'
@@ -162,18 +158,22 @@ export function DashboardPage() {
                     </div>
 
                     {/* Input */}
-                    <div className="border-t p-4 flex gap-2">
+                    <div className="flex gap-2 border-t p-4">
                       <Input
-                        value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Type a message..."
                         onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                        placeholder="Type a message..."
+                        value={newMessage}
                       />
                       <Button onClick={handleSendMessage}>
-                        <Send className="w-4 h-4" />
+                        <Send className="h-4 w-4" />
                       </Button>
                     </div>
                   </>
+                ) : (
+                  <div className="flex flex-1 items-center justify-center text-gray-500">
+                    Select a conversation to start messaging
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -182,7 +182,7 @@ export function DashboardPage() {
 
         {/* Invitations Tab */}
         {activeTab === 'invitations' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* Received */}
             <Card>
               <CardHeader>
@@ -192,47 +192,47 @@ export function DashboardPage() {
                 {invitations === undefined ? (
                   <div className="text-center text-gray-500">Loading...</div>
                 ) : invitations.received.length === 0 ? (
-                  <div className="text-center text-gray-500 py-8">No invitations received yet</div>
+                  <div className="py-8 text-center text-gray-500">No invitations received yet</div>
                 ) : (
                   <div className="space-y-4">
                     {invitations.received.map((inv) => (
                       <div
+                        className="flex items-center justify-between rounded-lg bg-gray-50 p-4"
                         key={inv._id}
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
                       >
                         <div className="flex items-center gap-3">
                           <img
+                            alt=""
+                            className="h-10 w-10 rounded-full"
                             src={
                               inv.otherUser?.photoUrl ||
                               `https://api.dicebear.com/7.x/initials/svg?seed=${inv.otherUser?.firstName || 'U'}`
                             }
-                            alt=""
-                            className="w-10 h-10 rounded-full"
                           />
                           <div>
                             <p className="font-medium">{inv.otherUser?.firstName || 'Unknown'}</p>
-                            <p className="text-sm text-gray-500">{inv.date}</p>
+                            <p className="text-gray-500 text-sm">{inv.date}</p>
                           </div>
                         </div>
                         {inv.status === 'pending' ? (
                           <div className="flex gap-2">
                             <Button
+                              onClick={() => handleInvitationResponse(inv._id, false)}
                               size="sm"
                               variant="outline"
-                              onClick={() => handleInvitationResponse(inv._id, false)}
                             >
-                              <X className="w-4 h-4" />
+                              <X className="h-4 w-4" />
                             </Button>
                             <Button
-                              size="sm"
                               onClick={() => handleInvitationResponse(inv._id, true)}
+                              size="sm"
                             >
-                              <Check className="w-4 h-4" />
+                              <Check className="h-4 w-4" />
                             </Button>
                           </div>
                         ) : (
                           <span
-                            className={`text-sm font-medium ${
+                            className={`font-medium text-sm ${
                               inv.status === 'accepted' ? 'text-green-600' : 'text-gray-500'
                             }`}
                           >
@@ -255,30 +255,30 @@ export function DashboardPage() {
                 {invitations === undefined ? (
                   <div className="text-center text-gray-500">Loading...</div>
                 ) : invitations.sent.length === 0 ? (
-                  <div className="text-center text-gray-500 py-8">No invitations sent yet</div>
+                  <div className="py-8 text-center text-gray-500">No invitations sent yet</div>
                 ) : (
                   <div className="space-y-4">
                     {invitations.sent.map((inv) => (
                       <div
+                        className="flex items-center justify-between rounded-lg bg-gray-50 p-4"
                         key={inv._id}
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
                       >
                         <div className="flex items-center gap-3">
                           <img
+                            alt=""
+                            className="h-10 w-10 rounded-full"
                             src={
                               inv.otherUser?.photoUrl ||
                               `https://api.dicebear.com/7.x/initials/svg?seed=${inv.otherUser?.firstName || 'U'}`
                             }
-                            alt=""
-                            className="w-10 h-10 rounded-full"
                           />
                           <div>
                             <p className="font-medium">{inv.otherUser?.firstName || 'Unknown'}</p>
-                            <p className="text-sm text-gray-500">{inv.date}</p>
+                            <p className="text-gray-500 text-sm">{inv.date}</p>
                           </div>
                         </div>
                         <span
-                          className={`text-sm font-medium ${
+                          className={`font-medium text-sm ${
                             inv.status === 'accepted'
                               ? 'text-green-600'
                               : inv.status === 'pending'

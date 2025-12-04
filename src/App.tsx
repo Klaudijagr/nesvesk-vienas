@@ -16,14 +16,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600" />
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-red-600 border-b-2" />
       </div>
     );
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate replace to="/login" />;
   }
 
   return <>{children}</>;
@@ -33,57 +33,57 @@ export function App() {
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/browse" element={<BrowsePage />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route element={<LandingPage />} path="/" />
+        <Route element={<BrowsePage />} path="/browse" />
+        <Route element={<LoginPage />} path="/login" />
         <Route
-          path="/dashboard"
           element={
             <ProtectedRoute>
               <DashboardPage />
             </ProtectedRoute>
           }
+          path="/dashboard"
         />
         {/* Register - protected */}
         <Route
-          path="/register"
           element={
             <ProtectedRoute>
               <RegisterPage />
             </ProtectedRoute>
           }
+          path="/register"
         />
         {/* Matches - protected */}
         <Route
-          path="/matches"
           element={
             <ProtectedRoute>
               <MatchesPage />
             </ProtectedRoute>
           }
+          path="/matches"
         />
         {/* Edit profile - protected */}
         <Route
-          path="/profile/edit"
           element={
             <ProtectedRoute>
               <EditProfilePage />
             </ProtectedRoute>
           }
+          path="/profile/edit"
         />
         {/* Profile view */}
-        <Route path="/profile/:id" element={<ProfilePage />} />
+        <Route element={<ProfilePage />} path="/profile/:id" />
         {/* Static pages */}
         <Route
-          path="/terms"
           element={
-            <div className="p-8 max-w-3xl mx-auto">
-              <h1 className="text-2xl font-bold mb-4">Terms of Service</h1>
+            <div className="mx-auto max-w-3xl p-8">
+              <h1 className="mb-4 font-bold text-2xl">Terms of Service</h1>
               <p className="text-gray-600">Coming soon...</p>
             </div>
           }
+          path="/terms"
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route element={<Navigate replace to="/" />} path="*" />
       </Routes>
     </Layout>
   );

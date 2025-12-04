@@ -35,11 +35,11 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-gray-50 px-4">
+    <div className="flex min-h-[80vh] items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="bg-red-100 p-3 rounded-full">
+          <div className="mb-4 flex justify-center">
+            <div className="rounded-full bg-red-100 p-3">
               <Gift className="h-8 w-8 text-red-600" />
             </div>
           </div>
@@ -53,34 +53,34 @@ export function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
                 required
+                type="email"
+                value={email}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
                 minLength={6}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                type="password"
+                value={password}
               />
             </div>
 
-            {error && <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</div>}
+            {error && <div className="rounded-lg bg-red-50 p-3 text-red-600 text-sm">{error}</div>}
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button className="w-full" disabled={loading} type="submit">
               {loading ? 'Please wait...' : flow === 'signIn' ? 'Sign In' : 'Create Account'}
             </Button>
           </form>
@@ -90,9 +90,9 @@ export function LoginPage() {
               <p>
                 Don't have an account?{' '}
                 <button
-                  type="button"
+                  className="font-medium text-red-600 hover:underline"
                   onClick={() => setFlow('signUp')}
-                  className="text-red-600 hover:underline font-medium"
+                  type="button"
                 >
                   Sign up
                 </button>
@@ -101,9 +101,9 @@ export function LoginPage() {
               <p>
                 Already have an account?{' '}
                 <button
-                  type="button"
+                  className="font-medium text-red-600 hover:underline"
                   onClick={() => setFlow('signIn')}
-                  className="text-red-600 hover:underline font-medium"
+                  type="button"
                 >
                   Sign in
                 </button>

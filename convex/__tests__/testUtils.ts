@@ -8,9 +8,7 @@ type TestContext = ReturnType<typeof convexTest>;
  */
 export async function createTestUser(t: TestContext, name: string) {
   // Create user in the users table
-  const userId = await t.run(async (ctx) => {
-    return await ctx.db.insert('users', {});
-  });
+  const userId = await t.run(async (ctx) => await ctx.db.insert('users', {}));
 
   // Return client with identity using the user's actual ID as subject
   return {

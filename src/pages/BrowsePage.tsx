@@ -60,45 +60,45 @@ export function BrowsePage() {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Top Bar / Search Widget */}
-      <div className="bg-white border-b border-gray-200 sticky top-16 z-40 shadow-sm">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+      <div className="sticky top-16 z-40 border-gray-200 border-b bg-white shadow-sm">
+        <div className="mx-auto max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
             {/* Mode Toggle */}
-            <div className="flex bg-gray-100 p-1 rounded-lg flex-shrink-0">
+            <div className="flex flex-shrink-0 rounded-lg bg-gray-100 p-1">
               <button
-                type="button"
-                onClick={() => setActiveTab('host')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                className={`rounded-md px-4 py-2 font-medium text-sm transition-all ${
                   activeTab === 'host'
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-500 hover:text-gray-900'
                 }`}
+                onClick={() => setActiveTab('host')}
+                type="button"
               >
                 Find a Host
               </button>
               <button
-                type="button"
-                onClick={() => setActiveTab('guest')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                className={`rounded-md px-4 py-2 font-medium text-sm transition-all ${
                   activeTab === 'guest'
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-500 hover:text-gray-900'
                 }`}
+                onClick={() => setActiveTab('guest')}
+                type="button"
               >
                 Find Guests
               </button>
             </div>
 
             {/* Filter Bar */}
-            <div className="flex-1 w-full lg:w-auto flex flex-col md:flex-row items-center gap-2">
-              <div className="flex-1 w-full flex items-center bg-white border border-gray-200 rounded-lg hover:border-gray-300 focus-within:border-red-500 focus-within:ring-1 focus-within:ring-red-500 transition-all overflow-hidden h-12 shadow-sm">
+            <div className="flex w-full flex-1 flex-col items-center gap-2 md:flex-row lg:w-auto">
+              <div className="flex h-12 w-full flex-1 items-center overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all focus-within:border-red-500 focus-within:ring-1 focus-within:ring-red-500 hover:border-gray-300">
                 <div className="pl-3 text-gray-400">
-                  <MapPin className="w-5 h-5" />
+                  <MapPin className="h-5 w-5" />
                 </div>
                 <select
-                  className="w-full bg-transparent border-none focus:ring-0 text-sm text-gray-800"
-                  value={selectedCity}
+                  className="w-full border-none bg-transparent text-gray-800 text-sm focus:ring-0"
                   onChange={(e) => setSelectedCity(e.target.value)}
+                  value={selectedCity}
                 >
                   <option value="">Anywhere in Lithuania</option>
                   {CITIES.map((city) => (
@@ -109,14 +109,14 @@ export function BrowsePage() {
                 </select>
               </div>
 
-              <div className="flex-1 w-full flex items-center bg-white border border-gray-200 rounded-lg hover:border-gray-300 focus-within:border-red-500 focus-within:ring-1 focus-within:ring-red-500 transition-all overflow-hidden h-12 shadow-sm">
+              <div className="flex h-12 w-full flex-1 items-center overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all focus-within:border-red-500 focus-within:ring-1 focus-within:ring-red-500 hover:border-gray-300">
                 <div className="pl-3 text-gray-400">
-                  <Calendar className="w-5 h-5" />
+                  <Calendar className="h-5 w-5" />
                 </div>
                 <select
-                  className="w-full bg-transparent border-none focus:ring-0 text-sm text-gray-800"
-                  value={selectedDate}
+                  className="w-full border-none bg-transparent text-gray-800 text-sm focus:ring-0"
                   onChange={(e) => setSelectedDate(e.target.value)}
+                  value={selectedDate}
                 >
                   <option value="">Any Dates</option>
                   {HOLIDAY_DATES.map((date) => (
@@ -127,14 +127,14 @@ export function BrowsePage() {
                 </select>
               </div>
 
-              <div className="flex-1 w-full flex items-center bg-white border border-gray-200 rounded-lg hover:border-gray-300 focus-within:border-red-500 focus-within:ring-1 focus-within:ring-red-500 transition-all overflow-hidden h-12 shadow-sm">
+              <div className="flex h-12 w-full flex-1 items-center overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all focus-within:border-red-500 focus-within:ring-1 focus-within:ring-red-500 hover:border-gray-300">
                 <div className="pl-3 text-gray-400">
-                  <Globe className="w-5 h-5" />
+                  <Globe className="h-5 w-5" />
                 </div>
                 <select
-                  className="w-full bg-transparent border-none focus:ring-0 text-sm text-gray-800"
-                  value={selectedLanguage}
+                  className="w-full border-none bg-transparent text-gray-800 text-sm focus:ring-0"
                   onChange={(e) => setSelectedLanguage(e.target.value)}
+                  value={selectedLanguage}
                 >
                   <option value="">Any Language</option>
                   {LANGUAGES.map((lang) => (
@@ -148,12 +148,12 @@ export function BrowsePage() {
               {/* Clear Button */}
               {(selectedCity || selectedDate || selectedLanguage) && (
                 <button
-                  type="button"
+                  className="flex h-12 items-center justify-center rounded-lg border border-transparent px-4 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
                   onClick={clearFilters}
-                  className="h-12 px-4 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors border border-transparent"
                   title="Clear Filters"
+                  type="button"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="h-5 w-5" />
                 </button>
               )}
             </div>
@@ -162,65 +162,65 @@ export function BrowsePage() {
       </div>
 
       {/* Results */}
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-gray-900">
+      <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="font-bold text-gray-900 text-xl">
             {isLoading
               ? 'Loading...'
               : `${filteredProfiles.length} ${activeTab === 'host' ? 'Hosts' : 'Guests'} found`}
           </h2>
 
           <div className="flex items-center gap-3">
-            <div className="relative group">
+            <div className="group relative">
               <button
+                className="flex items-center gap-2 font-medium text-gray-700 text-sm hover:text-black"
                 type="button"
-                className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-black"
               >
-                Sort by: <span className="text-black font-bold capitalize">{sortBy}</span>
-                <ChevronDown className="w-4 h-4" />
+                Sort by: <span className="font-bold text-black capitalize">{sortBy}</span>
+                <ChevronDown className="h-4 w-4" />
               </button>
-              <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-100 shadow-lg rounded-lg overflow-hidden hidden group-hover:block z-50">
+              <div className="absolute right-0 z-50 mt-2 hidden w-40 overflow-hidden rounded-lg border border-gray-100 bg-white shadow-lg group-hover:block">
                 <button
-                  type="button"
+                  className="block w-full px-4 py-2 text-left text-gray-700 text-sm hover:bg-gray-50"
                   onClick={() => setSortBy('recommended')}
-                  className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700"
+                  type="button"
                 >
                   Recommended
                 </button>
                 <button
-                  type="button"
+                  className="block w-full px-4 py-2 text-left text-gray-700 text-sm hover:bg-gray-50"
                   onClick={() => setSortBy('newest')}
-                  className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700"
+                  type="button"
                 >
                   Newest
                 </button>
               </div>
             </div>
 
-            <div className="h-6 w-px bg-gray-300 mx-2"></div>
+            <div className="mx-2 h-6 w-px bg-gray-300" />
 
-            <div className="flex bg-gray-100 rounded-lg p-0.5">
+            <div className="flex rounded-lg bg-gray-100 p-0.5">
               <button
-                type="button"
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-md ${
+                className={`rounded-md p-2 ${
                   viewMode === 'grid'
-                    ? 'bg-white shadow-sm text-black'
+                    ? 'bg-white text-black shadow-sm'
                     : 'text-gray-400 hover:text-gray-600'
                 }`}
+                onClick={() => setViewMode('grid')}
+                type="button"
               >
-                <Grid className="w-4 h-4" />
+                <Grid className="h-4 w-4" />
               </button>
               <button
-                type="button"
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-md ${
+                className={`rounded-md p-2 ${
                   viewMode === 'list'
-                    ? 'bg-white shadow-sm text-black'
+                    ? 'bg-white text-black shadow-sm'
                     : 'text-gray-400 hover:text-gray-600'
                 }`}
+                onClick={() => setViewMode('list')}
+                type="button"
               >
-                <List className="w-4 h-4" />
+                <List className="h-4 w-4" />
               </button>
             </div>
           </div>
@@ -228,16 +228,16 @@ export function BrowsePage() {
 
         {/* Loading State */}
         {isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
               <div
+                className="h-80 animate-pulse rounded-xl border border-gray-100 bg-white"
                 key={i}
-                className="bg-white rounded-xl border border-gray-100 h-80 animate-pulse"
               >
-                <div className="h-48 bg-gray-200 rounded-t-xl" />
-                <div className="p-4 space-y-3">
-                  <div className="h-4 bg-gray-200 rounded w-3/4" />
-                  <div className="h-3 bg-gray-200 rounded w-1/2" />
+                <div className="h-48 rounded-t-xl bg-gray-200" />
+                <div className="space-y-3 p-4">
+                  <div className="h-4 w-3/4 rounded bg-gray-200" />
+                  <div className="h-3 w-1/2 rounded bg-gray-200" />
                 </div>
               </div>
             ))}
@@ -246,12 +246,12 @@ export function BrowsePage() {
 
         {/* Grid View */}
         {!isLoading && viewMode === 'grid' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredProfiles.map((profile) => (
               <ListingCard
                 key={profile._id}
-                profile={profile}
                 onInvite={() => handleInvite(profile.userId)}
+                profile={profile}
               />
             ))}
           </div>
@@ -262,81 +262,81 @@ export function BrowsePage() {
           <div className="space-y-4">
             {filteredProfiles.map((profile) => (
               <div
+                className="group flex flex-col gap-6 rounded-xl border border-gray-200 bg-white p-4 transition-all hover:shadow-md md:flex-row"
                 key={profile._id}
-                className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col md:flex-row gap-6 hover:shadow-md transition-all group"
               >
-                <div className="w-32 h-32 flex-shrink-0 relative rounded-lg overflow-hidden bg-gray-100">
+                <div className="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
                   <img
+                    alt={profile.firstName}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     src={
                       profile.photoUrl ||
                       `https://api.dicebear.com/7.x/initials/svg?seed=${profile.firstName}`
                     }
-                    alt={profile.firstName}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
                 <div className="flex-1 py-1">
-                  <div className="flex justify-between items-start">
+                  <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900">
+                      <h3 className="font-bold text-gray-900 text-lg">
                         {profile.firstName}
                         {profile.role !== 'host' && profile.age && `, ${profile.age}`}
                       </h3>
-                      <p className="text-gray-500 flex items-center gap-1 text-xs mt-1">
-                        <MapPin className="w-3 h-3" /> {profile.city}
+                      <p className="mt-1 flex items-center gap-1 text-gray-500 text-xs">
+                        <MapPin className="h-3 w-3" /> {profile.city}
                       </p>
                     </div>
                     <span
-                      className={`inline-block px-2 py-1 text-xs font-bold uppercase tracking-wide rounded-md border ${
+                      className={`inline-block rounded-md border px-2 py-1 font-bold text-xs uppercase tracking-wide ${
                         profile.verified
-                          ? 'bg-green-50 text-green-700 border-green-100'
-                          : 'bg-gray-50 text-gray-500 border-gray-100'
+                          ? 'border-green-100 bg-green-50 text-green-700'
+                          : 'border-gray-100 bg-gray-50 text-gray-500'
                       }`}
                     >
                       {profile.verified ? 'Verified' : 'Unverified'}
                     </span>
                   </div>
 
-                  <p className="text-gray-600 mt-2 line-clamp-2 text-sm">{profile.bio}</p>
+                  <p className="mt-2 line-clamp-2 text-gray-600 text-sm">{profile.bio}</p>
 
-                  <div className="flex flex-wrap gap-2 mt-3">
+                  <div className="mt-3 flex flex-wrap gap-2">
                     {profile.languages.map((l) => (
                       <span
+                        className="rounded-full bg-gray-100 px-2 py-1 text-gray-600 text-xs"
                         key={l}
-                        className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
                       >
                         {l}
                       </span>
                     ))}
                   </div>
                 </div>
-                <div className="w-full md:w-48 flex flex-col justify-between py-1 border-t md:border-t-0 md:border-l border-gray-100 pl-0 md:pl-6 gap-3">
+                <div className="flex w-full flex-col justify-between gap-3 border-gray-100 border-t py-1 pl-0 md:w-48 md:border-t-0 md:border-l md:pl-6">
                   <div>
-                    <p className="text-xs font-semibold text-gray-900 uppercase tracking-wide">
+                    <p className="font-semibold text-gray-900 text-xs uppercase tracking-wide">
                       Availability
                     </p>
-                    <div className="flex flex-wrap gap-1 mt-1">
+                    <div className="mt-1 flex flex-wrap gap-1">
                       {profile.availableDates.map((d) => (
                         <span
+                          className="rounded bg-red-50 px-1.5 py-0.5 text-red-600 text-xs"
                           key={d}
-                          className="text-xs text-red-600 bg-red-50 px-1.5 py-0.5 rounded"
                         >
                           {d}
                         </span>
                       ))}
                     </div>
                   </div>
-                  <div className="space-y-2 mt-auto">
+                  <div className="mt-auto space-y-2">
                     <Link
+                      className="block w-full rounded-lg bg-gray-100 px-3 py-2 text-center font-medium text-gray-900 text-xs transition-colors hover:bg-gray-200"
                       to={`/profile/${profile.userId}`}
-                      className="block w-full text-center py-2 px-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-xs font-medium transition-colors"
                     >
                       View Profile
                     </Link>
                     <button
-                      type="button"
+                      className="block w-full rounded-lg bg-red-600 px-3 py-2 text-center font-medium text-white text-xs transition-colors hover:bg-red-700"
                       onClick={() => handleInvite(profile.userId)}
-                      className="block w-full text-center py-2 px-3 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-medium transition-colors"
+                      type="button"
                     >
                       {activeTab === 'host' ? 'Request to Join' : 'Send Invite'}
                     </button>
@@ -349,14 +349,14 @@ export function BrowsePage() {
 
         {/* Empty State */}
         {!isLoading && filteredProfiles.length === 0 && (
-          <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
+          <div className="rounded-xl border border-gray-300 border-dashed bg-white py-20 text-center">
             <SlidersHorizontal className="mx-auto h-12 w-12 text-gray-300" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No matches found</h3>
-            <p className="mt-1 text-sm text-gray-500">Try adjusting your filters or dates.</p>
+            <h3 className="mt-2 font-medium text-gray-900 text-sm">No matches found</h3>
+            <p className="mt-1 text-gray-500 text-sm">Try adjusting your filters or dates.</p>
             <button
-              type="button"
+              className="mt-4 font-medium text-red-600 text-sm hover:underline"
               onClick={clearFilters}
-              className="mt-4 text-red-600 hover:underline text-sm font-medium"
+              type="button"
             >
               Clear all filters
             </button>
