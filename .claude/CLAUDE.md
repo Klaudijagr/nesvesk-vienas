@@ -7,7 +7,7 @@ This project uses **Ultracite**, a zero-config Biome preset that enforces strict
 - **Format code**: `npx ultracite fix`
 - **Check for issues**: `npx ultracite check`
 - **Diagnose setup**: `npx ultracite doctor`
-
+bunx convex dev
 Biome (the underlying engine) provides extremely fast Rust-based linting and formatting. Most issues are automatically fixable.
 
 ---

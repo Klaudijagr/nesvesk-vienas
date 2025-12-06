@@ -1,4 +1,3 @@
-import { authTables } from '@convex-dev/auth/server';
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 
@@ -32,12 +31,17 @@ const invitationStatus = v.union(
 );
 
 export default defineSchema({
-  // Include Convex Auth tables
-  ...authTables,
+  // Users table (linked to Clerk via tokenIdentifier)
+  users: defineTable({
+    clerkId: v.string(),
+    email: v.optional(v.string()),
+    name: v.optional(v.string()),
+    imageUrl: v.optional(v.string()),
+  }).index('by_clerkId', ['clerkId']),
 
-  // User profiles (extends auth user)
+  // User profiles (extends user)
   profiles: defineTable({
-    // Link to auth user
+    // Link to user
     userId: v.id('users'),
 
     // Basic info
@@ -47,8 +51,10 @@ export default defineSchema({
     age: v.optional(v.number()),
     city,
     bio: v.string(),
-    photoUrl: v.optional(v.string()),
+    photoUrl: v.optional(v.string()), // Main/primary photo (first in gallery)
+    photos: v.optional(v.array(v.string())), // Additional photos (up to 5 total)
     verified: v.boolean(),
+    isVisible: v.optional(v.boolean()), // Whether profile appears in search
 
     // Contact (hidden until match)
     phone: v.optional(v.string()),
@@ -85,6 +91,15 @@ export default defineSchema({
     receiverId: v.id('users'),
     content: v.string(),
     read: v.boolean(),
+    // Optional event card for hosts to share event details
+    eventCard: v.optional(
+      v.object({
+        date: holidayDate,
+        address: v.optional(v.string()),
+        phone: v.optional(v.string()),
+        note: v.optional(v.string()),
+      }),
+    ),
   })
     .index('by_sender', ['senderId'])
     .index('by_receiver', ['receiverId'])

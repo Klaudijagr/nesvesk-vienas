@@ -1,18 +1,14 @@
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
+import type { Id } from './_generated/dataModel';
+import type { MutationCtx } from './_generated/server';
 import { mutation, query } from './_generated/server';
-import { getCurrentUserId } from './lib/auth';
+import { getCurrentUserId, getOrCreateUser } from './lib/auth';
 
-// Helper to get user email from auth account
-// biome-ignore lint/suspicious/noExplicitAny: Auth context type requires any for querying authAccounts table
-async function getUserEmail(ctx: any, userId: string): Promise<string | null> {
-  const authAccount = await ctx.db
-    .query('authAccounts')
-    .withIndex('userIdAndProvider', (q: { eq: (f: string, v: string) => unknown }) =>
-      q.eq('userId', userId),
-    )
-    .first();
-  return authAccount?.providerAccountId || null; // Email is stored as providerAccountId for password auth
+// Helper to get user email from users table
+async function getUserEmail(ctx: MutationCtx, userId: Id<'users'>): Promise<string | null> {
+  const user = await ctx.db.get(userId);
+  return user?.email || null;
 }
 
 // Get invitations for current user (both sent and received)
@@ -72,7 +68,7 @@ export const send = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    const userId = await getCurrentUserId(ctx);
+    const userId = await getOrCreateUser(ctx);
     if (!userId) throw new Error('Not authenticated');
 
     // Check if invitation already exists
@@ -120,7 +116,7 @@ export const respond = mutation({
     accept: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const userId = await getCurrentUserId(ctx);
+    const userId = await getOrCreateUser(ctx);
     if (!userId) throw new Error('Not authenticated');
 
     const invitation = await ctx.db.get(args.invitationId);

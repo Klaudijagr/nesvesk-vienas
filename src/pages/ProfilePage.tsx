@@ -52,10 +52,10 @@ export function ProfilePage() {
         toUserId: id as Id<'users'>,
         date: selectedDate as '24 Dec' | '25 Dec' | '26 Dec' | '31 Dec',
       });
-      alert('Invitation sent!');
+      alert('Request sent!');
       setSelectedDate('');
     } catch {
-      alert('Failed to send invitation. You may have already sent one.');
+      alert('Failed to send request. You may have already sent one.');
     } finally {
       setIsSending(false);
     }
@@ -368,9 +368,9 @@ export function ProfilePage() {
                     </div>
                   ) : (
                     <>
-                      {/* Send Invitation */}
+                      {/* Request to Connect */}
                       <div className="space-y-2">
-                        <p className="text-gray-600 text-sm">Send an invitation for:</p>
+                        <p className="text-gray-600 text-sm">Request to connect for:</p>
                         <select
                           className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                           onChange={(e) => setSelectedDate(e.target.value)}
@@ -393,7 +393,7 @@ export function ProfilePage() {
                           ) : (
                             <>
                               <Send className="mr-2 h-4 w-4" />
-                              Send Invitation
+                              Send Request
                             </>
                           )}
                         </Button>

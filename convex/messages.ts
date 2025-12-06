@@ -139,3 +139,57 @@ export const getUnreadCount = query({
     return unread.length;
   },
 });
+
+// Send an event card (host shares event details with guest)
+export const sendEventCard = mutation({
+  args: {
+    receiverId: v.id('users'),
+    date: v.union(
+      v.literal('24 Dec'),
+      v.literal('25 Dec'),
+      v.literal('26 Dec'),
+      v.literal('31 Dec'),
+    ),
+    address: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    note: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getCurrentUserId(ctx);
+    if (!userId) throw new Error('Not authenticated');
+
+    // Verify the users are matched (have an accepted invitation)
+    const sentMatch = await ctx.db
+      .query('invitations')
+      .withIndex('by_from', (q) => q.eq('fromUserId', userId))
+      .filter((q) =>
+        q.and(q.eq(q.field('toUserId'), args.receiverId), q.eq(q.field('status'), 'accepted')),
+      )
+      .first();
+
+    const receivedMatch = await ctx.db
+      .query('invitations')
+      .withIndex('by_to', (q) => q.eq('toUserId', userId))
+      .filter((q) =>
+        q.and(q.eq(q.field('fromUserId'), args.receiverId), q.eq(q.field('status'), 'accepted')),
+      )
+      .first();
+
+    if (!(sentMatch || receivedMatch)) {
+      throw new Error('You must be matched to share event details');
+    }
+
+    return await ctx.db.insert('messages', {
+      senderId: userId,
+      receiverId: args.receiverId,
+      content: '📍 Shared event details',
+      read: false,
+      eventCard: {
+        date: args.date,
+        address: args.address,
+        phone: args.phone,
+        note: args.note,
+      },
+    });
+  },
+});

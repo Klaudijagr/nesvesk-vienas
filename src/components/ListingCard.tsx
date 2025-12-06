@@ -1,4 +1,16 @@
-import { Calendar, MapPin, MessageCircle, ShieldCheck, User, Users } from 'lucide-react';
+import {
+  Calendar,
+  Cigarette,
+  Dog,
+  MapPin,
+  MessageCircle,
+  ShieldCheck,
+  Sparkles,
+  User,
+  Users,
+  UtensilsCrossed,
+  Wine,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Doc, Id } from '../../convex/_generated/dataModel';
 
@@ -10,6 +22,19 @@ interface ListingCardProps {
 export function ListingCard({ profile, onInvite }: ListingCardProps) {
   const isHost = profile.role === 'host' || profile.role === 'both';
   const isGuest = profile.role === 'guest' || profile.role === 'both';
+
+  // Build preference icons
+  const preferenceIcons = [];
+  if (profile.drinkingAllowed)
+    preferenceIcons.push({ icon: Wine, label: 'Alcohol OK', color: 'text-purple-500' });
+  if (profile.smokingAllowed)
+    preferenceIcons.push({ icon: Cigarette, label: 'Smoking OK', color: 'text-gray-500' });
+  if (profile.petsAllowed || profile.hasPets)
+    preferenceIcons.push({
+      icon: Dog,
+      label: profile.hasPets ? 'Has pets' : 'Pets OK',
+      color: 'text-amber-500',
+    });
 
   return (
     <div className="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
@@ -48,7 +73,7 @@ export function ListingCard({ profile, onInvite }: ListingCardProps) {
         <div className="flex flex-wrap gap-2">
           {isHost && (
             <span className="flex items-center gap-1 rounded-md bg-purple-50 px-2 py-1 font-medium text-purple-700 text-xs uppercase tracking-wider">
-              <Users className="h-3 w-3" /> Host ({profile.capacity})
+              <Users className="h-3 w-3" /> Host ({profile.capacity ?? '?'})
             </span>
           )}
           {isGuest && (
@@ -70,10 +95,40 @@ export function ListingCard({ profile, onInvite }: ListingCardProps) {
           </p>
         </Link>
 
+        {/* Vibes */}
+        {profile.vibes.length > 0 && (
+          <div className="flex items-start gap-2">
+            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-purple-500" />
+            <div className="flex flex-wrap gap-1">
+              {profile.vibes.slice(0, 3).map((vibe) => (
+                <span
+                  className="rounded-full border border-purple-200 bg-purple-50 px-2 py-0.5 text-purple-600 text-xs"
+                  key={vibe}
+                >
+                  {vibe}
+                </span>
+              ))}
+              {profile.vibes.length > 3 && (
+                <span className="text-gray-400 text-xs">+{profile.vibes.length - 3}</span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Dietary */}
+        {profile.dietaryInfo.length > 0 && (
+          <div className="flex items-start gap-2">
+            <UtensilsCrossed className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
+            <span className="text-gray-600 text-xs">
+              {profile.dietaryInfo.slice(0, 3).join(', ')}
+            </span>
+          </div>
+        )}
+
         {/* Details */}
-        <div className="mt-2 space-y-2">
+        <div className="mt-auto space-y-2">
           <div className="flex items-start gap-2 text-gray-500 text-sm">
-            <Calendar className="mt-0.5 h-4 w-4 text-red-500" />
+            <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
             <div className="flex flex-wrap gap-1">
               {profile.availableDates.map((d) => (
                 <span className="rounded bg-gray-100 px-1.5 text-gray-700 text-xs" key={d}>
@@ -84,9 +139,20 @@ export function ListingCard({ profile, onInvite }: ListingCardProps) {
           </div>
 
           <div className="flex items-start gap-2 text-gray-500 text-sm">
-            <MessageCircle className="mt-0.5 h-4 w-4 text-red-500" />
+            <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
             <span className="text-xs">{profile.languages.join(', ')}</span>
           </div>
+
+          {/* Preference Icons */}
+          {preferenceIcons.length > 0 && (
+            <div className="flex items-center gap-3">
+              {preferenceIcons.map(({ icon: Icon, label, color }) => (
+                <div className={`flex items-center gap-1 ${color}`} key={label} title={label}>
+                  <Icon className="h-3.5 w-3.5" />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

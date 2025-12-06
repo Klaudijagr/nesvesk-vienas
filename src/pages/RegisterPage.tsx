@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useConvexAuth, useMutation, useQuery } from 'convex/react';
-import { ChevronLeft, ChevronRight, Gift, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { Camera, ChevronLeft, ChevronRight, Gift, Loader2 } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 import { api } from '../../convex/_generated/api';
+import type { Id } from '../../convex/_generated/dataModel';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
@@ -23,7 +24,7 @@ import {
 
 // Zod schema for form validation
 const profileSchema = z.object({
-  role: z.enum(['host', 'guest', 'both']),
+  role: z.enum(['host', 'guest']),
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().optional(),
   age: z.number().min(18, 'Must be at least 18').max(120).optional(),
@@ -45,6 +46,7 @@ const profileSchema = z.object({
   drinkingAllowed: z.boolean(),
   petsAllowed: z.boolean(),
   hasPets: z.boolean(),
+  isVisible: z.boolean(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -57,9 +59,49 @@ export function RegisterPage() {
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
   const existingProfile = useQuery(api.profiles.getMyProfile);
   const upsertProfile = useMutation(api.profiles.upsertProfile);
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+  const getStorageUrl = useMutation(api.files.getStorageUrl);
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [storageId, setStorageId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingPhoto(true);
+    try {
+      // Get upload URL from Convex
+      const uploadUrl = await generateUploadUrl();
+
+      // Upload file to Convex storage
+      const response = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': file.type },
+        body: file,
+      });
+
+      if (!response.ok) throw new Error('Upload failed');
+
+      const { storageId } = await response.json();
+
+      // Create a local preview URL immediately
+      const previewUrl = URL.createObjectURL(file);
+      setPhotoUrl(previewUrl);
+
+      // Store the storage ID for later use
+      setStorageId(storageId);
+    } catch (error) {
+      console.error('Photo upload failed:', error);
+      alert('Failed to upload photo. Please try again.');
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
 
   const {
     register,
@@ -70,7 +112,7 @@ export function RegisterPage() {
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      role: initialRole,
+      role: initialRole === 'host' ? 'host' : 'guest',
       firstName: '',
       lastName: '',
       city: 'Vilnius',
@@ -85,6 +127,7 @@ export function RegisterPage() {
       drinkingAllowed: true,
       petsAllowed: true,
       hasPets: false,
+      isVisible: true,
     },
   });
 
@@ -95,8 +138,9 @@ export function RegisterPage() {
   const amenities = watch('amenities');
   const houseRules = watch('houseRules');
   const vibes = watch('vibes');
+  const isVisible = watch('isVisible');
 
-  const isHost = role === 'host' || role === 'both';
+  const isHost = role === 'host';
   const totalSteps = isHost ? 4 : 3;
 
   // Redirect if not authenticated
@@ -106,7 +150,7 @@ export function RegisterPage() {
 
   // Redirect if already has profile
   if (existingProfile) {
-    return <Navigate replace to="/dashboard" />;
+    return <Navigate replace to="/browse" />;
   }
 
   const toggleArrayValue = (
@@ -127,13 +171,22 @@ export function RegisterPage() {
   const onSubmit = async (data: ProfileFormData) => {
     setIsSubmitting(true);
     try {
+      // Get the photo URL if a photo was uploaded
+      let finalPhotoUrl: string | undefined;
+      if (storageId) {
+        finalPhotoUrl =
+          (await getStorageUrl({ storageId: storageId as Id<'_storage'> })) ?? undefined;
+      }
+
       await upsertProfile({
         ...data,
         age: data.age || undefined,
         concept: data.concept || undefined,
         capacity: data.capacity || undefined,
+        isVisible: data.isVisible,
+        photoUrl: finalPhotoUrl,
       });
-      navigate('/dashboard');
+      navigate('/browse');
     } catch (error) {
       console.error('Failed to create profile:', error);
       alert('Failed to create profile. Please try again.');
@@ -187,28 +240,100 @@ export function RegisterPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Role Selection */}
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label>I want to...</Label>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 gap-4">
                     {[
-                      { value: 'host', label: 'Host', desc: 'Invite others' },
-                      { value: 'guest', label: 'Be a Guest', desc: 'Find a host' },
-                      { value: 'both', label: 'Both', desc: 'Host & visit' },
+                      { value: 'host', label: 'Be a Host', desc: 'Open your home to guests' },
+                      { value: 'guest', label: 'Be a Guest', desc: 'Find a host to visit' },
                     ].map((option) => (
                       <button
-                        className={`rounded-lg border-2 p-4 text-center transition-all ${
+                        className={`rounded-lg border-2 p-5 text-center transition-all ${
                           role === option.value
                             ? 'border-red-600 bg-red-50'
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
                         key={option.value}
-                        onClick={() => setValue('role', option.value as 'host' | 'guest' | 'both')}
+                        onClick={() => setValue('role', option.value as 'host' | 'guest')}
                         type="button"
                       >
-                        <div className="font-medium">{option.label}</div>
-                        <div className="text-gray-500 text-xs">{option.desc}</div>
+                        <div className="font-semibold text-lg">{option.label}</div>
+                        <div className="mt-1 text-gray-500 text-sm">{option.desc}</div>
                       </button>
                     ))}
+                  </div>
+                  <p className="text-center text-gray-400 text-sm">
+                    You can change this later in Settings
+                  </p>
+                </div>
+
+                {/* Visibility Toggle */}
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                  <label className="flex cursor-pointer items-center justify-between">
+                    <div>
+                      <div className="font-medium text-gray-900">Visible in search</div>
+                      <div className="text-gray-500 text-sm">
+                        Others can find you and send connection requests
+                      </div>
+                    </div>
+                    <input
+                      checked={isVisible}
+                      className="h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                      onChange={(e) => setValue('isVisible', e.target.checked)}
+                      type="checkbox"
+                    />
+                  </label>
+                  {!isVisible && (
+                    <p className="mt-2 text-amber-600 text-xs">
+                      You can still browse and send requests, but won't appear in search results.
+                    </p>
+                  )}
+                </div>
+
+                {/* Profile Photo */}
+                <div className="space-y-2">
+                  <Label>Profile Photo</Label>
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="relative flex h-24 w-24 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      {photoUrl ? (
+                        <img
+                          alt="Profile preview"
+                          className="h-full w-full object-cover"
+                          src={photoUrl}
+                        />
+                      ) : (
+                        <Camera className="h-8 w-8 text-gray-400" />
+                      )}
+                      {isUploadingPhoto && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                          <Loader2 className="h-6 w-6 animate-spin text-white" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <Button
+                        className="text-sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        size="sm"
+                        type="button"
+                        variant="outline"
+                      >
+                        {photoUrl ? 'Change Photo' : 'Upload Photo'}
+                      </Button>
+                      <p className="mt-1 text-gray-500 text-xs">
+                        A friendly photo helps build trust with others
+                      </p>
+                    </div>
+                    <input
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handlePhotoUpload}
+                      ref={fileInputRef}
+                      type="file"
+                    />
                   </div>
                 </div>
 

@@ -9,11 +9,18 @@ import {
   SlidersHorizontal,
   X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import { ListingCard } from '../components/ListingCard';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
 import { CITIES, HOLIDAY_DATES, LANGUAGES } from '../lib/types';
 
 export function BrowsePage() {
@@ -42,9 +49,9 @@ export function BrowsePage() {
         toUserId: userId,
         date: '24 Dec', // TODO: Let user pick date
       });
-      alert('Invitation sent! Check your inbox.');
+      alert('Request sent!');
     } catch {
-      alert('Failed to send invitation. Please try again.');
+      alert('Failed to send request. Please try again.');
     }
   };
 
@@ -54,8 +61,21 @@ export function BrowsePage() {
     setSelectedLanguage('');
   };
 
-  const isLoading = profiles === undefined;
-  const filteredProfiles = profiles ?? [];
+  // Track if we've loaded at least once to avoid showing skeleton on tab switch
+  const hasLoadedOnce = useRef(false);
+  const previousProfiles = useRef<typeof profiles>([]);
+
+  useEffect(() => {
+    if (profiles !== undefined) {
+      hasLoadedOnce.current = true;
+      previousProfiles.current = profiles;
+    }
+  }, [profiles]);
+
+  // Only show skeleton on initial load, not on tab/filter switches
+  const isLoading = profiles === undefined && !hasLoadedOnce.current;
+  // Use previous profiles while loading to avoid "0 found" flash
+  const filteredProfiles = profiles ?? previousProfiles.current ?? [];
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -91,59 +111,62 @@ export function BrowsePage() {
 
             {/* Filter Bar */}
             <div className="flex w-full flex-1 flex-col items-center gap-2 md:flex-row lg:w-auto">
-              <div className="flex h-12 w-full flex-1 items-center overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all focus-within:border-red-500 focus-within:ring-1 focus-within:ring-red-500 hover:border-gray-300">
-                <div className="pl-3 text-gray-400">
-                  <MapPin className="h-5 w-5" />
-                </div>
-                <select
-                  className="w-full border-none bg-transparent text-gray-800 text-sm focus:ring-0"
-                  onChange={(e) => setSelectedCity(e.target.value)}
-                  value={selectedCity}
-                >
-                  <option value="">Anywhere in Lithuania</option>
+              {/* City Select */}
+              <Select
+                onValueChange={(v) => setSelectedCity(v === '__all__' ? '' : v)}
+                value={selectedCity || '__all__'}
+              >
+                <SelectTrigger className="h-12 w-full flex-1 rounded-lg border-gray-200 bg-white shadow-sm hover:border-gray-300">
+                  <MapPin className="mr-2 h-4 w-4 text-gray-400" />
+                  <SelectValue placeholder="Anywhere in Lithuania" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">Anywhere in Lithuania</SelectItem>
                   {CITIES.map((city) => (
-                    <option key={city} value={city}>
+                    <SelectItem key={city} value={city}>
                       {city}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
-              </div>
+                </SelectContent>
+              </Select>
 
-              <div className="flex h-12 w-full flex-1 items-center overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all focus-within:border-red-500 focus-within:ring-1 focus-within:ring-red-500 hover:border-gray-300">
-                <div className="pl-3 text-gray-400">
-                  <Calendar className="h-5 w-5" />
-                </div>
-                <select
-                  className="w-full border-none bg-transparent text-gray-800 text-sm focus:ring-0"
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  value={selectedDate}
-                >
-                  <option value="">Any Dates</option>
+              {/* Date Select */}
+              <Select
+                onValueChange={(v) => setSelectedDate(v === '__all__' ? '' : v)}
+                value={selectedDate || '__all__'}
+              >
+                <SelectTrigger className="h-12 w-full flex-1 rounded-lg border-gray-200 bg-white shadow-sm hover:border-gray-300">
+                  <Calendar className="mr-2 h-4 w-4 text-gray-400" />
+                  <SelectValue placeholder="Any Dates" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">Any Dates</SelectItem>
                   {HOLIDAY_DATES.map((date) => (
-                    <option key={date} value={date}>
+                    <SelectItem key={date} value={date}>
                       {date}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
-              </div>
+                </SelectContent>
+              </Select>
 
-              <div className="flex h-12 w-full flex-1 items-center overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all focus-within:border-red-500 focus-within:ring-1 focus-within:ring-red-500 hover:border-gray-300">
-                <div className="pl-3 text-gray-400">
-                  <Globe className="h-5 w-5" />
-                </div>
-                <select
-                  className="w-full border-none bg-transparent text-gray-800 text-sm focus:ring-0"
-                  onChange={(e) => setSelectedLanguage(e.target.value)}
-                  value={selectedLanguage}
-                >
-                  <option value="">Any Language</option>
+              {/* Language Select */}
+              <Select
+                onValueChange={(v) => setSelectedLanguage(v === '__all__' ? '' : v)}
+                value={selectedLanguage || '__all__'}
+              >
+                <SelectTrigger className="h-12 w-full flex-1 rounded-lg border-gray-200 bg-white shadow-sm hover:border-gray-300">
+                  <Globe className="mr-2 h-4 w-4 text-gray-400" />
+                  <SelectValue placeholder="Any Language" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">Any Language</SelectItem>
                   {LANGUAGES.map((lang) => (
-                    <option key={lang} value={lang}>
+                    <SelectItem key={lang} value={lang}>
                       {lang}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
-              </div>
+                </SelectContent>
+              </Select>
 
               {/* Clear Button */}
               {(selectedCity || selectedDate || selectedLanguage) && (
@@ -338,7 +361,7 @@ export function BrowsePage() {
                       onClick={() => handleInvite(profile.userId)}
                       type="button"
                     >
-                      {activeTab === 'host' ? 'Request to Join' : 'Send Invite'}
+                      {activeTab === 'host' ? 'Request to Join' : 'Send Request'}
                     </button>
                   </div>
                 </div>

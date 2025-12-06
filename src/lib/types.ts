@@ -19,6 +19,7 @@ export const LANGUAGES: Language[] = ['Lithuanian', 'English', 'Ukrainian', 'Rus
 export const HOLIDAY_DATES: HolidayDate[] = ['24 Dec', '25 Dec', '26 Dec', '31 Dec'];
 
 export const CONCEPTS: Concept[] = ['Party', 'Dinner', 'Hangout'];
+export const CONCEPT_OPTIONS = CONCEPTS;
 
 export const DIETARY_OPTIONS = [
   'Vegetarian',
