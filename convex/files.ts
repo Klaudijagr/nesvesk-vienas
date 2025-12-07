@@ -1,6 +1,6 @@
-import { v } from 'convex/values';
-import { mutation, query } from './_generated/server';
-import { getCurrentUserId, getOrCreateUser } from './lib/auth';
+import { v } from "convex/values";
+import { mutation, query } from "./_generated/server";
+import { getCurrentUserId, getOrCreateUser } from "./lib/auth";
 
 // Generate upload URL for profile photos
 export const generateUploadUrl = mutation({
@@ -9,7 +9,9 @@ export const generateUploadUrl = mutation({
     // Use getOrCreateUser since this may be called during registration
     // before the user record exists in Convex
     const userId = await getOrCreateUser(ctx);
-    if (!userId) throw new Error('Not authenticated');
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
 
     return await ctx.storage.generateUploadUrl();
   },
@@ -18,20 +20,24 @@ export const generateUploadUrl = mutation({
 // Store the uploaded file and update profile
 export const saveProfilePhoto = mutation({
   args: {
-    storageId: v.id('_storage'),
+    storageId: v.id("_storage"),
   },
   handler: async (ctx, args) => {
     const userId = await getCurrentUserId(ctx);
-    if (!userId) throw new Error('Not authenticated');
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
 
     // Get the URL for the uploaded file
     const photoUrl = await ctx.storage.getUrl(args.storageId);
-    if (!photoUrl) throw new Error('Failed to get file URL');
+    if (!photoUrl) {
+      throw new Error("Failed to get file URL");
+    }
 
     // Update the profile with the new photo URL
     const profile = await ctx.db
-      .query('profiles')
-      .withIndex('by_userId', (q) => q.eq('userId', userId))
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
       .first();
 
     if (profile) {
@@ -44,16 +50,18 @@ export const saveProfilePhoto = mutation({
 
 // Get URL for a storage ID
 export const getUrl = query({
-  args: { storageId: v.id('_storage') },
+  args: { storageId: v.id("_storage") },
   handler: async (ctx, args) => await ctx.storage.getUrl(args.storageId),
 });
 
 // Get URL for a storage ID (mutation version for use in sequences)
 export const getStorageUrl = mutation({
-  args: { storageId: v.id('_storage') },
+  args: { storageId: v.id("_storage") },
   handler: async (ctx, args) => {
     const userId = await getCurrentUserId(ctx);
-    if (!userId) throw new Error('Not authenticated');
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
     return await ctx.storage.getUrl(args.storageId);
   },
 });
@@ -63,22 +71,50 @@ const MAX_PHOTOS = 5;
 // Add a photo to the profile gallery
 export const addProfilePhoto = mutation({
   args: {
-    storageId: v.id('_storage'),
+    storageId: v.id("_storage"),
     setAsMain: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const userId = await getCurrentUserId(ctx);
-    if (!userId) throw new Error('Not authenticated');
+    // Use getOrCreateUser to ensure user exists
+    const userId = await getOrCreateUser(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
 
     const photoUrl = await ctx.storage.getUrl(args.storageId);
-    if (!photoUrl) throw new Error('Failed to get file URL');
+    if (!photoUrl) {
+      throw new Error("Failed to get file URL");
+    }
 
     const profile = await ctx.db
-      .query('profiles')
-      .withIndex('by_userId', (q) => q.eq('userId', userId))
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
       .first();
 
-    if (!profile) throw new Error('Profile not found');
+    // Create a basic profile if none exists
+    if (!profile) {
+      await ctx.db.insert("profiles", {
+        userId,
+        role: "guest",
+        firstName: "",
+        city: "Vilnius",
+        bio: "",
+        verified: false,
+        languages: [],
+        availableDates: [],
+        dietaryInfo: [],
+        amenities: [],
+        houseRules: [],
+        vibes: [],
+        smokingAllowed: false,
+        drinkingAllowed: false,
+        petsAllowed: false,
+        hasPets: false,
+        photos: [photoUrl], // Add to photos array too!
+        photoUrl,
+      });
+      return { photoUrl, totalPhotos: 1 };
+    }
 
     const currentPhotos = profile.photos ?? [];
 
@@ -91,7 +127,9 @@ export const addProfilePhoto = mutation({
     const updatedPhotos = [...currentPhotos, photoUrl];
 
     // If setAsMain or no main photo yet, set as main
-    const updates: { photos: string[]; photoUrl?: string } = { photos: updatedPhotos };
+    const updates: { photos: string[]; photoUrl?: string } = {
+      photos: updatedPhotos,
+    };
     if (args.setAsMain || !profile.photoUrl) {
       updates.photoUrl = photoUrl;
     }
@@ -109,20 +147,26 @@ export const removeProfilePhoto = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getCurrentUserId(ctx);
-    if (!userId) throw new Error('Not authenticated');
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
 
     const profile = await ctx.db
-      .query('profiles')
-      .withIndex('by_userId', (q) => q.eq('userId', userId))
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
       .first();
 
-    if (!profile) throw new Error('Profile not found');
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
 
     const currentPhotos = profile.photos ?? [];
     const updatedPhotos = currentPhotos.filter((p) => p !== args.photoUrl);
 
     // If we're removing the main photo, set the first remaining photo as main
-    const updates: { photos: string[]; photoUrl?: string } = { photos: updatedPhotos };
+    const updates: { photos: string[]; photoUrl?: string } = {
+      photos: updatedPhotos,
+    };
     if (profile.photoUrl === args.photoUrl) {
       updates.photoUrl = updatedPhotos[0] ?? undefined;
     }
@@ -140,20 +184,24 @@ export const setMainPhoto = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getCurrentUserId(ctx);
-    if (!userId) throw new Error('Not authenticated');
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
 
     const profile = await ctx.db
-      .query('profiles')
-      .withIndex('by_userId', (q) => q.eq('userId', userId))
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
       .first();
 
-    if (!profile) throw new Error('Profile not found');
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
 
     const currentPhotos = profile.photos ?? [];
 
     // Verify the photo exists in the gallery
     if (!currentPhotos.includes(args.photoUrl)) {
-      throw new Error('Photo not found in gallery');
+      throw new Error("Photo not found in gallery");
     }
 
     await ctx.db.patch(profile._id, { photoUrl: args.photoUrl });
@@ -162,19 +210,81 @@ export const setMainPhoto = mutation({
   },
 });
 
+// Sync Google/OAuth photo to profile if no photos exist
+export const syncGooglePhoto = mutation({
+  args: {
+    googlePhotoUrl: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getOrCreateUser(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    // Only sync if profile has no photos yet
+    if (
+      profile &&
+      (!profile.photos || profile.photos.length === 0) &&
+      !profile.photoUrl
+    ) {
+      await ctx.db.patch(profile._id, {
+        photoUrl: args.googlePhotoUrl,
+        photos: [args.googlePhotoUrl],
+      });
+      return { synced: true };
+    }
+
+    // If no profile exists, create a minimal one with the photo
+    if (!profile) {
+      await ctx.db.insert("profiles", {
+        userId,
+        role: "guest",
+        firstName: "",
+        city: "Vilnius",
+        bio: "",
+        verified: false,
+        languages: [],
+        availableDates: [],
+        dietaryInfo: [],
+        amenities: [],
+        houseRules: [],
+        vibes: [],
+        smokingAllowed: false,
+        drinkingAllowed: false,
+        petsAllowed: false,
+        hasPets: false,
+        photoUrl: args.googlePhotoUrl,
+        photos: [args.googlePhotoUrl],
+      });
+      return { synced: true, created: true };
+    }
+
+    return { synced: false };
+  },
+});
+
 // Get all profile photos
 export const getProfilePhotos = query({
   args: {},
   handler: async (ctx) => {
     const userId = await getCurrentUserId(ctx);
-    if (!userId) return null;
+    if (!userId) {
+      return null;
+    }
 
     const profile = await ctx.db
-      .query('profiles')
-      .withIndex('by_userId', (q) => q.eq('userId', userId))
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
       .first();
 
-    if (!profile) return null;
+    if (!profile) {
+      return null;
+    }
 
     return {
       mainPhoto: profile.photoUrl ?? null,

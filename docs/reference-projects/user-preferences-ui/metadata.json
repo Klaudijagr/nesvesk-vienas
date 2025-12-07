@@ -1,0 +1,5 @@
+{
+  "name": "User Preferences UI",
+  "description": "A responsive React component replicating a user preference selection interface for hosting and meetup status.",
+  "requestFramePermissions": []
+}

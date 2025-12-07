@@ -1,32 +1,38 @@
 # Nešvęsk Vienas
 
-A holiday hosting/guest matching platform for Lithuania. Connect hosts with guests for Christmas and New Year celebrations.
+**"Don't celebrate alone"** - A platform connecting hosts and guests for holiday celebrations in Lithuania.
 
-## Features
+## About
 
-- **Magic Link Auth** - Passwordless authentication via email
-- **Profile System** - Multi-step registration wizard for hosts and guests
-- **Browse & Filter** - Find hosts/guests by city, date, language, and vibes
-- **Invitations** - Send and respond to holiday invitations
-- **Matches** - Contact info revealed when both parties agree
-- **Identity Verification** - Face verification using EdgeFace-XXS + YuNet
+Nešvęsk Vienas helps people find companions for holiday celebrations. Hosts can open their homes, and guests can find welcoming places to celebrate together. The platform focuses on Christmas (Dec 24-26) and New Year's Eve (Dec 31), with potential expansion to other holidays.
 
 ## Tech Stack
 
-- **Runtime**: [Bun](https://bun.sh)
-- **Frontend**: React 19, React Router, Tailwind CSS
-- **Backend**: [Convex](https://convex.dev) (real-time database + functions)
-- **Auth**: Convex Auth with magic links
-- **Face Verification**: Python + FastAPI + ONNX Runtime
-- **Linting**: Ultracite + Biome
+- **Framework**: [Next.js 16](https://nextjs.org) (App Router)
+- **Language**: TypeScript
+- **UI**: React 19, [Tailwind CSS 4](https://tailwindcss.com), [shadcn/ui](https://ui.shadcn.com)
+- **Backend**: [Convex](https://convex.dev)
+- **Auth**: [Clerk](https://clerk.com)
+- **Email**: [Resend](https://resend.com)
+- **Face Verification**: [@vladmandic/face-api](https://github.com/vladmandic/face-api)
+- **Linting**: [Biome](https://biomejs.dev) via [Ultracite](https://github.com/haydenbleasel/ultracite)
+
+## Features
+
+- **Host/Guest Profiles** - Create detailed profiles with photos, preferences, and availability
+- **Browse & Filter** - Find hosts or guests by city, language, date, and more
+- **Messaging** - In-app chat between matched users
+- **Face Verification** - Optional photo verification for trust
+- **Event Management** - Create and manage holiday events
+- **Multi-language** - Lithuanian, English, Ukrainian, Russian
 
 ## Getting Started
 
 ### Prerequisites
 
-- [Bun](https://bun.sh) v1.3+
-- [uv](https://docs.astral.sh/uv/) (Python package manager)
-- Convex account
+- [Bun](https://bun.sh) (recommended) or Node.js 20+
+- A [Convex](https://convex.dev) account
+- A [Clerk](https://clerk.com) account
 
 ### Installation
 
@@ -34,73 +40,89 @@ A holiday hosting/guest matching platform for Lithuania. Connect hosts with gues
 # Install dependencies
 bun install
 
-# Set up Convex (follow prompts)
-bunx convex dev
-```
-
-### Development
-
-```bash
-# Run both Bun server and face service
+# Run development server (starts both Next.js and Convex)
 bun dev
-
-# Or run separately:
-bun dev:bun      # Bun server on port 3001
-bun dev:face     # Face service on port 5001
-bun dev:convex   # Convex dev server
 ```
 
-### Testing
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-```bash
-# Run Convex tests (vitest)
-bun test
+### Environment Variables
 
-# Run once without watch
-bun test:run
+Create a `.env.local` file with the following:
 
-# With coverage
-bun test:coverage
-```
+```env
+# Convex
+CONVEX_DEPLOYMENT=
+NEXT_PUBLIC_CONVEX_URL=
 
-### Build
+# Clerk
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
 
-```bash
-bun run build
-```
-
-### Production
-
-```bash
-bun start
+# Resend (for emails)
+RESEND_API_KEY=
 ```
 
 ## Project Structure
 
 ```
-├── src/                  # Frontend React app
-│   ├── components/       # UI components
-│   ├── pages/            # Route pages
-│   └── lib/              # Utilities and types
-├── convex/               # Convex backend
-│   ├── __tests__/        # Backend tests
-│   └── schema.ts         # Database schema
-├── face-service/         # Python face verification API
-│   ├── main.py           # FastAPI server
-│   └── models/           # ONNX models
-├── docs/                 # Documentation
-└── styles/               # Global CSS
+app/                    # Next.js App Router pages
+  (landing)/           # Landing page
+  (dashboard)/         # Authenticated pages
+    browse/            # Browse hosts/guests
+    events/            # Event management
+    messages/          # Messaging
+    onboarding/        # Profile setup
+    profile/           # User profiles
+    settings/          # User settings
+  api/                 # API routes
+  sign-in/             # Clerk sign-in
+  sign-up/             # Clerk sign-up
+  verify/              # Verification page
+components/            # React components
+  ui/                  # shadcn/ui components
+convex/                # Convex backend
+  schema.ts            # Database schema
+  profiles.ts          # Profile queries/mutations
+  messages.ts          # Messaging logic
+  events.ts            # Event management
+  invitations.ts       # Invitation system
+contexts/              # React contexts
+hooks/                 # Custom hooks
+lib/                   # Utilities
 ```
 
-## Environment Variables
+## Scripts
 
-Create `.env.local`:
+```bash
+bun dev          # Start dev server (Next.js + Convex)
+bun dev:next     # Start only Next.js
+bun dev:convex   # Start only Convex
+bun build        # Production build
+bun start        # Start production server
+bun lint         # Run ESLint
+```
 
+## Code Quality
+
+This project uses Ultracite (Biome) for linting and formatting:
+
+```bash
+# Fix formatting and lint issues
+bunx ultracite fix
+
+# Check for issues
+bunx ultracite check
 ```
-CONVEX_DEPLOYMENT=your-deployment
-RESEND_API_KEY=your-resend-key
-```
+
+## Documentation
+
+See the [docs](./docs) folder for additional documentation:
+
+- [Planning Document](./docs/holiday-platform-planning-2.md) - Full project specification
+- [Changelog](./docs/CHANGELOG.md) - Version history
+- [TODO](./docs/TODO.md) - Upcoming tasks
 
 ## License
 
-MIT
+Private project.

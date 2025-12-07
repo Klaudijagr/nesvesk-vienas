@@ -1,15 +1,13 @@
 # Nešvęsk Vienas - Planning Document
 
 **Name**: Nešvęsk vienas ("Don't celebrate alone")
-**URL**: https://v0-nesvesk-vienas-app.vercel.app
-
+**URL**: <https://v0-nesvesk-vienas-app.vercel.app>
 
 ## Open Questions
 
 1. Character limits on any free-text fields? (bio, dietary notes, etc.)
 
 2. Video call integration - which provider? (stretch goal, not MVP)
-
 
 ## Answered
 
@@ -21,13 +19,14 @@
 
 Invitations/event links should be shareable.
 
-
 ## Full Spec (Decided)
 
 ### Languages
+
 - **Lithuanian, English, Ukrainian, Russian** (all four)
 
 ### Dates Available
+
 - December 24th, 25th, 26th, 31st (users can select multiple)
 
 ### Host Registration Fields
@@ -64,6 +63,7 @@ Invitations/event links should be shareable.
 ### Browse & Filter
 
 Both hosts and guests can browse and filter by:
+
 - City
 - Age
 - Languages
@@ -110,7 +110,6 @@ Both hosts and guests can browse and filter by:
 - **Verification**: Email required (for registration + notifications)
 - **Age restriction**: 18+ only
 
-
 ### Communication Features
 
 | Feature | Priority | Notes |
@@ -129,13 +128,13 @@ Both hosts and guests can browse and filter by:
 ### Browse Filters
 
 Users can filter listings by:
+
 - City
 - Age
 - Languages
 - Date
 - **Has photos / No photos**
 - **Verified / Not verified**
-
 
 ## Tech Stack
 
@@ -149,7 +148,6 @@ Users can filter listings by:
 - **Email**: Resend or similar (for match notifications)
 - **i18n**: next-intl or similar (for 4 languages)
 - **No AI features** for now
-
 
 ## Database Schema (Rough)
 
@@ -209,12 +207,12 @@ Reviews (post-event)
 ├── createdAt
 ```
 
-
 ## Legal/Safety Notes
 
 All comparable apps (TimeLeft, 222, Couchsurfing) use the same legal approach:
 
 **Terms of Service must include:**
+
 - Statement that you are a "platform" not a party to interactions
 - Full liability release - users release the company from claims
 - User warranties: 18+, no violent/sexual crime history, agreement not to misuse
@@ -222,11 +220,11 @@ All comparable apps (TimeLeft, 222, Couchsurfing) use the same legal approach:
 - Right to terminate accounts, reporting mechanism
 
 **For Lithuania specifically:**
+
 - GDPR compliance required from day one
 - Consider whether VšĮ (nonprofit entity) registration is needed, or if informal operation is okay for MVP
 
 **Key difference from TimeLeft/222**: Those apps use public venues as a safety layer. Private home hosting shifts more risk to users — Terms of Service language matters more.
-
 
 ## Comparable Apps
 
@@ -240,10 +238,10 @@ All comparable apps (TimeLeft, 222, Couchsurfing) use the same legal approach:
 
 **Nešvęsk vienas is unique**: Combines home hosting with seasonal/holiday focus + support for Ukrainian refugees. Nobody else is doing exactly this.
 
-
 ## Next Steps
 
 ### MVP (Launch before Christmas)
+
 1. ✅ Landing page done
 2. ✅ Full spec defined
 3. Build registration flows (host + guest)
@@ -256,12 +254,12 @@ All comparable apps (TimeLeft, 222, Couchsurfing) use the same legal approach:
 10. Launch with PR push
 
 ### Post-MVP (If successful)
+
 - Photo verification (live photo comparison)
 - Reviews/ratings system
 - Voice/video call integration
 - Easter event
 - Expand to other holidays / year-round
-
 
 ## Future Holidays (If Successful)
 

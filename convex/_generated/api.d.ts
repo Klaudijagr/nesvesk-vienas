@@ -8,8 +8,8 @@
  * @module
  */
 
-import type * as __tests___testUtils from "../__tests__/testUtils.js";
 import type * as email from "../email.js";
+import type * as events from "../events.js";
 import type * as files from "../files.js";
 import type * as invitations from "../invitations.js";
 import type * as lib_auth from "../lib/auth.js";
@@ -24,8 +24,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  "__tests__/testUtils": typeof __tests___testUtils;
   email: typeof email;
+  events: typeof events;
   files: typeof files;
   invitations: typeof invitations;
   "lib/auth": typeof lib_auth;

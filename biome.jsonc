@@ -1,0 +1,28 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": ["ultracite/core", "ultracite/next"],
+  "linter": {
+    "rules": {
+      "performance": {
+        "noNamespaceImport": "off",
+        "noBarrelFile": "off",
+        "noImgElement": "off"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": "warn"
+      },
+      "nursery": {
+        "noIncrementDecrement": "off",
+        "noLeakedRender": "off"
+      },
+      "style": {
+        "useFilenamingConvention": "off",
+        "noNestedTernary": "warn",
+        "noNonNullAssertion": "warn"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "warn"
+      }
+    }
+  }
+}
