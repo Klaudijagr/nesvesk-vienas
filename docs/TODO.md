@@ -82,6 +82,44 @@ Holiday hosting/guest matching platform for Lithuania.
 
 ---
 
+## Phase 3.5: UX Pivot (Couchers-style) - IN PROGRESS
+
+_See `docs/PIVOT-ANALYSIS.md` for full details_
+
+### Onboarding Redesign
+
+- [ ] **Fullscreen onboarding** - Separate layout, no sidebar during onboarding
+- [ ] **Preference Cards** - Hosting status (Can Host / May Host / Can't Host)
+- [ ] **Date dropdown per status** - If hosting, which dates? If guest, which dates?
+- [ ] **State persistence** - Auto-save each step to Convex (no data loss on refresh)
+
+### Profile Enhancements
+
+- [ ] **Public profile view** - `/profile` button to see your profile as others see it
+- [ ] **"My Home" section** - Detailed hosting preferences in Settings/Profile
+- [ ] **Location privacy picker** - Google Maps circle (prototype at `/location-picker`)
+
+### Content Moderation
+
+- [ ] **Profanity filter** - Use `obscenity` library (detects evasion like "fuuuck")
+- [ ] **Block on flagged message** - Message not sent, user notified
+- [ ] **Admin notification** - Flag to admin/dashboard for review
+- [ ] **Temporary suspension** - Repeat offenders get temp banned
+
+### Browse/Discovery
+
+- [ ] **Map view** - Show hosts on interactive map (with privacy circles)
+- [ ] **Hosting status filter** - Can Host / May Host / All
+- [ ] **Preference filters** - Pets, Smoking, Wheelchair accessible, etc.
+- [ ] **Compatibility score** - Match based on vibes/dates/languages
+
+### Deprecated
+
+- [x] ~~Events page~~ - Removed, matches tracked via messages
+- [x] ~~couchers-event-manager reference~~ - Deleted
+
+---
+
 ## Phase 4: Production Readiness (Priority: Low)
 
 ### Infrastructure
