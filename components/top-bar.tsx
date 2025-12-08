@@ -9,8 +9,10 @@ import { Button } from "./ui/button";
 
 const PAGE_TITLES: Record<string, string> = {
   "/browse": "Find Hosts",
+  "/profile": "My Profile",
   "/messages": "Messages",
   "/settings": "Settings",
+  "/location-picker": "Location Picker",
 };
 
 export function TopBar() {

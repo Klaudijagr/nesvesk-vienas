@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { Gift, Home, MessageCircle, Settings } from "lucide-react";
+import { Gift, Home, MessageCircle, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { api } from "@/convex/_generated/api";
@@ -13,12 +13,14 @@ export function AppSidebar() {
   const unreadCount = useQuery(api.messages.getUnreadCount) ?? 0;
   const pendingInvites = useQuery(api.invitations.getPendingCount) ?? 0;
 
-  const isActive = (url: string) => pathname === url;
+  const isActive = (url: string) =>
+    pathname === url || pathname.startsWith(`${url}/`);
 
   const totalBadge = unreadCount + pendingInvites;
 
   const navItems = [
     { title: "Home", url: "/browse", icon: Home },
+    { title: "Profile", url: "/profile", icon: User },
     {
       title: "Messages",
       url: "/messages",

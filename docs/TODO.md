@@ -88,14 +88,14 @@ _See `docs/PIVOT-ANALYSIS.md` for full details_
 
 ### Onboarding Redesign
 
-- [ ] **Fullscreen onboarding** - Separate layout, no sidebar during onboarding
-- [ ] **Preference Cards** - Hosting status (Can Host / May Host / Can't Host)
-- [ ] **Date dropdown per status** - If hosting, which dates? If guest, which dates?
+- [x] **Fullscreen onboarding** - Separate layout, no sidebar during onboarding
+- [x] **Preference Cards** - Hosting status (Can Host / May Host / Can't Host)
+- [x] **Date dropdown per status** - If hosting, which dates? If guest, which dates?
 - [ ] **State persistence** - Auto-save each step to Convex (no data loss on refresh)
 
 ### Profile Enhancements
 
-- [ ] **Public profile view** - `/profile` button to see your profile as others see it
+- [x] **Public profile view** - `/profile` button to see your profile as others see it
 - [ ] **"My Home" section** - Detailed hosting preferences in Settings/Profile
 - [ ] **Location privacy picker** - Google Maps circle (prototype at `/location-picker`)
 
