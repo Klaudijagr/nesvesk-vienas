@@ -1,7 +1,6 @@
 "use client";
 
 import { AppSidebar } from "@/components/app-sidebar";
-import { DevPanel } from "@/components/DevPanel";
 import { TopBar } from "@/components/top-bar";
 
 export default function DashboardLayout({
@@ -30,9 +29,6 @@ export default function DashboardLayout({
           </div>
         </footer>
       </div>
-
-      {/* Dev Panel - floating */}
-      <DevPanel />
     </div>
   );
 }

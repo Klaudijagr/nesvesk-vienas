@@ -85,10 +85,15 @@ export default function LocationPickerPage() {
     if (circle) {
       const newCenter = circle.getCenter();
       if (newCenter) {
-        setCircleCenter({
-          lat: newCenter.lat(),
-          lng: newCenter.lng(),
-        });
+        const lat = newCenter.lat();
+        const lng = newCenter.lng();
+        // Check if value actually changed significantly to avoid infinite loop
+        if (
+          Math.abs(lat - circleCenter.lat) > 0.000_001 ||
+          Math.abs(lng - circleCenter.lng) > 0.000_001
+        ) {
+          setCircleCenter({ lat, lng });
+        }
       }
     }
   };

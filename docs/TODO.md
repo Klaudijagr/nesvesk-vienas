@@ -96,8 +96,9 @@ _See `docs/PIVOT-ANALYSIS.md` for full details_
 ### Profile Enhancements
 
 - [x] **Public profile view** - `/profile` button to see your profile as others see it
+- [x] **Message Profile Integration** - View full profile in a "Slide-over" sheet while chatting (Conversations & Requests)
 - [ ] **"My Home" section** - Detailed hosting preferences in Settings/Profile
-- [ ] **Location privacy picker** - Google Maps circle (prototype at `/location-picker`)
+- [x] **Location privacy picker** - Google Maps circle (prototype at `/location-picker`)
 
 ### Content Moderation
 

@@ -97,8 +97,60 @@ export function DevPanel() {
 
           {/* Content */}
           <div className="max-h-96 overflow-y-auto p-3">
-            {/* Actions */}
             <div className="mb-3 space-y-2">
+              <div className="mb-2 grid grid-cols-2 gap-2">
+                <Link
+                  className="rounded bg-indigo-50 px-2 py-1.5 text-center text-indigo-700 text-xs hover:bg-indigo-100"
+                  href="/landing1"
+                >
+                  Landing 1 (Magic)
+                </Link>
+                <Link
+                  className="rounded bg-indigo-50 px-2 py-1.5 text-center text-indigo-700 text-xs hover:bg-indigo-100"
+                  href="/landing2"
+                >
+                  Landing 2 (Comm)
+                </Link>
+                <Link
+                  className="col-span-2 rounded bg-indigo-50 px-2 py-1.5 text-center text-indigo-700 text-xs hover:bg-indigo-100"
+                  href="/landing3"
+                >
+                  Landing 3 (Invite)
+                </Link>
+                <div className="col-span-2 my-1 border-indigo-100 border-t" />
+                <Link
+                  className="rounded bg-teal-50 px-2 py-1.5 text-center text-teal-700 text-xs hover:bg-teal-100"
+                  href="/landing1/dashboard"
+                >
+                  Dash 1
+                </Link>
+                <Link
+                  className="rounded bg-teal-50 px-2 py-1.5 text-center text-teal-700 text-xs hover:bg-teal-100"
+                  href="/landing2/dashboard"
+                >
+                  Dash 2
+                </Link>
+                <Link
+                  className="rounded bg-teal-50 px-2 py-1.5 text-center text-teal-700 text-xs hover:bg-teal-100"
+                  href="/landing3/dashboard"
+                >
+                  Dash 3
+                </Link>
+                <div className="col-span-2 my-1 border-indigo-100 border-t" />
+                <Link
+                  className="rounded bg-orange-50 px-2 py-1.5 text-center text-orange-700 text-xs hover:bg-orange-100"
+                  href="/location-picker"
+                >
+                  Loc. Picker
+                </Link>
+                <Link
+                  className="rounded bg-teal-50 px-2 py-1.5 text-center text-teal-700 text-xs hover:bg-teal-100"
+                  href="/"
+                >
+                  Orig. Home
+                </Link>
+              </div>
+
               <button
                 className="flex w-full items-center gap-2 rounded bg-red-50 px-3 py-2 text-left text-red-700 text-xs transition-colors hover:bg-red-100"
                 onClick={handleClearRealUsers}

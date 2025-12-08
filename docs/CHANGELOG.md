@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `deleteUser` action to delete from app (calls Clerk API, triggers webhook)
 - Sonner toast notifications for better UI feedback
 - DevPanel component for development testing
+- **Visual Concepts** (Prototyping):
+  - 3 Landing Page Variants (`/landing1`, `/landing2`, `/landing3`)
+  - 3 Dashboard Concept Flows (Magic Window, Community Map, Invitation Registry)
+  - Location Picker Prototype (`/location-picker`) with Google Maps circle overlay
+
+
 
 ### Changed
 

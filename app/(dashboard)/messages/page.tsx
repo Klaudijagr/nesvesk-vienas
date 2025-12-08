@@ -13,15 +13,22 @@ import {
   UserPlus,
   X,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { ProfileView } from "@/components/profile-view";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { HOLIDAY_DATES } from "@/lib/types";
@@ -306,6 +313,13 @@ export default function MessagesPage() {
     activeConversationId ? { conversationId: activeConversationId } : "skip"
   );
 
+  const activeRequestProfile = useQuery(
+    api.profiles.getProfile,
+    activeRequest?.oderId
+      ? { userId: activeRequest.oderId as Id<"users"> }
+      : "skip"
+  );
+
   const sendMessage = useMutation(api.messages.sendMessage);
   const markAsRead = useMutation(api.messages.markAsRead);
   const respondToInvitation = useMutation(api.invitations.respond);
@@ -542,11 +556,25 @@ export default function MessagesPage() {
                   {activeRequest.profile?.city}
                 </p>
               </div>
-              <Link href={`/profile/${activeRequest.oderId}`}>
-                <Button size="sm" variant="outline">
-                  View Profile
-                </Button>
-              </Link>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button size="sm" variant="outline">
+                    View Profile
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
+                  <SheetHeader className="mb-4">
+                    <SheetTitle>Profile Details</SheetTitle>
+                  </SheetHeader>
+                  {activeRequestProfile ? (
+                    <ProfileView profile={activeRequestProfile} />
+                  ) : (
+                    <div className="flex h-40 items-center justify-center">
+                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
+                    </div>
+                  )}
+                </SheetContent>
+              </Sheet>
             </div>
 
             <div className="flex flex-1 flex-col items-center justify-center p-8">
@@ -622,11 +650,22 @@ export default function MessagesPage() {
                     Share Details
                   </Button>
                 )}
-                <Link href={`/profile/${activeConversation.oderId}`}>
-                  <Button size="sm" variant="outline">
-                    View Profile
-                  </Button>
-                </Link>
+
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button size="sm" variant="ghost">
+                      View Profile
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
+                    <SheetHeader className="mb-4">
+                      <SheetTitle>Profile Details</SheetTitle>
+                    </SheetHeader>
+                    {activeConversation.profile && (
+                      <ProfileView profile={activeConversation.profile} />
+                    )}
+                  </SheetContent>
+                </Sheet>
               </div>
             </div>
 
