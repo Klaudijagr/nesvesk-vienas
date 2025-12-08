@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { Calendar, Gift, Home, MessageCircle, Settings } from "lucide-react";
+import { Gift, Home, MessageCircle, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { api } from "@/convex/_generated/api";
@@ -12,7 +12,6 @@ export function AppSidebar() {
   const pathname = usePathname();
   const unreadCount = useQuery(api.messages.getUnreadCount) ?? 0;
   const pendingInvites = useQuery(api.invitations.getPendingCount) ?? 0;
-  const upcomingEvents = useQuery(api.events.getUpcomingCount) ?? 0;
 
   const isActive = (url: string) => pathname === url;
 
@@ -20,12 +19,6 @@ export function AppSidebar() {
 
   const navItems = [
     { title: "Home", url: "/browse", icon: Home },
-    {
-      title: "Events",
-      url: "/events",
-      icon: Calendar,
-      badge: upcomingEvents > 0 ? upcomingEvents : undefined,
-    },
     {
       title: "Messages",
       url: "/messages",

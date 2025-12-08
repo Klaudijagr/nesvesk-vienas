@@ -9,8 +9,6 @@ import { Button } from "./ui/button";
 
 const PAGE_TITLES: Record<string, string> = {
   "/browse": "Find Hosts",
-  "/events": "My Events",
-  "/events/create": "Create Event",
   "/messages": "Messages",
   "/settings": "Settings",
 };
