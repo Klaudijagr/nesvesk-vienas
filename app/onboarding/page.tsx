@@ -663,8 +663,8 @@ export default function OnboardingPage() {
         // Save the actual granular status and dates
         hostingStatus: hostingStatus as "can-host" | "may-host" | "cant-host",
         guestStatus: guestStatus as "looking" | "maybe-guest" | "not-looking",
-        hostingDates: hostingDates,
-        guestDates: guestDates,
+        hostingDates,
+        guestDates,
         firstName: formData.firstName,
         lastName: formData.lastName || undefined,
         age:

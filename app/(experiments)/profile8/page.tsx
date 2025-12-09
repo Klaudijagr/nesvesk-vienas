@@ -112,7 +112,7 @@ export default function Profile8Page() {
             1. Both Host & Guest (Definite)
           </h2>
           <div className="rounded-xl bg-white p-4 shadow-sm">
-            <ProfileView profile={mockProfile} isOwnProfile />
+            <ProfileView isOwnProfile profile={mockProfile} />
           </div>
         </section>
 
@@ -195,7 +195,7 @@ function CompactProfileCard({ profile }: { profile: Doc<"profiles"> }) {
           />
         </div>
 
-        <h2 className="font-bold text-xl text-gray-900">
+        <h2 className="font-bold text-gray-900 text-xl">
           {profile.firstName}
           {profile.lastName && ` ${profile.lastName}`}
           {profile.age && (
@@ -217,18 +217,18 @@ function CompactProfileCard({ profile }: { profile: Doc<"profiles"> }) {
               <div
                 className={`rounded-lg p-3 ${
                   profile.hostingStatus === "can-host"
-                    ? "bg-green-50 border border-green-200"
-                    : "bg-amber-50 border border-amber-200"
+                    ? "border border-green-200 bg-green-50"
+                    : "border border-amber-200 bg-amber-50"
                 }`}
               >
-                <div className="flex items-center justify-center gap-1.5 mb-1.5">
+                <div className="mb-1.5 flex items-center justify-center gap-1.5">
                   <Users
-                    size={14}
                     className={
                       profile.hostingStatus === "can-host"
                         ? "text-green-600"
                         : "text-amber-600"
                     }
+                    size={14}
                   />
                   <span
                     className={`font-semibold text-sm ${
@@ -246,12 +246,12 @@ function CompactProfileCard({ profile }: { profile: Doc<"profiles"> }) {
                 <div className="flex flex-wrap justify-center gap-1">
                   {hostingDates.map((date) => (
                     <span
-                      key={date}
-                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium text-xs ${
                         profile.hostingStatus === "can-host"
                           ? "bg-green-100 text-green-700"
                           : "bg-amber-100 text-amber-700"
                       }`}
+                      key={date}
                     >
                       <Calendar size={10} />
                       {date}
@@ -268,18 +268,18 @@ function CompactProfileCard({ profile }: { profile: Doc<"profiles"> }) {
               <div
                 className={`rounded-lg p-3 ${
                   profile.guestStatus === "looking"
-                    ? "bg-blue-50 border border-blue-200"
-                    : "bg-amber-50 border border-amber-200"
+                    ? "border border-blue-200 bg-blue-50"
+                    : "border border-amber-200 bg-amber-50"
                 }`}
               >
-                <div className="flex items-center justify-center gap-1.5 mb-1.5">
+                <div className="mb-1.5 flex items-center justify-center gap-1.5">
                   <User
-                    size={14}
                     className={
                       profile.guestStatus === "looking"
                         ? "text-blue-600"
                         : "text-amber-600"
                     }
+                    size={14}
                   />
                   <span
                     className={`font-semibold text-sm ${
@@ -296,12 +296,12 @@ function CompactProfileCard({ profile }: { profile: Doc<"profiles"> }) {
                 <div className="flex flex-wrap justify-center gap-1">
                   {guestDates.map((date) => (
                     <span
-                      key={date}
-                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium text-xs ${
                         profile.guestStatus === "looking"
                           ? "bg-blue-100 text-blue-700"
                           : "bg-amber-100 text-amber-700"
                       }`}
+                      key={date}
                     >
                       <Calendar size={10} />
                       {date}
@@ -316,8 +316,8 @@ function CompactProfileCard({ profile }: { profile: Doc<"profiles"> }) {
         <div className="mt-4 flex flex-wrap justify-center gap-1">
           {profile.languages.map((lang) => (
             <span
+              className="rounded-full bg-gray-100 px-2.5 py-1 text-gray-600 text-xs"
               key={lang}
-              className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-600"
             >
               {lang}
             </span>
@@ -326,7 +326,7 @@ function CompactProfileCard({ profile }: { profile: Doc<"profiles"> }) {
       </div>
 
       {/* Centered Verification Section */}
-      <div className="border-t border-gray-100 bg-gray-50 p-4">
+      <div className="border-gray-100 border-t bg-gray-50 p-4">
         <p className="mb-3 text-center font-medium text-gray-500 text-xs uppercase tracking-wider">
           Verified
         </p>
@@ -360,12 +360,12 @@ function VerificationBadge({
         className={`rounded-full p-2 ${verified ? "bg-green-100" : "bg-gray-200"}`}
       >
         <Icon
-          size={16}
           className={verified ? "text-green-600" : "text-gray-400"}
+          size={16}
         />
       </div>
       <span
-        className={`text-[10px] font-medium ${verified ? "text-green-600" : "text-gray-400"}`}
+        className={`font-medium text-[10px] ${verified ? "text-green-600" : "text-gray-400"}`}
       >
         {label}
       </span>

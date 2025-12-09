@@ -101,6 +101,12 @@ export function DevPanel() {
             <div className="mb-3 space-y-2">
               <div className="mb-2 grid grid-cols-2 gap-2">
                 <Link
+                  className="col-span-2 rounded bg-amber-100 px-2 py-1.5 text-center font-medium text-amber-800 text-xs hover:bg-amber-200"
+                  href="/landing-magic"
+                >
+                  Landing Magic (Full)
+                </Link>
+                <Link
                   className="rounded bg-indigo-50 px-2 py-1.5 text-center text-indigo-700 text-xs hover:bg-indigo-100"
                   href="/landing1"
                 >

@@ -13,7 +13,6 @@ import {
   Info,
   Loader2,
   MapPin,
-  Pencil,
   Save,
   ShieldCheck,
   Sparkles,
@@ -412,7 +411,7 @@ export function ProfileView({ profile, isOwnProfile }: ProfileViewProps) {
                               <div className="flex flex-wrap justify-center gap-1">
                                 {profile.hostingDates.map((date) => (
                                   <span
-                                    className={`rounded px-2 py-0.5 text-[10px] font-medium ${
+                                    className={`rounded px-2 py-0.5 font-medium text-[10px] ${
                                       profile.hostingStatus === "can-host"
                                         ? "bg-green-50 text-green-600"
                                         : "bg-amber-50 text-amber-600"
@@ -447,7 +446,7 @@ export function ProfileView({ profile, isOwnProfile }: ProfileViewProps) {
                               <div className="flex flex-wrap justify-center gap-1">
                                 {profile.guestDates.map((date) => (
                                   <span
-                                    className={`rounded px-2 py-0.5 text-[10px] font-medium ${
+                                    className={`rounded px-2 py-0.5 font-medium text-[10px] ${
                                       profile.guestStatus === "looking"
                                         ? "bg-blue-50 text-blue-600"
                                         : "bg-amber-50 text-amber-600"
@@ -462,7 +461,7 @@ export function ProfileView({ profile, isOwnProfile }: ProfileViewProps) {
                         </div>
                       )}
                     {/* Fallback to old role display if no new fields */}
-                    {!profile.hostingStatus && !profile.guestStatus && (
+                    {!(profile.hostingStatus || profile.guestStatus) && (
                       <div className="flex gap-2">
                         {isHost && (
                           <span className="flex items-center gap-1 rounded-full bg-purple-100 px-3 py-1.5 font-medium text-purple-700 text-xs">

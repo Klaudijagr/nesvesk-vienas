@@ -3,11 +3,8 @@
 import { useMutation, useQuery } from "convex/react";
 import {
   ArrowRight,
-  Calendar,
   Check,
-  MapPin,
   MessageCircle,
-  Phone,
   Search,
   Share2,
   UserPlus,
