@@ -1,4 +1,4 @@
-# Nešvęsk Vienas
+# Nešvęsk vienas
 
 A holiday hosting/guest matching platform for Lithuania. Connect hosts with guests for Christmas and New Year celebrations.
 

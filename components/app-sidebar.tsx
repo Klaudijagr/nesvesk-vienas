@@ -39,7 +39,7 @@ export function AppSidebar() {
         </div>
         <div className="flex flex-col">
           <span className="font-bold text-foreground text-lg">
-            Nešvęsk Vienas
+            Nešvęsk vienas
           </span>
           <span className="text-muted-foreground text-xs">
             Don't Celebrate Alone

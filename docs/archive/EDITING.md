@@ -1,4 +1,4 @@
-# Editing Guide for Nešvęsk Vienas
+# Editing Guide for Nešvęsk vienas
 
 This guide explains how to make changes to the website content, translations, and UI.
 

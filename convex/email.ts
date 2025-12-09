@@ -24,7 +24,7 @@ const templates = {
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #dc2626;">You have a new invitation!</h1>
         <p><strong>${senderName}</strong> has invited you to celebrate <strong>${date}</strong> together.</p>
-        <p>Log in to Nešvęsk Vienas to view the invitation and respond:</p>
+        <p>Log in to Nešvęsk vienas to view the invitation and respond:</p>
         <a href="${process.env.SITE_URL || "http://localhost:3000"}/dashboard"
            style="display: inline-block; background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin: 16px 0;">
           View Invitation
@@ -133,7 +133,7 @@ export const sendEmail = internalAction({
       }
 
       const { error } = await resend.emails.send({
-        from: "Nešvęsk Vienas <noreply@nesvesk-vienas.lt>",
+        from: "Nešvęsk vienas <noreply@nesvesk-vienas.lt>",
         to: args.to,
         subject: template.subject,
         html: template.html,
@@ -164,9 +164,9 @@ export const testEmail = action({
     }
 
     const { data, error } = await resend.emails.send({
-      from: "Nešvęsk Vienas <noreply@nesvesk-vienas.lt>",
+      from: "Nešvęsk vienas <noreply@nesvesk-vienas.lt>",
       to: args.to,
-      subject: "Test Email from Nešvęsk Vienas",
+      subject: "Test Email from Nešvęsk vienas",
       html: "<h1>Test email!</h1><p>If you received this, email is working.</p>",
     });
 

@@ -19,7 +19,7 @@ export default function OnboardingLayout({
             </div>
             <div className="flex flex-col">
               <span className="font-bold text-foreground text-lg">
-                Nešvęsk Vienas
+                Nešvęsk vienas
               </span>
               <span className="-mt-1 text-muted-foreground text-xs">
                 Don't Celebrate Alone
@@ -36,7 +36,7 @@ export default function OnboardingLayout({
 
       {/* Minimal footer */}
       <footer className="shrink-0 py-4 text-center text-muted-foreground text-sm">
-        &copy; {new Date().getFullYear()} Nešvęsk Vienas
+        &copy; {new Date().getFullYear()} Nešvęsk vienas
       </footer>
     </div>
   );

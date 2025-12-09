@@ -1,4 +1,4 @@
-# Nešvęsk Vienas - Planning Document
+# Nešvęsk vienas - Planning Document
 
 **Name**: Nešvęsk vienas ("Don't celebrate alone")
 **URL**: <https://v0-nesvesk-vienas-app.vercel.app>

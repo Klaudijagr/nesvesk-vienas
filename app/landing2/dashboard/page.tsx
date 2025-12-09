@@ -40,7 +40,7 @@ export default function CommunityDashboard() {
       <nav className="flex items-center justify-between bg-white px-6 py-4 shadow-sm">
         <div className="flex items-center gap-2 font-bold text-[#0a2342] text-xl tracking-tight">
           <div className="h-2 w-2 rounded-full bg-blue-500" />
-          Nešvęsk Vienas
+          Nešvęsk vienas
         </div>
         <div className="flex gap-6 font-medium text-gray-500 text-sm">
           <span className="border-amber-400 border-b-2 text-[#0a2342]">

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Nešvęsk Vienas will be documented in this file.
+All notable changes to Nešvęsk vienas will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## [Unreleased]
+
+### Added
+
+- **Sentry integration** - Error tracking and monitoring
+  - `instrumentation-client.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`
+  - `app/global-error.tsx` - Global error boundary with Sentry capture
+  - Test page at `/sentry-example-page`
+  - `docs/SENTRY-USAGE.md` - Usage guide for spans, logs, and exception capture
+- **Vercel Analytics & Speed Insights** - Enabled in dashboard
+- **Consolidated TODO.md** - Living task list with all features and references
+- **Archived old docs** - Moved outdated docs to `docs/archive/`
+- **Legal & Safety page templates** - Scraped Couchsurfing pages for reference
+  - Safety guidelines, community guidelines, policies, FAQ, terms templates
+  - Located in `docs/courchsurfing-pages/`
+
+---
+
+## [0.3.0] - 2024-12-08
 
 ### Added
 
@@ -19,16 +37,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sonner toast notifications for better UI feedback
 - DevPanel component for development testing
 - **Visual Concepts** (Prototyping):
-  - 3 Landing Page Variants (`/landing1`, `/landing2`, `/landing3`)
+  - 3 Landing Page Variants (`/client1`, `/client2`, `/client3`)
   - 3 Dashboard Concept Flows (Magic Window, Community Map, Invitation Registry)
   - Location Picker Prototype (`/location-picker`):
     - Added address autocomplete via Google Places API
     - Added privacy radius slider (100m - 2000m)
     - Fixed infinite update loops and visual glitches
-
-
-
-
 
 ### Changed
 
@@ -103,8 +117,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History
 
-| Version    | Date       | Summary                                              |
-| ---------- | ---------- | ---------------------------------------------------- |
+| Version    | Date       | Summary                                               |
+| ---------- | ---------- | ----------------------------------------------------- |
 | 0.1.0      | 2024-12-03 | Initial release - auth, profiles, browse, invitations |
-| 0.2.0      | 2024-12-07 | Face verification, E2E testing, docs organization    |
-| Unreleased | -          | Next.js App Router, Clerk auth, bi-directional sync  |
+| 0.2.0      | 2024-12-07 | Face verification, E2E testing, docs organization     |
+| 0.3.0      | 2024-12-08 | Next.js App Router, Clerk auth, bi-directional sync   |
+| Unreleased | -          | Sentry, Vercel Analytics, consolidated docs           |

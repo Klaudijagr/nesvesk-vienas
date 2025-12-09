@@ -32,9 +32,6 @@ export default function LandingPage() {
               <br />
               <span className="text-amber-400">{t.heroHighlight}</span>
             </h1>
-            <p className="mb-4 text-amber-200/90 text-lg italic">
-              {t.heroSubtitle}
-            </p>
             <p className="mb-8 text-gray-100 text-lg leading-relaxed md:text-xl">
               {t.heroDescription}
             </p>
@@ -43,13 +40,13 @@ export default function LandingPage() {
                 className="inline-flex items-center justify-center rounded-full border border-transparent bg-amber-400 px-8 py-4 font-bold text-base text-green-800 shadow-lg transition-transform hover:scale-105 hover:bg-yellow-400 md:text-lg"
                 href={isSignedIn ? "/register?role=host" : "/sign-in"}
               >
-                {t.startAsHost}
+                {t.inviteGuests}
               </Link>
               <Link
                 className="inline-flex items-center justify-center rounded-full border-2 border-white px-8 py-4 font-bold text-base text-white transition-colors hover:bg-white hover:text-green-800 md:text-lg"
-                href="/browse"
+                href={isSignedIn ? "/register?role=guest" : "/sign-in"}
               >
-                {t.findGathering}
+                {t.becomeGuest}
               </Link>
             </div>
           </div>
@@ -64,7 +61,7 @@ export default function LandingPage() {
               {t.howItWorks}
             </h2>
             <p className="mx-auto max-w-2xl text-gray-500">
-              Safe, simple, and meaningful connections for the holiday season.
+              {t.howItWorksSubtitle}
             </p>
           </div>
 
@@ -89,6 +86,37 @@ export default function LandingPage() {
               </div>
               <h3 className="mb-3 font-bold text-xl">3. {t.step3Title}</h3>
               <p className="text-gray-500">{t.step3Description}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Story Section */}
+      <div className="bg-white py-20" id="about">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center gap-8 rounded-2xl bg-gradient-to-br from-green-50 to-amber-50 p-8 md:flex-row md:p-12">
+            <div className="relative h-64 w-full md:w-1/3">
+              <Image
+                alt="Friends sharing a meal"
+                className="rounded-lg object-cover shadow-md"
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                src="https://images.unsplash.com/photo-1543007630-9710e4a00a20?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+              />
+            </div>
+            <div className="w-full md:w-2/3">
+              <h3 className="mb-4 font-bold text-2xl text-gray-900">
+                {t.originStoryTitle}
+              </h3>
+              <p className="mb-6 text-gray-600 italic">
+                "{t.originStoryQuote}"
+              </p>
+              <p className="mb-4 text-gray-500 text-sm">
+                — {t.originStoryAuthor}
+              </p>
+              <p className="text-gray-500 text-sm">
+                {t.originStoryDescription}
+              </p>
             </div>
           </div>
         </div>
@@ -122,23 +150,10 @@ export default function LandingPage() {
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900">
-                      {t.mutualMatching}
+                      {t.mutualConsent}
                     </h4>
                     <p className="text-gray-500 text-sm">
-                      {t.mutualMatchingDesc}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-100">
-                    <Heart className="h-5 w-5 text-amber-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">
-                      {t.communityFirst}
-                    </h4>
-                    <p className="text-gray-500 text-sm">
-                      {t.communityFirstDesc}
+                      {t.mutualConsentDesc}
                     </p>
                   </div>
                 </div>
@@ -157,58 +172,37 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Story Section */}
-      <div className="bg-white py-20" id="about">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center gap-8 rounded-2xl bg-gradient-to-br from-green-50 to-amber-50 p-8 md:flex-row md:p-12">
-            <div className="relative h-64 w-full md:w-1/3">
-              <Image
-                alt="Friends sharing a meal"
-                className="rounded-lg object-cover shadow-md"
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-                src="https://images.unsplash.com/photo-1543007630-9710e4a00a20?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-              />
-            </div>
-            <div className="w-full md:w-2/3">
-              <h3 className="mb-4 font-bold text-2xl text-gray-900">
-                Why we started
-              </h3>
-              <p className="mb-6 text-gray-600">
-                "Last year, I realized how many people spend the holidays alone
-                — including war refugees, elderly neighbors, and young people
-                far from home. We built this platform to turn strangers into
-                friends for one magical evening."
-              </p>
-              <p className="text-gray-500 text-sm">
-                Nešvęsk Vienas connects hosts with empty seats at their table to
-                guests looking for somewhere to belong. Because no one should
-                celebrate alone.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Stats */}
       <div className="bg-green-800 py-12 text-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
             <div>
-              <div className="font-bold text-3xl text-amber-400">4</div>
-              <div className="text-green-200 text-sm">Languages supported</div>
+              <div className="font-bold text-3xl text-amber-400">
+                {t.statsLanguagesValue}
+              </div>
+              <div className="text-green-200 text-sm">{t.statsLanguages}</div>
             </div>
             <div>
-              <div className="font-bold text-3xl text-amber-400">5</div>
-              <div className="text-green-200 text-sm">Cities in Lithuania</div>
+              <div className="font-bold text-3xl text-amber-400">
+                {t.statsCitiesValue}
+              </div>
+              <div className="text-green-200 text-sm">{t.statsCities}</div>
             </div>
             <div>
-              <div className="font-bold text-3xl text-amber-400">Dec 24-31</div>
-              <div className="text-green-200 text-sm">Holiday dates</div>
+              <div className="font-bold text-3xl text-amber-400">
+                {t.statsHolidayPeriodValue}
+              </div>
+              <div className="text-green-200 text-sm">
+                {t.statsHolidayPeriod}
+              </div>
             </div>
             <div>
-              <div className="font-bold text-3xl text-amber-400">18+</div>
-              <div className="text-green-200 text-sm">Community members</div>
+              <div className="font-bold text-3xl text-amber-400">
+                {t.statsCommunityMembersValue}
+              </div>
+              <div className="text-green-200 text-sm">
+                {t.statsCommunityMembers}
+              </div>
             </div>
           </div>
         </div>
@@ -245,24 +239,22 @@ export default function LandingPage() {
             <div className="col-span-1 lg:col-span-2">
               <div className="mb-4 flex items-center gap-2">
                 <Gift className="h-6 w-6 text-red-500" />
-                <span className="font-bold text-lg">Nešvęsk Vienas</span>
+                <span className="font-bold text-lg">{t.appName}</span>
               </div>
               <p className="max-w-sm text-gray-400 text-sm leading-relaxed">
-                A non-profit initiative connecting people for the holidays.
-                Whether you're a host with an extra chair or a guest looking for
-                company, you belong here.
+                {t.appTagline}
               </p>
             </div>
 
             <div>
-              <h3 className="mb-4 font-semibold text-white">Platform</h3>
+              <h3 className="mb-4 font-semibold text-white">{t.platform}</h3>
               <ul className="space-y-2 text-gray-400 text-sm">
                 <li>
                   <Link
                     className="transition-colors hover:text-amber-400"
                     href="/browse"
                   >
-                    Find a Host
+                    {t.becomeGuest}
                   </Link>
                 </li>
                 <li>
@@ -270,29 +262,23 @@ export default function LandingPage() {
                     className="transition-colors hover:text-amber-400"
                     href="/register?role=host"
                   >
-                    Become a Host
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className="transition-colors hover:text-amber-400"
-                    href="/register?role=guest"
-                  >
-                    Guest Sign Up
+                    {t.inviteGuests}
                   </Link>
                 </li>
               </ul>
             </div>
 
             <div>
-              <h3 className="mb-4 font-semibold text-white">Legal & Safety</h3>
+              <h3 className="mb-4 font-semibold text-white">
+                {t.legalAndSafety}
+              </h3>
               <ul className="space-y-2 text-gray-400 text-sm">
                 <li>
                   <Link
                     className="transition-colors hover:text-amber-400"
-                    href="/terms"
+                    href="/safety"
                   >
-                    Safety Guidelines
+                    {t.safetyGuidelines}
                   </Link>
                 </li>
                 <li>
@@ -300,15 +286,15 @@ export default function LandingPage() {
                     className="transition-colors hover:text-amber-400"
                     href="/terms"
                   >
-                    Terms of Service
+                    {t.termsOfService}
                   </Link>
                 </li>
                 <li>
                   <Link
                     className="transition-colors hover:text-amber-400"
-                    href="/terms"
+                    href="/privacy"
                   >
-                    Privacy Policy
+                    {t.privacyPolicy}
                   </Link>
                 </li>
               </ul>
@@ -316,7 +302,7 @@ export default function LandingPage() {
           </div>
           <div className="mt-12 border-gray-800 border-t pt-8 text-center text-gray-500 text-sm">
             <span>
-              &copy; {new Date().getFullYear()} Nešvęsk Vienas.{" "}
+              &copy; {new Date().getFullYear()} {t.appName}.{" "}
               {t.allRightsReserved}
             </span>
           </div>

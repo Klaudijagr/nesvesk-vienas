@@ -2,6 +2,7 @@
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { TopBar } from "@/components/top-bar";
+import { VerifyBanner } from "@/components/verify-banner";
 
 export default function DashboardLayout({
   children,
@@ -17,6 +18,7 @@ export default function DashboardLayout({
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top bar - only spans content area */}
         <TopBar />
+        <VerifyBanner />
 
         {/* Main content area - scrollable */}
         <main className="flex-1 overflow-y-auto bg-gray-50">{children}</main>
@@ -24,7 +26,7 @@ export default function DashboardLayout({
         {/* Footer - spans content area */}
         <footer className="shrink-0 border-t bg-gray-50 py-3">
           <div className="text-center text-gray-500 text-sm">
-            &copy; {new Date().getFullYear()} Nešvęsk Vienas. All rights
+            &copy; {new Date().getFullYear()} Nešvęsk vienas. All rights
             reserved.
           </div>
         </footer>

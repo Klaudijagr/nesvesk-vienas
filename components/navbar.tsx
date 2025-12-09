@@ -50,7 +50,7 @@ export function Navbar() {
             <span
               className={`font-bold text-lg ${isScrolled ? "text-gray-900" : "text-white"}`}
             >
-              Nešvęsk Vienas
+              Nešvęsk vienas
             </span>
           </Link>
 
@@ -75,7 +75,7 @@ export function Navbar() {
               onClick={() => scrollToSection("about")}
               type="button"
             >
-              About
+              {t.about}
             </button>
           </div>
 
@@ -115,7 +115,7 @@ export function Navbar() {
                       : "bg-amber-400 text-green-800 hover:bg-yellow-400"
                   }`}
                 >
-                  Go to App
+                  {t.goToApp}
                 </Button>
               </Link>
               <UserButton
@@ -156,7 +156,7 @@ export function Navbar() {
                 onClick={() => scrollToSection("about")}
                 type="button"
               >
-                About
+                {t.about}
               </button>
               <div className="px-2">
                 <LanguageSelector />
@@ -177,7 +177,7 @@ export function Navbar() {
                 <SignedIn>
                   <Link className="flex-1" href="/browse">
                     <Button className="w-full bg-red-600 text-white hover:bg-red-700">
-                      Go to App
+                      {t.goToApp}
                     </Button>
                   </Link>
                 </SignedIn>

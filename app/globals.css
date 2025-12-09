@@ -8,6 +8,18 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-playfair: var(--font-playfair);
+  --font-courier: var(--font-courier);
+
+  /* Heritage Holiday Palette */
+  --color-sage: #7d8f76;
+  --color-sage-dark: #5a6b54;
+  --color-cream: #f7f5ef;
+  --color-cream-dark: #ede9df;
+  --color-barn-red: #9a2a2a;
+  --color-barn-red-light: #b83a3a;
+  --color-soft-black: #2c2c2c;
+  --color-dark-green: #4a5d45;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -119,4 +131,92 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Heritage Holiday Font Utilities */
+.font-playfair {
+  font-family: var(--font-playfair), ui-serif, Georgia, serif;
+}
+
+.font-courier {
+  font-family: var(--font-courier), ui-monospace, monospace;
+}
+
+.font-pinyon {
+  font-family: "Pinyon Script", cursive;
+}
+
+/* Heritage Holiday Stripe Backgrounds */
+.stripe-sage {
+  background: repeating-linear-gradient(
+    90deg,
+    #7d8f76 0px,
+    #7d8f76 24px,
+    #f7f5ef 24px,
+    #f7f5ef 48px
+  );
+}
+
+.stripe-sage-rough {
+  background:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(
+      90deg,
+      #7d8f76 0px,
+      #7d8f76 26px,
+      #f7f5ef 26px,
+      #f7f5ef 52px
+    );
+}
+
+.stripe-red {
+  background: repeating-linear-gradient(
+    90deg,
+    #9a2a2a 0px,
+    #9a2a2a 24px,
+    #f7f5ef 24px,
+    #f7f5ef 48px
+  );
+}
+
+.stripe-red-rough {
+  background:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(
+      90deg,
+      #9a2a2a 0px,
+      #9a2a2a 26px,
+      #f7f5ef 26px,
+      #f7f5ef 52px
+    );
+}
+
+/* Stationery Card Styles */
+.stationery-card {
+  background-color: #f7f5ef;
+  border-radius: 8px;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.stationery-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Vintage Pill Button */
+.btn-vintage-pill {
+  @apply px-8 py-3 rounded-full border-2 border-barn-red text-barn-red uppercase tracking-wider text-sm transition-colors;
+  font-family: var(--font-courier), ui-monospace, monospace;
+}
+
+.btn-vintage-pill:hover {
+  @apply bg-barn-red text-cream;
 }

@@ -59,7 +59,7 @@ export default function Landing3Type() {
           </Link>
 
           <p className="mt-8 text-gray-400 text-xs">
-            Nešvęsk Vienas - A Community Initiative
+            Nešvęsk vienas - A Community Initiative
           </p>
         </div>
 

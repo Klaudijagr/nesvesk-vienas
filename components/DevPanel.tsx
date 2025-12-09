@@ -118,6 +118,26 @@ export function DevPanel() {
                   Landing 3 (Invite)
                 </Link>
                 <div className="col-span-2 my-1 border-indigo-100 border-t" />
+                {/* Client Heritage Holiday Variants */}
+                <Link
+                  className="rounded bg-emerald-50 px-2 py-1.5 text-center text-emerald-700 text-xs hover:bg-emerald-100"
+                  href="/client1"
+                >
+                  Client 1 (Sage)
+                </Link>
+                <Link
+                  className="rounded bg-rose-50 px-2 py-1.5 text-center text-rose-700 text-xs hover:bg-rose-100"
+                  href="/client2"
+                >
+                  Client 2 (Festive)
+                </Link>
+                <Link
+                  className="col-span-2 rounded bg-amber-50 px-2 py-1.5 text-center text-amber-700 text-xs hover:bg-amber-100"
+                  href="/client3"
+                >
+                  Client 3 (Envelope)
+                </Link>
+                <div className="col-span-2 my-1 border-indigo-100 border-t" />
                 <Link
                   className="rounded bg-teal-50 px-2 py-1.5 text-center text-teal-700 text-xs hover:bg-teal-100"
                   href="/landing1/dashboard"

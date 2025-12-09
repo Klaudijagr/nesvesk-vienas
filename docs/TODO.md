@@ -1,104 +1,208 @@
-# TODO - Nešvęsk Vienas
+# TODO - Nešvęsk vienas
 
 Holiday hosting/guest matching platform for Lithuania.
 
----
-
-## Phase 1: Core Matching Flow (Priority: High) - COMPLETE
-
-### Flow 3: Host/Guest Matching
-
-- [x] **Invitations UI** - Display pending invitations in Dashboard/Matches page
-- [x] **Accept/Decline UI** - Buttons to respond to invitations
-- [x] **Match confirmation** - Success state when both parties agree
-- [x] **Contact reveal** - Unlock phone/address after match (fixed `isMatched` in profiles.ts)
-- [x] **Date picker in invite** - User selects date from profile's available dates
-
-### Flow 4: Identity Verification
-
-- [x] **Verification UI** - Add "Verify Identity" button to Dashboard
-- [x] **Upload component** - ID photo + selfie capture/upload
-- [x] **Connect to face service** - Call `/api/face/verify` endpoint
-- [x] **Store verification result** - Update `verified` field in Convex profile
-- [x] **Verification status display** - Show pending/verified/failed states
+**Last updated**: December 8, 2024
 
 ---
 
-## Phase 2: Communication (Priority: Medium) - COMPLETE
+## Completed Features
 
-### Flow 5: Messaging
+### Core Infrastructure
 
-- [x] **Chat UI component** - Real-time message thread in Dashboard
-- [x] **Message list** - Conversations in sidebar + dedicated MessagesPage
-- [x] **Unread indicators** - Badge count in nav + TopBar
-- [x] **Notification system** - Bell icon with combined count (messages + invites)
+- [x] Next.js 16 App Router migration
+- [x] Convex database + real-time sync
+- [x] Clerk authentication (magic link)
+- [x] Clerk ↔ Convex bi-directional sync (webhooks)
+- [x] Toast notifications (Sonner) - for actions like sending invites, profile saved, errors
+- [x] DevPanel for development testing
+- [x] 33 backend tests passing (vitest + convex-test)
+- [x] E2E testing setup (Playwright + Stagehand v3 + Gemini 2.5 Flash)
+- [x] Linting setup (Ultracite + Biome)
+- [x] Dev server (Bun + concurrently)
 
----
+### User Flow
 
-## Phase 3: UX Improvements (Priority: Medium) - IN PROGRESS
+- [x] Multi-step onboarding (4 steps: Preferences → Basic Info → Bio → Languages)
+- [x] Preference cards (Can Host / May Host / Can't Host + Guest options)
+- [x] Holiday date selection per preference
+- [x] Fullscreen onboarding (separate layout, no sidebar)
+- [x] Profile creation + editing
+- [x] Photo upload + gallery (up to 5 photos, main photo selection)
+- [x] Browse hosts/guests with filters (city, date, language)
+- [x] Grid/list view toggle
+- [x] Shadcn Select dropdowns - Full clickable area for filters
+- [x] Tab switch optimization - No "0 found" flash when switching host/guest
 
-### Browse Enhancements
+### Matching & Messaging
 
-- [x] **Shadcn Select dropdowns** - Full clickable area for filters
-- [x] **Tab switch optimization** - No "0 found" flash when switching host/guest
-- [ ] **Map view** - Show hosts on interactive map
-- [ ] **Save/favorite profiles** - Bookmark interesting hosts/guests
-- [ ] **Compatibility score** - Calculate match based on vibes/dates/languages
+- [x] Send invitations (backend)
+- [x] Invitations UI - display pending invitations
+- [x] Accept/Decline UI
+- [x] Match confirmation
+- [x] Contact reveal after match (phone/address)
+- [x] Date picker in invite
+- [x] Real-time chat
+- [x] Message list in sidebar + dedicated MessagesPage
+- [x] Unread indicators + badge count
+- [x] Notification bell (combined messages + invites)
+- [x] Message Profile Integration - View full profile in "Slide-over" sheet while chatting
 
-### Navigation & Layout
+### Verification
 
-- [x] **Sidebar redesign** - AppSidebar with proper nav items
-- [x] **TopBar** - Search + notifications + Clerk UserButton
-- [x] **Dashboard overview** - Stats cards + quick actions
-- [x] **Settings page** - Profile editing + account settings in tabs
-- [x] **Toast notifications** - Sonner toasts for user feedback
+- [x] Face verification API (EdgeFace-XXS + YuNet)
+- [x] Verified badge display
+- [x] "Verify Identity" button in Dashboard
+- [x] Upload component (ID photo + selfie)
+- [x] Verification status display (pending/verified/failed)
 
-### Registration Improvements
+### Localization
 
-- [x] **Photo upload** - ~~Add during registration (currently only in edit)~~ Fixed `generateUploadUrl` to work during registration
-- [ ] **Contact info** - Phone number collection
-- [ ] **Interests/hobbies** - Beyond just "vibes"
-- [ ] **Progress persistence** - Save form state across refreshes
-- [ ] **Onboarding tour** - Tooltips for first-time users
+- [x] i18n setup - 4 languages (LT, EN, UA, RU) in single TypeScript file
+- [x] LanguageSelector component in navbar
+- [x] Landing page fully translated
+- [x] EDITING.md guide for non-technical content editing
+- [x] Client copy update - Updated i18n.ts with translations from client document
 
-### Profile Enhancements
+### Layout & Navigation
 
-- [x] **Photo gallery** - Multiple photos per profile (up to 5, with main photo selection)
-- [ ] **Last active** - Show when user was last online
-- [ ] **Response rate** - Track invitation response speed
-
-### Localization (NEW - from znote.md)
-
-- [x] **i18n setup** - 4 languages (LT, EN, UA, RU) in single TypeScript file
-- [x] **LanguageSelector** - Navbar component to switch languages
-- [x] **EDITING.md** - Guide for non-technical content editing
-- [x] **Wire up translations** - LandingPage now uses `useLocale()` for all text
+- [x] Sidebar navigation (AppSidebar)
+- [x] TopBar with search + notifications + Clerk UserButton
+- [x] Dashboard with stats + quick actions
+- [x] Settings page with profile editing in tabs
+- [x] Public profile view - `/profile` button to see your profile as others see it
+- [x] Location privacy picker (prototype at `/location-picker`)
 
 ### Data Sync
 
-- [x] **Clerk → Convex webhook** - Auto-sync user creation/updates/deletions
-- [x] **Convex → Clerk delete** - `deleteUser` action removes from both systems
-- [x] **Cascading deletes** - User deletion removes all related data (profile, messages, etc.)
+- [x] Clerk → Convex webhook - Auto-sync user creation/updates/deletions
+- [x] Convex → Clerk delete - `deleteUser` action removes from both systems
+- [x] Cascading deletes - User deletion removes all related data
 
 ---
 
-## Phase 3.5: UX Pivot (Couchers-style) - IN PROGRESS
+## High Priority - UI/UX Redesign
 
-_See `docs/PIVOT-ANALYSIS.md` for full details_
+### Navigation Redesign
 
-### Onboarding Redesign
+- [ ] **Switch from sidebar to top bar navigation** - More screen real estate
+  - Reference: `docs/couchsurfing-reimagined/components/Navbar.tsx`
+  - Items: Dashboard | Inbox | Profile | Settings
+  - Keep inbox badge count
 
-- [x] **Fullscreen onboarding** - Separate layout, no sidebar during onboarding
-- [x] **Preference Cards** - Hosting status (Can Host / May Host / Can't Host)
-- [x] **Date dropdown per status** - If hosting, which dates? If guest, which dates?
+### Username Routing
+
+- [ ] **`/people/[username]` route** - Human-readable profile URLs
+  - See: `docs/USERNAME-ROUTING-ANALYSIS.md` for full plan
+  - Phase 1: Add `username` field to profiles schema + index
+  - Phase 2: `getProfileByUsername` query, `checkUsernameAvailability`, `setUsername` mutation
+  - Phase 3: New route at `app/(dashboard)/people/[username]/page.tsx`
+  - Phase 4: Username selection in onboarding/settings
+  - Phase 5: Update all profile links
+  - Keep `/profile/[id]` for backwards compatibility
+
+### Profile Card in Chat
+
+- [ ] **Right sidebar mini-profile** - Show while chatting (xl screens)
+  - Reference: `docs/couchsurfing-reimagined/components/InboxView.tsx`
+  - Avatar, status indicator, references count
+  - Verification badges
+  - Interests tags
+  - **Private notes field** - Yellow sticky note (only you see it)
+  - **Labels/tags** - "Friend", "Potential Host", custom labels
+
+### Profile Status System
+
+- [ ] **Status dropdown** - Green/Yellow/Red (Accepting/Maybe/Not Accepting)
+  - Reference: `docs/couchsurfing-reimagined/components/ProfileView.tsx`
+  - Instant status change from profile card
+  - "Wants to Meet Up" option for non-hosting scenarios
+
+---
+
+## High Priority - Features
+
+### Onboarding Improvements
+
+- [ ] **Extended date range** - Dec 23 to Jan 2 (currently only 24, 25, 26, 31)
+- [ ] **Typeahead city search** - Instead of dropdown, autocomplete Lithuanian cities
+- [ ] **Profile completion indicator** - "You're 80% done!" encouragement UI
 - [ ] **State persistence** - Auto-save each step to Convex (no data loss on refresh)
+
+### Email Integration (Resend)
+
+- [ ] **Set up Resend API** - For transactional emails
+- [ ] **Email verification** - Optional badge, don't force signup verification (avoid drop-offs)
+- [ ] **Match notifications** - Email when someone accepts your invite
+- [ ] **New message notifications** - Email digest for unread messages
+
+### Browse/Discovery Enhancements
+
+- [ ] **Bigger filter system**:
+  - Filter by interests
+  - Filter by gender
+  - Filter by verification status
+  - Filter by hosting status (Can Host / May Host / All)
+- [ ] **Map view** - Show hosts on interactive map (with privacy circles)
+- [ ] **Compatibility score** - Match based on vibes/dates/languages/interests
+
+### Chat/Inbox Improvements
+
+- [ ] **Archive conversations**
+- [ ] **Block user functionality**
+- [ ] **Report user modal** with reasons (Spam, Inappropriate, Harassment, Fake Profile, Other)
+
+---
+
+## Medium Priority
+
+### "My Home" Section
+
+- [ ] **Detailed hosting preferences** in Settings/Profile tab
+  - Max guests
+  - Sleeping arrangements (Private/Shared/Common)
+  - Pet-friendly (yes/no)
+  - Smoking policy (No/Outside/Yes)
+  - Kid-friendly
+  - Wheelchair accessible
+  - Roommate situation
+  - Public transport info
+  - House rules text
+  - Reference: `docs/archive/PIVOT-ANALYSIS.md` for full field list
+
+### References System
+
+- [ ] **Leave reference** - After confirmed meetup, prompt to leave reference
+- [ ] **Reference types** - Host / Guest / Personal
+- [ ] **Positive/Negative indicator**
+- [ ] **Respond to references** - Reply to references left on your profile
+- [ ] Reference: `docs/couchsurfing-reimagined/types.ts` for Reference interface
+
+### Verification Enhancements
+
+- [ ] **Phone verification** - Via SMS or authenticator app (Clerk supports this)
+- [ ] **Email verification badge** - Show if email is verified
+- [ ] **Photo verification badge** - Current face verification
+- Note: NOT doing Government ID verification
 
 ### Profile Enhancements
 
-- [x] **Public profile view** - `/profile` button to see your profile as others see it
-- [x] **Message Profile Integration** - View full profile in a "Slide-over" sheet while chatting (Conversations & Requests)
-- [ ] **"My Home" section** - Detailed hosting preferences in Settings/Profile
-- [x] **Location privacy picker** - Google Maps circle (prototype at `/location-picker`)
+- [ ] **Last active** - Show when user was last online
+- [ ] **Response rate** - Track invitation response speed
+- [ ] **Interests/hobbies** - Beyond just "vibes"
+
+### Dashboard i18n (~210-260 strings)
+
+- [ ] **app-sidebar.tsx** - Nav labels (~5 strings)
+- [ ] **top-bar.tsx** - Page titles (~5 strings)
+- [ ] **verify-banner.tsx** - Banner message (~2 strings)
+- [ ] **onboarding/page.tsx** - Multi-step form (~30-35 strings)
+- [ ] **browse/page.tsx** - Filters, empty states, buttons (~30-35 strings)
+- [ ] **profile/[id]/page.tsx** - Status messages, CTAs (~25-30 strings)
+- [ ] **location-picker/page.tsx** - Instructions, labels (~20-25 strings)
+- [ ] **settings/page.tsx** - Many labels & descriptions (~50-55 strings)
+- [ ] **messages/page.tsx** - Modals, dynamic text, status messages (~35-40 strings)
+- [ ] **Dynamic text helpers** - Template interpolation for "{name}", "{count}", etc.
 
 ### Content Moderation
 
@@ -107,79 +211,72 @@ _See `docs/PIVOT-ANALYSIS.md` for full details_
 - [ ] **Admin notification** - Flag to admin/dashboard for review
 - [ ] **Temporary suspension** - Repeat offenders get temp banned
 
-### Browse/Discovery
+### Card Playground / Dev Mode
 
-- [ ] **Map view** - Show hosts on interactive map (with privacy circles)
-- [ ] **Hosting status filter** - Can Host / May Host / All
-- [ ] **Preference filters** - Pets, Smoking, Wheelchair accessible, etc.
-- [ ] **Compatibility score** - Match based on vibes/dates/languages
-
-### Deprecated
-
-- [x] ~~Events page~~ - Removed, matches tracked via messages
-- [x] ~~couchers-event-manager reference~~ - Deleted
+- [ ] **`/dev/cards` route** - Experiment with card designs
+- [ ] Test different card layouts, sizes, information density
+- [ ] Reference the mockup cards in `docs/couchsurfing-reimagined/`
 
 ---
 
-## Phase 4: Production Readiness (Priority: Low)
+## Low Priority / Post-MVP
 
-### Infrastructure
+### Monitoring & Error Tracking
 
-- [ ] **Error boundaries** - Graceful error handling in React
-- [ ] **Analytics** - Track user flows and conversions
+- [x] **Sentry integration** - Automatic error capture and alerting
+  - Catches JS errors, shows stack traces, user context
+  - Free tier: 5,000 errors/month
+  - Configured: `instrumentation-client.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`
+  - Test page: `/sentry-example-page`
+- [x] **Error boundaries** - Graceful error handling in React
+  - `app/global-error.tsx` - catches and reports to Sentry
+- [ ] **Report Problem button** - User feedback mechanism
+  - Footer link or floating button
+  - Options: simple mailto link, feedback form modal, or Sentry's feedback widget
+  - Store reports in Convex or send to email
+
+### Analytics & Performance
+
+- [x] **Vercel Analytics** - Enabled in Vercel dashboard
+  - Page views, unique visitors, referrers
+- [x] **Vercel Speed Insights** - Core Web Vitals monitoring
+  - Track page load times, performance scores
 - [ ] **SEO** - Meta tags, OpenGraph, sitemap
-- [ ] **PWA** - Installable app with offline support
+- [ ] **PWA** - Installable app with offline support (stretch goal)
 
-### Security
+### Legal & Safety Pages
 
-- [ ] **Rate limiting** - Prevent spam invitations
-- [ ] **Report user** - Flag inappropriate profiles
-- [ ] **Block user** - Prevent contact from specific users
-
-### Legal
-
-- [ ] **Terms of Service** - Complete the /terms page
-- [ ] **Privacy Policy** - GDPR compliance
+- [ ] **Safety Guidelines Page** (`/safety`) - User safety tips and best practices
+  - Review profiles carefully, trust instincts, have backup plan
+  - Communicate through platform, know your limits, leave references
+  - Reference: `docs/courchsurfing-pages/main-about-site/about-safety.md`
+  - Reference: `docs/courchsurfing-pages/main-about-site/about-tips.md`
+- [ ] **Community Guidelines Page** (`/guidelines`) - How to behave on the platform
+  - Be considerate and respectful, resolve disputes together
+  - Don't attack members, use good judgment, report violations
+  - Reference: `docs/courchsurfing-pages/main-about-site/about-guidelines.md`
+- [ ] **Policies Page** (`/policies`) - Platform rules and conduct
+  - No spam, no dating/hookups, no charging for hosting
+  - No harassment, one profile only, keep it legal
+  - Content policy (hate speech, explicit content, etc.)
+  - Reference policy (14-day window, when refs can be removed)
+  - Reference: `docs/courchsurfing-pages/main-about-site/about-policies.md`
+- [ ] **FAQ Page** (`/faq`) - Common questions about safety and platform
+  - Is it safe? How to report problems? References explained
+  - What to do in emergencies, message disputes
+  - Reference: `docs/courchsurfing-pages/main-about-site/about-faq.md`
+- [ ] **Terms of Service** (`/terms`) - Legal terms
+  - Eligibility (18+), member conduct, liability release
+  - Reference: `docs/courchsurfing-pages/main-about-site/about-terms-of-use.md`
+- [ ] **Privacy Policy** (`/privacy`) - GDPR compliance
 - [ ] **Cookie consent** - Banner for EU users
 
----
+### Future Features
 
-## Completed
-
-- [x] Auth (Clerk magic link)
-- [x] Profile creation (multi-step wizard)
-- [x] Profile editing
-- [x] Browse hosts/guests with filters
-- [x] Grid/list view toggle
-- [x] Send invitations (backend)
-- [x] Face verification API (EdgeFace-XXS + YuNet)
-- [x] Verified badge display
-- [x] Convex tests setup (vitest + convex-test)
-- [x] Linting setup (Ultracite + Biome)
-- [x] Dev server (Bun + concurrently)
-- [x] Sidebar navigation
-- [x] TopBar with search + notifications
-- [x] Clerk UserButton integration
-- [x] Dashboard with stats + quick actions
-- [x] MessagesPage
-- [x] HostingPage
-- [x] SettingsPage with profile editing
-- [x] Photo upload during registration (fixed auth flow)
-- [x] Photo gallery (multiple photos, main selection)
-- [x] i18n infrastructure (4 languages)
-- [x] LanguageSelector component
-- [x] EDITING.md guide for non-technical users
-- [x] Landing page fixes (footer, image, styling)
-- [x] 33 backend tests passing
-- [x] E2E testing setup (Playwright + Stagehand v3 + Gemini 2.5 Flash)
-- [x] Multi-user test fixtures (hostPage, guestPage, guest2Page)
-- [x] Clerk test users created via API script
-- [x] Face verification API response format fix
-- [x] Migrated to Next.js 16 App Router
-- [x] Switched from Convex Auth to Clerk
-- [x] Clerk ↔ Convex bi-directional sync (webhooks)
-- [x] Toast notifications (Sonner)
-- [x] DevPanel for development testing
+- [ ] Save/favorite profiles - Bookmark interesting hosts/guests
+- [ ] Voice/video call integration (stretch goal)
+- [ ] Easter event expansion
+- [ ] Year-round hosting mode
 
 ---
 
@@ -189,3 +286,51 @@ _See `docs/PIVOT-ANALYSIS.md` for full details_
 - [ ] Consider migrating some tests to bun test for speed
 - [ ] Remove unused dependencies from package.json
 - [ ] Clean up old Bun server files (src/ folder)
+- [ ] Consolidate client1, client2, client3 landing page experiments
+
+---
+
+## Archived Docs
+
+The following docs have been moved to `docs/archive/`:
+
+- `holiday-platform-planning-2.md` - Original spec (superseded by this TODO)
+- `PIVOT-ANALYSIS.md` - Couchers-style analysis (key items added here)
+- `verification-stack-options.md` - Verification research (implemented EdgeFace approach)
+
+### Reference Docs (Keep Active)
+
+- `CLAUDE.md` - Claude Code instructions
+- `README.md` - Project overview
+- `CHANGELOG.md` - Version history
+- `reference-projects/couchsurfing-reimagined/` - **Mockup project for UI reference** (Important!)
+- `client-visual/` - Visual design references
+- `courchsurfing-pages/` - Scraped Couchsurfing pages for legal/safety page templates
+
+---
+
+## Quick Reference
+
+### Toast Notifications
+
+Yes, we have toasts via Sonner. Used for actions (invite sent, profile saved, errors).
+NOT used for real-time message notifications (those use bell icon badge).
+
+```tsx
+import { toast } from "sonner";
+toast.success("Profile saved!");
+toast.error("Something went wrong");
+```
+
+### Clerk Phone Verification
+
+Clerk supports phone verification out of the box via SMS. Can be enabled in Clerk dashboard.
+Also supports authenticator app (TOTP) for 2FA if needed.
+
+### Key Mockup Files
+
+- `docs/reference-projects/couchsurfing-reimagined/components/Navbar.tsx` - Top bar navigation
+- `docs/reference-projects/couchsurfing-reimagined/components/Dashboard.tsx` - Browse/Find page
+- `docs/reference-projects/couchsurfing-reimagined/components/InboxView.tsx` - Chat with profile sidebar
+- `docs/reference-projects/couchsurfing-reimagined/components/ProfileView.tsx` - Profile with status dropdown
+- `docs/reference-projects/couchsurfing-reimagined/types.ts` - TypeScript interfaces for Reference, etc.

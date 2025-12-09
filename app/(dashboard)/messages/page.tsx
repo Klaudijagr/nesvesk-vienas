@@ -242,7 +242,7 @@ function MessageBubble({
   );
 }
 
-export default function MessagesPage() {
+function MessagesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
@@ -462,110 +462,198 @@ export default function MessagesPage() {
   const isHost = myProfile?.role === "host";
 
   return (
-    <Suspense
-      fallback={
-        <div className="flex h-full items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
-        </div>
-      }
-    >
-      <div className="flex h-full">
-        <div className="flex w-80 shrink-0 flex-col border-r bg-background">
-          {/* Search bar - aligned with profile header height */}
-          <div className="flex h-[72px] items-center border-b px-4">
-            <div className="relative w-full">
-              <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                className="pl-9"
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search conversations..."
-                value={searchQuery}
-              />
-            </div>
+    <div className="flex h-full">
+      <div className="flex w-80 shrink-0 flex-col border-r bg-background">
+        {/* Search bar - aligned with profile header height */}
+        <div className="flex h-[72px] items-center border-b px-4">
+          <div className="relative w-full">
+            <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              className="pl-9"
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search conversations..."
+              value={searchQuery}
+            />
           </div>
+        </div>
 
-          <div className="flex-1 overflow-y-auto p-2">
-            {isLoading ? (
-              <div className="flex h-full items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
-              </div>
-            ) : filteredItems.length === 0 ? (
-              <div className="flex h-full flex-col items-center justify-center p-4 text-center">
-                <MessageCircle className="mb-4 h-12 w-12 text-muted-foreground/50" />
-                <p className="text-muted-foreground">No messages yet</p>
-                <p className="mt-1 text-muted-foreground text-sm">
-                  Connect with hosts or guests to start chatting
-                </p>
-                {/* Dev: Create test conversations */}
-                <Button
-                  className="mt-4"
-                  onClick={async () => {
-                    try {
-                      const result = await createTestConversations({});
-                      if (result.conversations) {
-                        toast.success(result.message, {
-                          description: result.conversations.join(", "),
-                        });
-                      } else {
-                        toast.info(result.message, {
-                          description: `${result.conversationCount} conversations exist`,
-                        });
-                      }
-                    } catch (e) {
-                      toast.error(e instanceof Error ? e.message : "Failed");
+        <div className="flex-1 overflow-y-auto p-2">
+          {isLoading ? (
+            <div className="flex h-full items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
+            </div>
+          ) : filteredItems.length === 0 ? (
+            <div className="flex h-full flex-col items-center justify-center p-4 text-center">
+              <MessageCircle className="mb-4 h-12 w-12 text-muted-foreground/50" />
+              <p className="text-muted-foreground">No messages yet</p>
+              <p className="mt-1 text-muted-foreground text-sm">
+                Connect with hosts or guests to start chatting
+              </p>
+              {/* Dev: Create test conversations */}
+              <Button
+                className="mt-4"
+                onClick={async () => {
+                  try {
+                    const result = await createTestConversations({});
+                    if (result.conversations) {
+                      toast.success(result.message, {
+                        description: result.conversations.join(", "),
+                      });
+                    } else {
+                      toast.info(result.message, {
+                        description: `${result.conversationCount} conversations exist`,
+                      });
                     }
-                  }}
-                  size="sm"
+                  } catch (e) {
+                    toast.error(e instanceof Error ? e.message : "Failed");
+                  }
+                }}
+                size="sm"
+                variant="outline"
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                Create Test Conversations
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {pendingCount > 0 && (
+                <div className="mb-2 px-3 py-2">
+                  <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                    {pendingCount} pending request
+                    {pendingCount !== 1 ? "s" : ""}
+                  </span>
+                </div>
+              )}
+              {filteredItems.map((item) => (
+                <SidebarItemComponent
+                  isActive={item.oderId === activeId}
+                  item={item}
+                  key={`${item.type}-${item.oderId}`}
+                  onClick={() => handleItemClick(item)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col">
+        {activeRequest ? (
+          <>
+            <div className="flex h-[72px] items-center gap-3 border-b px-4">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={activeRequest.profile?.photoUrl} />
+                <AvatarFallback>
+                  {activeRequest.profile?.firstName?.charAt(0) ?? "?"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <h2 className="font-semibold">
+                  {activeRequest.profile?.firstName}
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  {activeRequest.profile?.city}
+                </p>
+              </div>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button size="sm" variant="outline">
+                    View Profile
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
+                  <SheetHeader className="mb-4">
+                    <SheetTitle>Profile Details</SheetTitle>
+                  </SheetHeader>
+                  {activeRequestProfile ? (
+                    <ProfileView profile={activeRequestProfile} />
+                  ) : (
+                    <div className="flex h-40 items-center justify-center">
+                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
+                    </div>
+                  )}
+                </SheetContent>
+              </Sheet>
+            </div>
+
+            <div className="flex flex-1 flex-col items-center justify-center p-8">
+              <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-amber-100">
+                <UserPlus className="h-12 w-12 text-amber-600" />
+              </div>
+              <h2 className="mb-2 font-semibold text-2xl">
+                Connection Request
+              </h2>
+              <p className="mb-2 max-w-md text-center text-muted-foreground">
+                <span className="font-medium text-foreground">
+                  {activeRequest.profile?.firstName}
+                </span>{" "}
+                wants to connect with you for{" "}
+                <span className="font-medium text-foreground">
+                  {activeRequest.date}
+                </span>
+                .
+              </p>
+              <p className="mb-8 max-w-md text-center text-muted-foreground text-sm">
+                If you accept, you'll be able to message each other and share
+                contact information.
+              </p>
+
+              <div className="flex gap-3">
+                <Button
+                  className="gap-2"
+                  disabled={isResponding}
+                  onClick={() => handleRespond(false)}
+                  size="lg"
                   variant="outline"
                 >
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Create Test Conversations
+                  <X className="h-4 w-4" />
+                  Decline
+                </Button>
+                <Button
+                  className="gap-2 bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600"
+                  disabled={isResponding}
+                  onClick={() => handleRespond(true)}
+                  size="lg"
+                >
+                  <Check className="h-4 w-4" />
+                  Accept
                 </Button>
               </div>
-            ) : (
-              <div className="space-y-1">
-                {pendingCount > 0 && (
-                  <div className="mb-2 px-3 py-2">
-                    <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-                      {pendingCount} pending request
-                      {pendingCount !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-                )}
-                {filteredItems.map((item) => (
-                  <SidebarItemComponent
-                    isActive={item.oderId === activeId}
-                    item={item}
-                    key={`${item.type}-${item.oderId}`}
-                    onClick={() => handleItemClick(item)}
-                  />
-                ))}
+            </div>
+          </>
+        ) : activeUserId && activeConversation ? (
+          <>
+            <div className="flex h-[72px] items-center gap-3 border-b px-4">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={activeConversation.profile?.photoUrl} />
+                <AvatarFallback>
+                  {activeConversation.profile?.firstName?.charAt(0) ?? "?"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <h2 className="font-semibold">
+                  {activeConversation.profile?.firstName}
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  {activeConversation.profile?.city}
+                </p>
               </div>
-            )}
-          </div>
-        </div>
+              <div className="flex gap-2">
+                {isHost && (
+                  <Button
+                    onClick={() => setShowShareModal(true)}
+                    size="sm"
+                    variant="outline"
+                  >
+                    <Share2 className="mr-1 h-4 w-4" />
+                    Share Details
+                  </Button>
+                )}
 
-        <div className="flex flex-1 flex-col">
-          {activeRequest ? (
-            <>
-              <div className="flex h-[72px] items-center gap-3 border-b px-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={activeRequest.profile?.photoUrl} />
-                  <AvatarFallback>
-                    {activeRequest.profile?.firstName?.charAt(0) ?? "?"}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <h2 className="font-semibold">
-                    {activeRequest.profile?.firstName}
-                  </h2>
-                  <p className="text-muted-foreground text-sm">
-                    {activeRequest.profile?.city}
-                  </p>
-                </div>
                 <Sheet>
                   <SheetTrigger asChild>
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="ghost">
                       View Profile
                     </Button>
                   </SheetTrigger>
@@ -573,228 +661,146 @@ export default function MessagesPage() {
                     <SheetHeader className="mb-4">
                       <SheetTitle>Profile Details</SheetTitle>
                     </SheetHeader>
-                    {activeRequestProfile ? (
-                      <ProfileView profile={activeRequestProfile} />
-                    ) : (
-                      <div className="flex h-40 items-center justify-center">
-                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
-                      </div>
+                    {activeConversation.profile && (
+                      <ProfileView profile={activeConversation.profile} />
                     )}
                   </SheetContent>
                 </Sheet>
               </div>
+            </div>
 
-              <div className="flex flex-1 flex-col items-center justify-center p-8">
-                <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-amber-100">
-                  <UserPlus className="h-12 w-12 text-amber-600" />
-                </div>
-                <h2 className="mb-2 font-semibold text-2xl">
-                  Connection Request
-                </h2>
-                <p className="mb-2 max-w-md text-center text-muted-foreground">
-                  <span className="font-medium text-foreground">
-                    {activeRequest.profile?.firstName}
-                  </span>{" "}
-                  wants to connect with you for{" "}
-                  <span className="font-medium text-foreground">
-                    {activeRequest.date}
-                  </span>
-                  .
-                </p>
-                <p className="mb-8 max-w-md text-center text-muted-foreground text-sm">
-                  If you accept, you'll be able to message each other and share
-                  contact information.
-                </p>
+            <div
+              className="flex-1 space-y-4 overflow-y-auto p-4"
+              ref={messagesContainerRef}
+            >
+              {messages?.map((message) => (
+                <MessageBubble
+                  content={message.content}
+                  eventCard={message.eventCard}
+                  isOwn={message.senderId === myProfile?.userId}
+                  key={message._id}
+                  timestamp={message.createdAt}
+                />
+              ))}
+            </div>
 
-                <div className="flex gap-3">
-                  <Button
-                    className="gap-2"
-                    disabled={isResponding}
-                    onClick={() => handleRespond(false)}
-                    size="lg"
-                    variant="outline"
-                  >
-                    <X className="h-4 w-4" />
-                    Decline
-                  </Button>
-                  <Button
-                    className="gap-2 bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600"
-                    disabled={isResponding}
-                    onClick={() => handleRespond(true)}
-                    size="lg"
-                  >
-                    <Check className="h-4 w-4" />
-                    Accept
-                  </Button>
-                </div>
+            <div className="border-t p-4">
+              <div className="flex items-center gap-3">
+                <Input
+                  className="flex-1"
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  placeholder="Type a message..."
+                  value={messageInput}
+                />
+                <Button
+                  className="bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600"
+                  disabled={!messageInput.trim()}
+                  onClick={handleSend}
+                >
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
               </div>
-            </>
-          ) : activeUserId && activeConversation ? (
-            <>
-              <div className="flex h-[72px] items-center gap-3 border-b px-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={activeConversation.profile?.photoUrl} />
-                  <AvatarFallback>
-                    {activeConversation.profile?.firstName?.charAt(0) ?? "?"}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <h2 className="font-semibold">
-                    {activeConversation.profile?.firstName}
-                  </h2>
-                  <p className="text-muted-foreground text-sm">
-                    {activeConversation.profile?.city}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  {isHost && (
-                    <Button
-                      onClick={() => setShowShareModal(true)}
-                      size="sm"
-                      variant="outline"
-                    >
-                      <Share2 className="mr-1 h-4 w-4" />
-                      Share Details
-                    </Button>
-                  )}
+            </div>
 
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button size="sm" variant="ghost">
-                        View Profile
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
-                      <SheetHeader className="mb-4">
-                        <SheetTitle>Profile Details</SheetTitle>
-                      </SheetHeader>
-                      {activeConversation.profile && (
-                        <ProfileView profile={activeConversation.profile} />
-                      )}
-                    </SheetContent>
-                  </Sheet>
-                </div>
-              </div>
-
-              <div
-                className="flex-1 space-y-4 overflow-y-auto p-4"
-                ref={messagesContainerRef}
-              >
-                {messages?.map((message) => (
-                  <MessageBubble
-                    content={message.content}
-                    eventCard={message.eventCard}
-                    isOwn={message.senderId === myProfile?.userId}
-                    key={message._id}
-                    timestamp={message.createdAt}
-                  />
-                ))}
-              </div>
-
-              <div className="border-t p-4">
-                <div className="flex items-center gap-3">
-                  <Input
-                    className="flex-1"
-                    onChange={(e) => setMessageInput(e.target.value)}
-                    onKeyDown={handleKeyPress}
-                    placeholder="Type a message..."
-                    value={messageInput}
-                  />
-                  <Button
-                    className="bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600"
-                    disabled={!messageInput.trim()}
-                    onClick={handleSend}
-                  >
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              {showShareModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                  <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-                    <h3 className="mb-4 font-semibold text-lg">
-                      Share Event Details
-                    </h3>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="shareDate">Date *</Label>
-                        <select
-                          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                          id="shareDate"
-                          onChange={(e) => setShareDate(e.target.value)}
-                          value={shareDate}
-                        >
-                          <option value="">Select a date...</option>
-                          {HOLIDAY_DATES.map((date) => (
-                            <option key={date} value={date}>
-                              {date}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="shareAddress">Address</Label>
-                        <Input
-                          id="shareAddress"
-                          onChange={(e) => setShareAddress(e.target.value)}
-                          placeholder="Where should they come?"
-                          value={shareAddress}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="sharePhone">Phone</Label>
-                        <Input
-                          id="sharePhone"
-                          onChange={(e) => setSharePhone(e.target.value)}
-                          placeholder="Your contact number"
-                          value={sharePhone}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="shareNote">Note</Label>
-                        <Input
-                          id="shareNote"
-                          onChange={(e) => setShareNote(e.target.value)}
-                          placeholder="Any additional info..."
-                          value={shareNote}
-                        />
-                      </div>
+            {showShareModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+                  <h3 className="mb-4 font-semibold text-lg">
+                    Share Event Details
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="shareDate">Date *</Label>
+                      <select
+                        className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                        id="shareDate"
+                        onChange={(e) => setShareDate(e.target.value)}
+                        value={shareDate}
+                      >
+                        <option value="">Select a date...</option>
+                        {HOLIDAY_DATES.map((date) => (
+                          <option key={date} value={date}>
+                            {date}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                    <div className="mt-6 flex gap-3">
-                      <Button
-                        className="flex-1"
-                        onClick={() => setShowShareModal(false)}
-                        variant="outline"
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        className="flex-1 bg-gradient-to-r from-red-500 to-amber-500"
-                        disabled={!shareDate || isSendingCard}
-                        onClick={handleShareEventDetails}
-                      >
-                        {isSendingCard ? "Sending..." : "Send Details"}
-                      </Button>
+                    <div className="space-y-2">
+                      <Label htmlFor="shareAddress">Address</Label>
+                      <Input
+                        id="shareAddress"
+                        onChange={(e) => setShareAddress(e.target.value)}
+                        placeholder="Where should they come?"
+                        value={shareAddress}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="sharePhone">Phone</Label>
+                      <Input
+                        id="sharePhone"
+                        onChange={(e) => setSharePhone(e.target.value)}
+                        placeholder="Your contact number"
+                        value={sharePhone}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="shareNote">Note</Label>
+                      <Input
+                        id="shareNote"
+                        onChange={(e) => setShareNote(e.target.value)}
+                        placeholder="Any additional info..."
+                        value={shareNote}
+                      />
                     </div>
                   </div>
+                  <div className="mt-6 flex gap-3">
+                    <Button
+                      className="flex-1"
+                      onClick={() => setShowShareModal(false)}
+                      variant="outline"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      className="flex-1 bg-gradient-to-r from-red-500 to-amber-500"
+                      disabled={!shareDate || isSendingCard}
+                      onClick={handleShareEventDetails}
+                    >
+                      {isSendingCard ? "Sending..." : "Send Details"}
+                    </Button>
+                  </div>
                 </div>
-              )}
-            </>
-          ) : (
-            <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-              <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-                <MessageCircle className="h-10 w-10 text-muted-foreground" />
               </div>
-              <h2 className="mb-2 font-semibold text-xl">Your Messages</h2>
-              <p className="max-w-sm text-muted-foreground">
-                Select a conversation to start chatting, or respond to
-                connection requests from hosts and guests.
-              </p>
+            )}
+          </>
+        ) : (
+          <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
+            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+              <MessageCircle className="h-10 w-10 text-muted-foreground" />
             </div>
-          )}
-        </div>
+            <h2 className="mb-2 font-semibold text-xl">Your Messages</h2>
+            <p className="max-w-sm text-muted-foreground">
+              Select a conversation to start chatting, or respond to connection
+              requests from hosts and guests.
+            </p>
+          </div>
+        )}
       </div>
+    </div>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-full items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
+        </div>
+      }
+    >
+      <MessagesPageContent />
     </Suspense>
   );
 }

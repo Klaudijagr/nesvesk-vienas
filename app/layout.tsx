@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import {
+  Courier_Prime,
+  Geist,
+  Geist_Mono,
+  Playfair_Display,
+} from "next/font/google";
 import { DevPanel } from "@/components/DevPanel";
 import { ConvexClientProvider } from "@/components/providers/convex-client-provider";
 
@@ -17,8 +22,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const courierPrime = Courier_Prime({
+  variable: "--font-courier",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Nešvęsk Vienas - Don't Celebrate Alone",
+  title: "Nešvęsk vienas - Don't Celebrate Alone",
   description:
     "A non-profit initiative connecting people for the holidays. Find hosts or guests for holiday celebrations in Lithuania.",
 };
@@ -30,8 +48,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Pinyon Script for vintage accent text */}
+        <link href="https://fonts.googleapis.com" rel="preconnect" />
+        <link
+          crossOrigin="anonymous"
+          href="https://fonts.gstatic.com"
+          rel="preconnect"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${courierPrime.variable} antialiased`}
       >
         <ConvexClientProvider>
           <LocaleProvider>{children}</LocaleProvider>

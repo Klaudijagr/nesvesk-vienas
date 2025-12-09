@@ -8,6 +8,54 @@ export type City =
   | "Klaipėda"
   | "Šiauliai"
   | "Panevėžys"
+  | "Alytus"
+  | "Marijampolė"
+  | "Mažeikiai"
+  | "Utena"
+  | "Jonava"
+  | "Kėdainiai"
+  | "Telšiai"
+  | "Tauragė"
+  | "Ukmergė"
+  | "Visaginas"
+  | "Palanga"
+  | "Plungė"
+  | "Kretinga"
+  | "Šilutė"
+  | "Gargždai"
+  | "Radviliškis"
+  | "Druskininkai"
+  | "Elektrėnai"
+  | "Jurbarkas"
+  | "Rokiškis"
+  | "Kuršėnai"
+  | "Biržai"
+  | "Vilkaviškis"
+  | "Garliava"
+  | "Grigiškės"
+  | "Lentvaris"
+  | "Raseiniai"
+  | "Prienai"
+  | "Anykščiai"
+  | "Kaišiadorys"
+  | "Joniškis"
+  | "Naujoji Akmenė"
+  | "Varėna"
+  | "Kelmė"
+  | "Šalčininkai"
+  | "Pasvalys"
+  | "Kupiškis"
+  | "Zarasai"
+  | "Skuodas"
+  | "Kazlų Rūda"
+  | "Širvintos"
+  | "Molėtai"
+  | "Švenčionys"
+  | "Ignalina"
+  | "Pabradė"
+  | "Šilalė"
+  | "Neringa"
+  | "Pagėgiai"
   | "Other";
 
 export type Language = "Lithuanian" | "English" | "Ukrainian" | "Russian";
@@ -24,6 +72,54 @@ export const CITIES: City[] = [
   "Klaipėda",
   "Šiauliai",
   "Panevėžys",
+  "Alytus",
+  "Marijampolė",
+  "Mažeikiai",
+  "Utena",
+  "Jonava",
+  "Kėdainiai",
+  "Telšiai",
+  "Tauragė",
+  "Ukmergė",
+  "Visaginas",
+  "Palanga",
+  "Plungė",
+  "Kretinga",
+  "Šilutė",
+  "Gargždai",
+  "Radviliškis",
+  "Druskininkai",
+  "Elektrėnai",
+  "Jurbarkas",
+  "Rokiškis",
+  "Kuršėnai",
+  "Biržai",
+  "Vilkaviškis",
+  "Garliava",
+  "Grigiškės",
+  "Lentvaris",
+  "Raseiniai",
+  "Prienai",
+  "Anykščiai",
+  "Kaišiadorys",
+  "Joniškis",
+  "Naujoji Akmenė",
+  "Varėna",
+  "Kelmė",
+  "Šalčininkai",
+  "Pasvalys",
+  "Kupiškis",
+  "Zarasai",
+  "Skuodas",
+  "Kazlų Rūda",
+  "Širvintos",
+  "Molėtai",
+  "Švenčionys",
+  "Ignalina",
+  "Pabradė",
+  "Šilalė",
+  "Neringa",
+  "Pagėgiai",
   "Other",
 ];
 

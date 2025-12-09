@@ -3,6 +3,7 @@
 import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PhotoGallery } from "@/components/PhotoGallery";
@@ -36,6 +37,7 @@ export default function OnboardingPage() {
 
   const [step, setStep] = useState<Step>(1);
   const [isSaving, setIsSaving] = useState(false);
+  const [completed, setCompleted] = useState(false);
 
   // Step 1: Preferences
   const [hostingStatus, setHostingStatus] = useState("cant-host");
@@ -84,10 +86,15 @@ export default function OnboardingPage() {
 
   // If profile already complete, redirect to browse
   useEffect(() => {
-    if (profile?.firstName && profile?.bio && profile?.languages.length > 0) {
+    if (
+      !completed &&
+      profile?.firstName &&
+      profile?.bio &&
+      profile?.languages.length > 0
+    ) {
       router.push("/browse");
     }
-  }, [profile, router]);
+  }, [completed, profile, router]);
 
   // Derive role from statuses
   const getRole = (): "host" | "guest" | "both" => {
@@ -170,7 +177,7 @@ export default function OnboardingPage() {
         petsAllowed: false,
         hasPets: false,
       });
-      router.push("/browse");
+      setCompleted(true);
     } finally {
       setIsSaving(false);
     }
@@ -189,10 +196,32 @@ export default function OnboardingPage() {
   const showGuestDates =
     guestStatus === "looking" || guestStatus === "maybe-guest";
 
+  if (completed) {
+    return (
+      <Card className="w-full max-w-2xl">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">All set!</CardTitle>
+          <CardDescription>
+            Your profile is saved. Verify your identity to build trust, or skip
+            for now.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3 md:flex-row md:justify-center">
+          <Button asChild>
+            <Link href="/verify">Verify identity</Link>
+          </Button>
+          <Button onClick={() => router.push("/browse")} variant="outline">
+            Skip for now
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Welcome to Nešvęsk Vienas</CardTitle>
+        <CardTitle className="text-2xl">Welcome to Nešvęsk vienas</CardTitle>
         <CardDescription>
           {step === 1 && "What brings you here this holiday season?"}
           {step === 2 && "Tell us about yourself"}

@@ -34,6 +34,7 @@
 ## Couchers.org / Couchsurfing Model
 
 ### Hosting Status (Preference Cards UI)
+
 Like your `user-preferences-ui` reference project:
 
 | Status | Icon | Description |
@@ -49,6 +50,7 @@ Like your `user-preferences-ui` reference project:
 | **Can't meet** | ✗ | "I prefer not to meet up with others" |
 
 ### "My Home" Section (Couchers/Couchsurfing)
+
 - **Hosting Preferences**: Last-minute guests, people with children, pets, drinking
 - **Maximum Guests**: Number slider
 - **Smoking Policy**: No, Outside/Window, Yes
@@ -62,7 +64,7 @@ Like your `user-preferences-ui` reference project:
 
 ### Key Differences
 
-| Aspect | Nešvęsk Vienas (Current) | Couchers Model |
+| Aspect | Nešvęsk vienas (Current) | Couchers Model |
 |--------|--------------------------|----------------|
 | **Role** | Binary (host/guest/both) | Fluid (status can change anytime) |
 | **Availability** | Specific dates (24-31 Dec) | Always-on (Can host / Maybe / Can't) |
@@ -77,6 +79,7 @@ Like your `user-preferences-ui` reference project:
 Since you're focused on **Lithuanian holidays** (niche is good!), I suggest a hybrid:
 
 ### Keep What Works
+
 - ✅ **Holiday date focus** - Your differentiator vs. Couchers/CS
 - ✅ **Verification flow** - Trust is critical
 - ✅ **Multi-language support** - Important for Ukraine refugees
@@ -86,6 +89,7 @@ Since you're focused on **Lithuanian holidays** (niche is good!), I suggest a hy
 ### Add from Couchers Model
 
 #### 1. **Preference Cards in Onboarding** (from `user-preferences-ui`)
+
 Replace the simple "I want to be a host/guest/both" with:
 
 ```
@@ -107,6 +111,7 @@ Step 2: Meetup Status (for non-hosts or additional)
 ```
 
 #### 2. **"My Home" Tab in Profile/Settings**
+
 New section with detailed hosting preferences:
 
 ```tsx
@@ -133,6 +138,7 @@ home: {
 ```
 
 #### 3. **Browse Page Redesign**
+
 - Remove host/guest toggle → Show everyone
 - Add hosting status filter: "Can host", "May host", "All"
 - Add capability filters: "Wheelchair accessible", "Pet-friendly", etc.
@@ -140,6 +146,7 @@ home: {
 - Compatibility score (already in TODO)
 
 #### 4. **Events Tab: Keep but Repurpose**
+
 Instead of being the primary flow, events become:
 - **Post-match confirmation** - When matched, host creates "event" with details
 - **Public holiday gatherings** - Optional: hosts can post open events
@@ -150,29 +157,34 @@ Instead of being the primary flow, events become:
 ## Implementation Plan
 
 ### Phase 1: Onboarding Redesign (~2-3 days)
+
 - [ ] Add `hostingStatus` and `meetupStatus` fields to schema
 - [ ] Create `PreferenceCard` component (already have reference!)
 - [ ] Update onboarding to use Preference Cards instead of role buttons
 - [ ] Keep holiday date selection (your differentiator)
 
 ### Phase 2: Profile "My Home" Section (~2-3 days)
+
 - [ ] Add `home` object fields to schema
 - [ ] Create "My Home" tab in Settings page
 - [ ] Build form with all hosting preference fields
 - [ ] Add "About My Home" rich text / textarea
 
 ### Phase 3: Browse Page Updates (~1-2 days)
+
 - [ ] Remove host/guest toggle (or make it a filter)
 - [ ] Add hosting status filter ("Can host", "May host", "All")
 - [ ] Add preference filters (pets, smoking, accessibility)
 - [ ] Update profile cards to show hosting status prominently
 
-### Phase 4: Map View (~2-3 days) 
+### Phase 4: Map View (~2-3 days)
+
 - [ ] Add approximate location to profiles (MapLibre + OpenStreetMap)
 - [ ] Privacy slider for location accuracy
 - [ ] Map view tab on browse page
 
 ### Phase 5: Polish (~1-2 days)
+
 - [ ] Compatibility score algorithm
 - [ ] Last active timestamps
 - [ ] Response rate tracking
@@ -204,12 +216,14 @@ Instead of being the primary flow, events become:
 ## Reference Projects Summary
 
 ### `docs/reference-projects/user-preferences-ui`
+
 **Use for:** Preference Cards component (Hosting Status, Meetup Status)
 - Beautiful card-based selection UI
 - Already styled, just needs integration
 - Icons: ✓ / ? / ✗ for clear visual hierarchy
 
 ### `docs/reference-projects/couchers-event-manager`
+
 **Use for:** Event creation modal design
 - AI-powered event description
 - Nice form layout with date/time/location

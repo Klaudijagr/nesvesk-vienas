@@ -1,10 +1,10 @@
-# Nešvęsk Vienas
+# Nešvęsk vienas
 
 **"Don't celebrate alone"** - A platform connecting hosts and guests for holiday celebrations in Lithuania.
 
 ## About
 
-Nešvęsk Vienas helps people find companions for holiday celebrations. Hosts can open their homes, and guests can find welcoming places to celebrate together. The platform focuses on Christmas (Dec 24-26) and New Year's Eve (Dec 31), with potential expansion to other holidays.
+Nešvęsk vienas helps people find companions for holiday celebrations. Hosts can open their homes, and guests can find welcoming places to celebrate together. The platform focuses on Christmas (Dec 24-26) and New Year's Eve (Dec 31), with potential expansion to other holidays.
 
 ## Tech Stack
 

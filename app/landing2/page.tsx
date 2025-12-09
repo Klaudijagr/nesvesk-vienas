@@ -9,7 +9,7 @@ export default function Landing2Type() {
         {[...new Array(50)].map((_, i) => (
           <div
             className="absolute animate-pulse rounded-full bg-white"
-            key={i}
+            key={`snow-${i}`}
             style={{
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
