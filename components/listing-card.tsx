@@ -34,44 +34,124 @@ type ListingCardProps = {
   onAccept?: (userId: Id<"users">) => void;
 };
 
-export function ListingCard({ profile, onInvite, onAccept }: ListingCardProps) {
-  const connectionStatus = profile.connectionStatus ?? "none";
-  const isHost = profile.role === "host" || profile.role === "both";
-  const isGuest = profile.role === "guest" || profile.role === "both";
-
-  // Use username route if available, otherwise fall back to ID
-  const profileUrl = profile.username
-    ? `/people/${profile.username}`
-    : `/profile/${profile.userId}`;
-
-  // Build preference icons
-  const preferenceIcons: Array<{
-    icon: typeof Wine;
-    label: string;
-    color: string;
-  }> = [];
+// Helper to build preference icons
+function buildPreferenceIcons(profile: ProfileWithStatus) {
+  const icons: Array<{ icon: typeof Wine; label: string; color: string }> = [];
   if (profile.drinkingAllowed) {
-    preferenceIcons.push({
-      icon: Wine,
-      label: "Alcohol OK",
-      color: "text-purple-500",
-    });
+    icons.push({ icon: Wine, label: "Alcohol OK", color: "text-purple-500" });
   }
   if (profile.smokingAllowed) {
-    preferenceIcons.push({
+    icons.push({
       icon: Cigarette,
       label: "Smoking OK",
       color: "text-gray-500",
     });
   }
   if (profile.petsAllowed || profile.hasPets) {
-    preferenceIcons.push({
+    icons.push({
       icon: Dog,
       label: profile.hasPets ? "Has pets" : "Pets OK",
       color: "text-amber-500",
     });
   }
+  return icons;
+}
 
+// Connection action button component
+function ConnectionActionButton({
+  status,
+  userId,
+  onInvite,
+  onAccept,
+}: {
+  status: ConnectionStatus;
+  userId: Id<"users">;
+  onInvite?: (userId: Id<"users">) => void;
+  onAccept?: (userId: Id<"users">) => void;
+}) {
+  if (status === "matched") {
+    return (
+      <Link
+        className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-center font-medium text-sm text-white transition-colors hover:bg-green-700"
+        href="/messages"
+      >
+        Message
+      </Link>
+    );
+  }
+  if (status === "pending_sent") {
+    return (
+      <span className="flex flex-1 items-center justify-center rounded-lg border border-amber-500 bg-amber-50 px-4 py-2 font-medium text-amber-600 text-sm">
+        Pending
+      </span>
+    );
+  }
+  if (status === "pending_received" && onAccept) {
+    return (
+      <button
+        className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-blue-700"
+        onClick={() => onAccept(userId)}
+        type="button"
+      >
+        Accept
+      </button>
+    );
+  }
+  if (status === "none" && onInvite) {
+    return (
+      <button
+        className="flex-1 rounded-lg border border-red-600 bg-white px-4 py-2 font-medium text-red-600 text-sm transition-colors hover:bg-red-600 hover:text-white"
+        onClick={() => onInvite(userId)}
+        type="button"
+      >
+        Connect
+      </button>
+    );
+  }
+  return null;
+}
+
+// Role badges component
+function RoleBadges({
+  isHost,
+  isGuest,
+  capacity,
+  concept,
+}: {
+  isHost: boolean;
+  isGuest: boolean;
+  capacity?: number;
+  concept?: string;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {isHost && (
+        <span className="flex items-center gap-1 rounded-md bg-purple-50 px-2 py-1 font-medium text-purple-700 text-xs uppercase tracking-wider">
+          <Users className="h-3 w-3" /> Host ({capacity ?? "?"})
+        </span>
+      )}
+      {isGuest && (
+        <span className="flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 font-medium text-blue-700 text-xs uppercase tracking-wider">
+          <User className="h-3 w-3" /> Guest
+        </span>
+      )}
+      {isHost && concept && (
+        <span className="rounded-md bg-orange-50 px-2 py-1 font-medium text-orange-700 text-xs">
+          {concept}
+        </span>
+      )}
+    </div>
+  );
+}
+
+export function ListingCard({ profile, onInvite, onAccept }: ListingCardProps) {
+  const connectionStatus = profile.connectionStatus ?? "none";
+  const isHost = profile.role === "host" || profile.role === "both";
+  const isGuest = profile.role === "guest" || profile.role === "both";
+  const profileUrl = profile.username
+    ? `/people/${profile.username}`
+    : `/profile/${profile.userId}`;
+  const preferenceIcons = buildPreferenceIcons(profile);
   const photoUrl =
     profile.photoUrl ||
     `https://api.dicebear.com/7.x/initials/svg?seed=${profile.firstName}`;
@@ -108,24 +188,12 @@ export function ListingCard({ profile, onInvite, onAccept }: ListingCardProps) {
       </Link>
 
       <div className="flex flex-grow flex-col gap-3 p-4">
-        {/* Badges */}
-        <div className="flex flex-wrap gap-2">
-          {isHost ? (
-            <span className="flex items-center gap-1 rounded-md bg-purple-50 px-2 py-1 font-medium text-purple-700 text-xs uppercase tracking-wider">
-              <Users className="h-3 w-3" /> Host ({profile.capacity ?? "?"})
-            </span>
-          ) : null}
-          {isGuest ? (
-            <span className="flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 font-medium text-blue-700 text-xs uppercase tracking-wider">
-              <User className="h-3 w-3" /> Guest
-            </span>
-          ) : null}
-          {isHost && profile.concept ? (
-            <span className="rounded-md bg-orange-50 px-2 py-1 font-medium text-orange-700 text-xs">
-              {profile.concept}
-            </span>
-          ) : null}
-        </div>
+        <RoleBadges
+          capacity={profile.capacity}
+          concept={profile.concept}
+          isGuest={isGuest}
+          isHost={isHost}
+        />
 
         {/* Bio */}
         <Link className="block" href={profileUrl}>
@@ -211,37 +279,12 @@ export function ListingCard({ profile, onInvite, onAccept }: ListingCardProps) {
         >
           View Details
         </Link>
-        {connectionStatus === "matched" && (
-          <Link
-            className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-center font-medium text-sm text-white transition-colors hover:bg-green-700"
-            href="/messages"
-          >
-            Message
-          </Link>
-        )}
-        {connectionStatus === "pending_sent" && (
-          <span className="flex flex-1 items-center justify-center rounded-lg border border-amber-500 bg-amber-50 px-4 py-2 font-medium text-amber-600 text-sm">
-            Pending
-          </span>
-        )}
-        {connectionStatus === "pending_received" && onAccept && (
-          <button
-            className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-blue-700"
-            onClick={() => onAccept(profile.userId)}
-            type="button"
-          >
-            Accept
-          </button>
-        )}
-        {connectionStatus === "none" && onInvite && (
-          <button
-            className="flex-1 rounded-lg border border-red-600 bg-white px-4 py-2 font-medium text-red-600 text-sm transition-colors hover:bg-red-600 hover:text-white"
-            onClick={() => onInvite(profile.userId)}
-            type="button"
-          >
-            Connect
-          </button>
-        )}
+        <ConnectionActionButton
+          onAccept={onAccept}
+          onInvite={onInvite}
+          status={connectionStatus}
+          userId={profile.userId}
+        />
       </div>
     </div>
   );

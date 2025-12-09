@@ -395,7 +395,9 @@ function ShareDetailsModal({
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   const handleSubmit = () => {
     onSubmit({ date, address, phone, note });
@@ -486,6 +488,371 @@ function EmptyState() {
   );
 }
 
+// Sidebar component
+function MessagesSidebar({
+  items,
+  activeId,
+  isLoading,
+  pendingCount,
+  searchQuery,
+  onSearchChange,
+  onItemClick,
+  onCreateTest,
+}: {
+  items: SidebarItem[];
+  activeId: string | null;
+  isLoading: boolean;
+  pendingCount: number;
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  onItemClick: (id: string, type: "conversation" | "request") => void;
+  onCreateTest: () => Promise<void>;
+}) {
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex h-full items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
+        </div>
+      );
+    }
+    if (items.length === 0) {
+      return <EmptyConversationsList onCreateTest={onCreateTest} />;
+    }
+    return (
+      <div className="space-y-1">
+        {pendingCount > 0 && (
+          <div className="mb-2 px-3 py-2">
+            <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+              {pendingCount} pending request
+              {pendingCount !== 1 ? "s" : ""}
+            </span>
+          </div>
+        )}
+        {items.map((item) => (
+          <SidebarItemComponent
+            isActive={item.oderId === activeId}
+            item={item}
+            key={`${item.type}-${item.oderId}`}
+            onClick={() => onItemClick(item.oderId, item.type)}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex w-80 shrink-0 flex-col border-r bg-background">
+      <div className="flex h-[72px] items-center border-b px-4">
+        <div className="relative w-full">
+          <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            className="pl-9"
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Search conversations..."
+            value={searchQuery}
+          />
+        </div>
+      </div>
+      <div className="flex-1 overflow-y-auto p-2">{renderContent()}</div>
+    </div>
+  );
+}
+
+// Conversation view component
+function ConversationView({
+  conversation,
+  messages,
+  myProfile,
+  messagesContainerRef,
+  messageInput,
+  onMessageInputChange,
+  onSend,
+  isHost,
+  showShareModal,
+  onShowShareModal,
+  onCloseShareModal,
+  onShareEventDetails,
+  isSendingCard,
+}: {
+  conversation: NonNullable<
+    ReturnType<typeof useQuery<typeof api.messages.getConversations>>[number]
+  >;
+  messages:
+    | ReturnType<typeof useQuery<typeof api.messages.getConversationMessages>>
+    | undefined;
+  myProfile: ReturnType<typeof useQuery<typeof api.profiles.getMyProfile>>;
+  messagesContainerRef: React.RefObject<HTMLDivElement | null>;
+  messageInput: string;
+  onMessageInputChange: (value: string) => void;
+  onSend: () => void;
+  isHost: boolean;
+  showShareModal: boolean;
+  onShowShareModal: () => void;
+  onCloseShareModal: () => void;
+  onShareEventDetails: (data: {
+    date: string;
+    address: string;
+    phone: string;
+    note: string;
+  }) => void;
+  isSendingCard: boolean;
+}) {
+  return (
+    <>
+      {/* Conversation header */}
+      <div className="flex h-[72px] items-center gap-3 border-b px-4">
+        <Avatar className="h-12 w-12">
+          <AvatarImage src={conversation.profile?.photoUrl} />
+          <AvatarFallback>
+            {conversation.profile?.firstName?.charAt(0) ?? "?"}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <h2 className="font-semibold">{conversation.profile?.firstName}</h2>
+          <p className="text-muted-foreground text-sm">
+            {conversation.profile?.city}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {isHost && (
+            <Button onClick={onShowShareModal} size="sm" variant="outline">
+              <Share2 className="mr-1 h-4 w-4" />
+              Share Details
+            </Button>
+          )}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button size="sm" variant="ghost">
+                View Profile
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
+              <SheetHeader className="mb-4">
+                <SheetTitle>Profile Details</SheetTitle>
+              </SheetHeader>
+              {conversation.profile && (
+                <ProfileView profile={conversation.profile} />
+              )}
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div
+        className="flex-1 space-y-4 overflow-y-auto p-4"
+        ref={messagesContainerRef}
+      >
+        {messages?.map((message) => (
+          <MessageBubble
+            content={message.content}
+            eventCard={message.eventCard}
+            isOwn={message.senderId === myProfile?.userId}
+            key={message._id}
+            timestamp={message.createdAt}
+          />
+        ))}
+      </div>
+
+      {/* Input */}
+      <div className="border-t p-4">
+        <div className="flex items-center gap-3">
+          <Input
+            className="flex-1"
+            onChange={(e) => onMessageInputChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                onSend();
+              }
+            }}
+            placeholder="Type a message..."
+            value={messageInput}
+          />
+          <Button
+            className="bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600"
+            disabled={!messageInput.trim()}
+            onClick={onSend}
+          >
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      <ShareDetailsModal
+        isOpen={showShareModal}
+        isSending={isSendingCard}
+        onClose={onCloseShareModal}
+        onSubmit={onShareEventDetails}
+      />
+    </>
+  );
+}
+
+// Main content area component
+function MainContentArea({
+  activeRequest,
+  activeConversation,
+  activeRequestProfile,
+  isResponding,
+  onRespond,
+  messages,
+  myProfile,
+  messagesContainerRef,
+  messageInput,
+  onMessageInputChange,
+  onSend,
+  isHost,
+  showShareModal,
+  onShowShareModal,
+  onCloseShareModal,
+  onShareEventDetails,
+  isSendingCard,
+}: {
+  activeRequest: Extract<SidebarItem, { type: "request" }> | null;
+  activeConversation:
+    | ReturnType<typeof useQuery<typeof api.messages.getConversations>>[number]
+    | null;
+  activeRequestProfile: unknown;
+  isResponding: boolean;
+  onRespond: (accept: boolean) => void;
+  messages:
+    | ReturnType<typeof useQuery<typeof api.messages.getConversationMessages>>
+    | undefined;
+  myProfile: ReturnType<typeof useQuery<typeof api.profiles.getMyProfile>>;
+  messagesContainerRef: React.RefObject<HTMLDivElement | null>;
+  messageInput: string;
+  onMessageInputChange: (value: string) => void;
+  onSend: () => void;
+  isHost: boolean;
+  showShareModal: boolean;
+  onShowShareModal: () => void;
+  onCloseShareModal: () => void;
+  onShareEventDetails: (data: {
+    date: string;
+    address: string;
+    phone: string;
+    note: string;
+  }) => void;
+  isSendingCard: boolean;
+}) {
+  if (activeRequest) {
+    return (
+      <RequestView
+        isResponding={isResponding}
+        onRespond={onRespond}
+        profile={activeRequestProfile}
+        request={activeRequest}
+      />
+    );
+  }
+
+  if (activeConversation) {
+    return (
+      <ConversationView
+        conversation={activeConversation}
+        isHost={isHost}
+        isSendingCard={isSendingCard}
+        messageInput={messageInput}
+        messages={messages}
+        messagesContainerRef={messagesContainerRef}
+        myProfile={myProfile}
+        onCloseShareModal={onCloseShareModal}
+        onMessageInputChange={onMessageInputChange}
+        onSend={onSend}
+        onShareEventDetails={onShareEventDetails}
+        onShowShareModal={onShowShareModal}
+        showShareModal={showShareModal}
+      />
+    );
+  }
+
+  return <EmptyState />;
+}
+
+// Helper to build sidebar items
+function buildSidebarItems(
+  invitations: ReturnType<
+    typeof useQuery<typeof api.invitations.getMyInvitations>
+  >,
+  conversations: NonNullable<
+    ReturnType<typeof useQuery<typeof api.messages.getConversations>>
+  >
+): SidebarItem[] {
+  const items: SidebarItem[] = [];
+  for (const inv of invitations?.received ?? []) {
+    if (inv.status === "pending" && inv.otherUser) {
+      items.push({
+        type: "request",
+        oderId: inv.otherUser.id,
+        invitationId: inv._id,
+        profile: {
+          firstName: inv.otherUser.firstName,
+          photoUrl: inv.otherUser.photoUrl,
+          city: inv.otherUser.city,
+        },
+        date: inv.date,
+        createdAt: inv._creationTime,
+      });
+    }
+  }
+  for (const conv of conversations) {
+    items.push({ type: "conversation", ...conv });
+  }
+  return items;
+}
+
+// Custom hook for scroll management
+function useMessagesScroll(
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  conversationId: Id<"conversations"> | undefined,
+  messages: unknown[] | undefined
+) {
+  const prevConversationId = useRef(conversationId);
+  const prevMessagesLength = useRef(messages?.length ?? 0);
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+    if (conversationId !== prevConversationId.current) {
+      container.scrollTop = container.scrollHeight;
+      prevConversationId.current = conversationId;
+      prevMessagesLength.current = messages?.length ?? 0;
+    }
+  }, [conversationId, messages, containerRef]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!(container && messages)) {
+      return;
+    }
+    const currentLength = messages.length;
+    if (
+      conversationId === prevConversationId.current &&
+      currentLength > prevMessagesLength.current
+    ) {
+      container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+    }
+    prevMessagesLength.current = currentLength;
+  }, [messages, conversationId, containerRef]);
+}
+
+// Custom hook for mark as read
+function useMarkAsRead(
+  conversationId: Id<"conversations"> | undefined,
+  unreadCount: number | undefined
+) {
+  const markAsRead = useMutation(api.messages.markAsRead);
+  useEffect(() => {
+    if (conversationId && unreadCount) {
+      markAsRead({ conversationId });
+    }
+  }, [conversationId, unreadCount, markAsRead]);
+}
+
 // Main component
 function MessagesPageContent() {
   const router = useRouter();
@@ -513,28 +880,7 @@ function MessagesPageContent() {
     | null;
 
   // Build sidebar items
-  const sidebarItems: SidebarItem[] = [];
-  if (invitations?.received) {
-    for (const inv of invitations.received) {
-      if (inv.status === "pending" && inv.otherUser) {
-        sidebarItems.push({
-          type: "request",
-          oderId: inv.otherUser.id,
-          invitationId: inv._id,
-          profile: {
-            firstName: inv.otherUser.firstName,
-            photoUrl: inv.otherUser.photoUrl,
-            city: inv.otherUser.city,
-          },
-          date: inv.date,
-          createdAt: inv._creationTime,
-        });
-      }
-    }
-  }
-  for (const conv of conversations) {
-    sidebarItems.push({ type: "conversation", ...conv });
-  }
+  const sidebarItems = buildSidebarItems(invitations, conversations);
 
   // Active items
   const activeItem = sidebarItems.find((item) => item.oderId === activeId);
@@ -562,43 +908,13 @@ function MessagesPageContent() {
 
   // Mutations
   const sendMessage = useMutation(api.messages.sendMessage);
-  const markAsRead = useMutation(api.messages.markAsRead);
   const respondToInvitation = useMutation(api.invitations.respond);
   const sendEventCard = useMutation(api.messages.sendInvitationCard);
   const createTestConversations = useMutation(api.seed.createTestConversations);
 
-  // Scroll management
-  const prevConversationId = useRef(activeConversationId);
-  const prevMessagesLength = useRef(messages?.length ?? 0);
-
-  useLayoutEffect(() => {
-    const container = messagesContainerRef.current;
-    if (!container) return;
-    if (activeConversationId !== prevConversationId.current) {
-      container.scrollTop = container.scrollHeight;
-      prevConversationId.current = activeConversationId;
-      prevMessagesLength.current = messages?.length ?? 0;
-    }
-  }, [activeConversationId, messages]);
-
-  useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (!(container && messages)) return;
-    const currentLength = messages.length;
-    if (
-      activeConversationId === prevConversationId.current &&
-      currentLength > prevMessagesLength.current
-    ) {
-      container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
-    }
-    prevMessagesLength.current = currentLength;
-  }, [messages, activeConversationId]);
-
-  useEffect(() => {
-    if (activeConversationId && activeConversation?.unreadCount) {
-      markAsRead({ conversationId: activeConversationId });
-    }
-  }, [activeConversationId, activeConversation?.unreadCount, markAsRead]);
+  // Scroll and read management via hooks
+  useMessagesScroll(messagesContainerRef, activeConversationId, messages);
+  useMarkAsRead(activeConversationId, activeConversation?.unreadCount);
 
   // Handlers
   const setActiveChat = (id: string, type: "conversation" | "request") => {
@@ -606,7 +922,9 @@ function MessagesPageContent() {
   };
 
   const handleSend = async () => {
-    if (!(messageInput.trim() && activeConversationId)) return;
+    if (!(messageInput.trim() && activeConversationId)) {
+      return;
+    }
     await sendMessage({
       conversationId: activeConversationId,
       content: messageInput.trim(),
@@ -615,7 +933,9 @@ function MessagesPageContent() {
   };
 
   const handleRespond = async (accept: boolean) => {
-    if (!activeRequest) return;
+    if (!activeRequest) {
+      return;
+    }
     setIsResponding(true);
     try {
       await respondToInvitation({
@@ -638,7 +958,9 @@ function MessagesPageContent() {
     phone: string;
     note: string;
   }) => {
-    if (!activeConversationId) return;
+    if (!activeConversationId) {
+      return;
+    }
     setIsSendingCard(true);
     try {
       await sendEventCard({
@@ -681,157 +1003,36 @@ function MessagesPageContent() {
 
   return (
     <div className="flex h-full">
-      {/* Sidebar */}
-      <div className="flex w-80 shrink-0 flex-col border-r bg-background">
-        <div className="flex h-[72px] items-center border-b px-4">
-          <div className="relative w-full">
-            <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              className="pl-9"
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search conversations..."
-              value={searchQuery}
-            />
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-2">
-          {isLoading ? (
-            <div className="flex h-full items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
-            </div>
-          ) : filteredItems.length === 0 ? (
-            <EmptyConversationsList onCreateTest={handleCreateTest} />
-          ) : (
-            <div className="space-y-1">
-              {pendingCount > 0 && (
-                <div className="mb-2 px-3 py-2">
-                  <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-                    {pendingCount} pending request
-                    {pendingCount !== 1 ? "s" : ""}
-                  </span>
-                </div>
-              )}
-              {filteredItems.map((item) => (
-                <SidebarItemComponent
-                  isActive={item.oderId === activeId}
-                  item={item}
-                  key={`${item.type}-${item.oderId}`}
-                  onClick={() => setActiveChat(item.oderId, item.type)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Main content */}
+      <MessagesSidebar
+        activeId={activeId}
+        isLoading={isLoading}
+        items={filteredItems}
+        onCreateTest={handleCreateTest}
+        onItemClick={setActiveChat}
+        onSearchChange={setSearchQuery}
+        pendingCount={pendingCount}
+        searchQuery={searchQuery}
+      />
       <div className="flex flex-1 flex-col">
-        {activeRequest ? (
-          <RequestView
-            isResponding={isResponding}
-            onRespond={handleRespond}
-            profile={activeRequestProfile}
-            request={activeRequest}
-          />
-        ) : activeId && activeConversation ? (
-          <>
-            {/* Conversation header */}
-            <div className="flex h-[72px] items-center gap-3 border-b px-4">
-              <Avatar className="h-12 w-12">
-                <AvatarImage src={activeConversation.profile?.photoUrl} />
-                <AvatarFallback>
-                  {activeConversation.profile?.firstName?.charAt(0) ?? "?"}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <h2 className="font-semibold">
-                  {activeConversation.profile?.firstName}
-                </h2>
-                <p className="text-muted-foreground text-sm">
-                  {activeConversation.profile?.city}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                {isHost && (
-                  <Button
-                    onClick={() => setShowShareModal(true)}
-                    size="sm"
-                    variant="outline"
-                  >
-                    <Share2 className="mr-1 h-4 w-4" />
-                    Share Details
-                  </Button>
-                )}
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button size="sm" variant="ghost">
-                      View Profile
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
-                    <SheetHeader className="mb-4">
-                      <SheetTitle>Profile Details</SheetTitle>
-                    </SheetHeader>
-                    {activeConversation.profile && (
-                      <ProfileView profile={activeConversation.profile} />
-                    )}
-                  </SheetContent>
-                </Sheet>
-              </div>
-            </div>
-
-            {/* Messages */}
-            <div
-              className="flex-1 space-y-4 overflow-y-auto p-4"
-              ref={messagesContainerRef}
-            >
-              {messages?.map((message) => (
-                <MessageBubble
-                  content={message.content}
-                  eventCard={message.eventCard}
-                  isOwn={message.senderId === myProfile?.userId}
-                  key={message._id}
-                  timestamp={message.createdAt}
-                />
-              ))}
-            </div>
-
-            {/* Input */}
-            <div className="border-t p-4">
-              <div className="flex items-center gap-3">
-                <Input
-                  className="flex-1"
-                  onChange={(e) => setMessageInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSend();
-                    }
-                  }}
-                  placeholder="Type a message..."
-                  value={messageInput}
-                />
-                <Button
-                  className="bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600"
-                  disabled={!messageInput.trim()}
-                  onClick={handleSend}
-                >
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <ShareDetailsModal
-              isOpen={showShareModal}
-              isSending={isSendingCard}
-              onClose={() => setShowShareModal(false)}
-              onSubmit={handleShareEventDetails}
-            />
-          </>
-        ) : (
-          <EmptyState />
-        )}
+        <MainContentArea
+          activeConversation={activeConversation}
+          activeRequest={activeRequest}
+          activeRequestProfile={activeRequestProfile}
+          isHost={isHost}
+          isResponding={isResponding}
+          isSendingCard={isSendingCard}
+          messageInput={messageInput}
+          messages={messages}
+          messagesContainerRef={messagesContainerRef}
+          myProfile={myProfile}
+          onCloseShareModal={() => setShowShareModal(false)}
+          onMessageInputChange={setMessageInput}
+          onRespond={handleRespond}
+          onSend={handleSend}
+          onShareEventDetails={handleShareEventDetails}
+          onShowShareModal={() => setShowShareModal(true)}
+          showShareModal={showShareModal}
+        />
       </div>
     </div>
   );

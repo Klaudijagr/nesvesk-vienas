@@ -3,12 +3,15 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { TopBar } from "@/components/top-bar";
 import { VerifyBanner } from "@/components/verify-banner";
+import { useLocale } from "@/contexts/locale-context";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { t } = useLocale();
+
   return (
     <div className="flex h-screen">
       {/* Sidebar - full height on left */}
@@ -26,8 +29,7 @@ export default function DashboardLayout({
         {/* Footer - spans content area */}
         <footer className="shrink-0 border-t bg-gray-50 py-3">
           <div className="text-center text-gray-500 text-sm">
-            &copy; {new Date().getFullYear()} Nešvęsk vienas. All rights
-            reserved.
+            &copy; {new Date().getFullYear()} {t.appName}. {t.allRightsReserved}
           </div>
         </footer>
       </div>

@@ -356,10 +356,18 @@ const RESERVED_USERNAMES = [
 // Validate username format: 3-30 chars, lowercase alphanumeric + hyphens, no leading/trailing hyphens
 function isValidUsernameFormat(username: string): boolean {
   const normalized = username.toLowerCase().trim();
-  if (normalized.length < 3 || normalized.length > 30) return false;
-  if (!/^[a-z0-9-]+$/.test(normalized)) return false;
-  if (normalized.startsWith("-") || normalized.endsWith("-")) return false;
-  if (normalized.includes("--")) return false;
+  if (normalized.length < 3 || normalized.length > 30) {
+    return false;
+  }
+  if (!/^[a-z0-9-]+$/.test(normalized)) {
+    return false;
+  }
+  if (normalized.startsWith("-") || normalized.endsWith("-")) {
+    return false;
+  }
+  if (normalized.includes("--")) {
+    return false;
+  }
   return true;
 }
 
@@ -520,7 +528,9 @@ export const generateMissingUsernames = mutation({
     let updated = 0;
 
     for (const profile of profiles) {
-      if (profile.username) continue; // Already has username
+      if (profile.username) {
+        continue; // Already has username
+      }
 
       let baseUsername = generateUsername(profile.firstName, profile.lastName);
 

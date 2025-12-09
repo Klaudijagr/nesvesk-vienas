@@ -20,6 +20,162 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 
+type ConnectionStatus = {
+  status: string;
+  date?: string;
+  invitationId?: Id<"invitations">;
+} | null;
+
+// Connection card component
+function ConnectionCard({
+  status,
+  profile,
+  selectedDate,
+  isSending,
+  onDateChange,
+  onSendRequest,
+  onRespond,
+}: {
+  status: ConnectionStatus;
+  profile: { firstName: string; userId: string; availableDates: string[] };
+  selectedDate: string;
+  isSending: boolean;
+  onDateChange: (date: string) => void;
+  onSendRequest: () => void;
+  onRespond: (accept: boolean) => void;
+}) {
+  if (status?.status === "matched") {
+    return (
+      <>
+        <div className="rounded-lg bg-green-50 p-4 text-center">
+          <Check className="mx-auto mb-2 h-8 w-8 text-green-600" />
+          <p className="font-medium text-green-700">You&apos;re connected!</p>
+          <p className="mt-1 text-green-600 text-sm">
+            You can now message each other
+          </p>
+        </div>
+        <Link href={`/messages?chat=${profile.userId}&type=conversation`}>
+          <Button className="w-full">
+            <MessageCircle className="mr-2 h-4 w-4" />
+            Go to Messages
+          </Button>
+        </Link>
+      </>
+    );
+  }
+
+  if (status?.status === "pending_sent") {
+    return (
+      <div className="rounded-lg bg-amber-50 p-4 text-center">
+        <Clock className="mx-auto mb-2 h-8 w-8 text-amber-600" />
+        <p className="font-medium text-amber-700">Request Pending</p>
+        <p className="mt-1 text-amber-600 text-sm">
+          Waiting for {profile.firstName} to respond
+        </p>
+        <p className="mt-2 rounded bg-amber-100 px-2 py-1 font-medium text-amber-700 text-xs">
+          {status.date}
+        </p>
+      </div>
+    );
+  }
+
+  if (status?.status === "pending_received") {
+    return (
+      <div className="space-y-3">
+        <div className="rounded-lg bg-blue-50 p-4 text-center">
+          <Users className="mx-auto mb-2 h-8 w-8 text-blue-600" />
+          <p className="font-medium text-blue-700">
+            {profile.firstName} wants to connect!
+          </p>
+          <p className="mt-1 text-blue-600 text-sm">For {status.date}</p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            className="flex-1"
+            disabled={isSending}
+            onClick={() => onRespond(false)}
+            variant="outline"
+          >
+            <X className="mr-1 h-4 w-4" />
+            Decline
+          </Button>
+          <Button
+            className="flex-1"
+            disabled={isSending}
+            onClick={() => onRespond(true)}
+          >
+            {isSending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                <Check className="mr-1 h-4 w-4" />
+                Accept
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (status?.status === "none") {
+    return (
+      <div className="space-y-2">
+        <p className="text-gray-600 text-sm">Request to connect for:</p>
+        <select
+          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+          onChange={(e) => onDateChange(e.target.value)}
+          value={selectedDate}
+        >
+          <option value="">Select a date...</option>
+          {profile.availableDates.map((date) => (
+            <option key={date} value={date}>
+              {date}
+            </option>
+          ))}
+        </select>
+        <Button
+          className="w-full"
+          disabled={!selectedDate || isSending}
+          onClick={onSendRequest}
+        >
+          {isSending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <>
+              <Send className="mr-2 h-4 w-4" />
+              Send Request
+            </>
+          )}
+        </Button>
+      </div>
+    );
+  }
+
+  if (status?.status === "declined_by_them") {
+    return (
+      <div className="rounded-lg bg-gray-50 p-4 text-center">
+        <X className="mx-auto mb-2 h-8 w-8 text-gray-400" />
+        <p className="font-medium text-gray-600">Request Declined</p>
+        <p className="mt-1 text-gray-500 text-sm">
+          {profile.firstName} declined your request
+        </p>
+      </div>
+    );
+  }
+
+  if (status?.status === "declined_by_me") {
+    return (
+      <div className="rounded-lg bg-gray-50 p-4 text-center">
+        <X className="mx-auto mb-2 h-8 w-8 text-gray-400" />
+        <p className="font-medium text-gray-600">You declined this request</p>
+      </div>
+    );
+  }
+
+  return null;
+}
+
 export default function UsernamePage() {
   const params = useParams();
   const router = useRouter();
@@ -109,167 +265,28 @@ export default function UsernamePage() {
                   <CardTitle className="text-lg">Connect</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Matched - show success + message link */}
-                  {connectionStatus?.status === "matched" && (
-                    <>
-                      <div className="rounded-lg bg-green-50 p-4 text-center">
-                        <Check className="mx-auto mb-2 h-8 w-8 text-green-600" />
-                        <p className="font-medium text-green-700">
-                          You&apos;re connected!
-                        </p>
-                        <p className="mt-1 text-green-600 text-sm">
-                          You can now message each other
-                        </p>
-                      </div>
-                      <Link
-                        href={`/messages?chat=${profile.userId}&type=conversation`}
-                      >
-                        <Button className="w-full">
-                          <MessageCircle className="mr-2 h-4 w-4" />
-                          Go to Messages
-                        </Button>
-                      </Link>
-                    </>
-                  )}
-
-                  {/* Pending sent - show waiting state */}
-                  {connectionStatus?.status === "pending_sent" && (
-                    <div className="rounded-lg bg-amber-50 p-4 text-center">
-                      <Clock className="mx-auto mb-2 h-8 w-8 text-amber-600" />
-                      <p className="font-medium text-amber-700">
-                        Request Pending
-                      </p>
-                      <p className="mt-1 text-amber-600 text-sm">
-                        Waiting for {profile.firstName} to respond
-                      </p>
-                      <p className="mt-2 rounded bg-amber-100 px-2 py-1 font-medium text-amber-700 text-xs">
-                        {connectionStatus.date}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Pending received - show accept/decline */}
-                  {connectionStatus?.status === "pending_received" && (
-                    <div className="space-y-3">
-                      <div className="rounded-lg bg-blue-50 p-4 text-center">
-                        <Users className="mx-auto mb-2 h-8 w-8 text-blue-600" />
-                        <p className="font-medium text-blue-700">
-                          {profile.firstName} wants to connect!
-                        </p>
-                        <p className="mt-1 text-blue-600 text-sm">
-                          For {connectionStatus.date}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          className="flex-1"
-                          disabled={isSending}
-                          onClick={async () => {
-                            if (!connectionStatus.invitationId) {
-                              return;
-                            }
-                            setIsSending(true);
-                            try {
-                              await respondToInvitation({
-                                invitationId: connectionStatus.invitationId,
-                                accept: false,
-                              });
-                            } finally {
-                              setIsSending(false);
-                            }
-                          }}
-                          variant="outline"
-                        >
-                          <X className="mr-1 h-4 w-4" />
-                          Decline
-                        </Button>
-                        <Button
-                          className="flex-1"
-                          disabled={isSending}
-                          onClick={async () => {
-                            if (!connectionStatus.invitationId) {
-                              return;
-                            }
-                            setIsSending(true);
-                            try {
-                              await respondToInvitation({
-                                invitationId: connectionStatus.invitationId,
-                                accept: true,
-                              });
-                            } finally {
-                              setIsSending(false);
-                            }
-                          }}
-                        >
-                          {isSending ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <>
-                              <Check className="mr-1 h-4 w-4" />
-                              Accept
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* No connection - show request form */}
-                  {connectionStatus?.status === "none" && (
-                    <div className="space-y-2">
-                      <p className="text-gray-600 text-sm">
-                        Request to connect for:
-                      </p>
-                      <select
-                        className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                        value={selectedDate}
-                      >
-                        <option value="">Select a date...</option>
-                        {profile.availableDates.map((date) => (
-                          <option key={date} value={date}>
-                            {date}
-                          </option>
-                        ))}
-                      </select>
-                      <Button
-                        className="w-full"
-                        disabled={!selectedDate || isSending}
-                        onClick={handleSendInvitation}
-                      >
-                        {isSending ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <>
-                            <Send className="mr-2 h-4 w-4" />
-                            Send Request
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Declined states */}
-                  {connectionStatus?.status === "declined_by_them" && (
-                    <div className="rounded-lg bg-gray-50 p-4 text-center">
-                      <X className="mx-auto mb-2 h-8 w-8 text-gray-400" />
-                      <p className="font-medium text-gray-600">
-                        Request Declined
-                      </p>
-                      <p className="mt-1 text-gray-500 text-sm">
-                        {profile.firstName} declined your request
-                      </p>
-                    </div>
-                  )}
-
-                  {connectionStatus?.status === "declined_by_me" && (
-                    <div className="rounded-lg bg-gray-50 p-4 text-center">
-                      <X className="mx-auto mb-2 h-8 w-8 text-gray-400" />
-                      <p className="font-medium text-gray-600">
-                        You declined this request
-                      </p>
-                    </div>
-                  )}
+                  <ConnectionCard
+                    isSending={isSending}
+                    onDateChange={setSelectedDate}
+                    onRespond={async (accept) => {
+                      if (!connectionStatus?.invitationId) {
+                        return;
+                      }
+                      setIsSending(true);
+                      try {
+                        await respondToInvitation({
+                          invitationId: connectionStatus.invitationId,
+                          accept,
+                        });
+                      } finally {
+                        setIsSending(false);
+                      }
+                    }}
+                    onSendRequest={handleSendInvitation}
+                    profile={profile}
+                    selectedDate={selectedDate}
+                    status={connectionStatus}
+                  />
                 </CardContent>
               </Card>
             )}

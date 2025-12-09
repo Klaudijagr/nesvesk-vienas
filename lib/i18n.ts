@@ -43,7 +43,6 @@ export const translations = {
 
     // Safety
     safetyTitle: "Jūsų saugumas — pirmoje vietoje",
-    identityVerification: "Tapatybės patvirtinimas",
     identityVerificationDesc:
       "Galimas nuotraukos patvirtinimas, kad šeimininkai ir svečiai jaustųsi saugiau.",
     mutualConsent: "Abipusis sutikimas",
@@ -248,7 +247,6 @@ export const translations = {
 
     // Safety
     safetyTitle: "Your Safety Comes First",
-    identityVerification: "Identity Verification",
     identityVerificationDesc:
       "Optional photo verification to help hosts and guests feel safer.",
     mutualConsent: "Mutual Consent",
@@ -453,7 +451,6 @@ export const translations = {
 
     // Safety
     safetyTitle: "Твоя безпека — передусім",
-    identityVerification: "Підтвердження особи",
     identityVerificationDesc:
       "За бажанням можна підтвердити фото, щоб господарі та гості почувалися безпечніше.",
     mutualConsent: "Взаємна згода",
@@ -661,7 +658,6 @@ export const translations = {
 
     // Safety
     safetyTitle: "Твоя безопасность — на первом месте",
-    identityVerification: "Подтверждение личности",
     identityVerificationDesc:
       "По желанию можно пройти фотоподтверждение — так хозяева и гости чувствуют себя увереннее.",
     mutualConsent: "Взаимное согласие",

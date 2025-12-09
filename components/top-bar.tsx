@@ -20,13 +20,24 @@ export function TopBar() {
 
   // Get page title from pathname with i18n
   const getPageTitle = () => {
-    if (pathname === "/browse") return t.navFindHosts;
-    if (pathname === "/profile") return t.navMyProfile;
-    if (pathname === "/messages") return t.navMessages;
-    if (pathname === "/settings") return t.navSettings;
-    if (pathname === "/location-picker") return t.navLocationPicker;
-    if (pathname.startsWith("/profile/") || pathname.startsWith("/people/"))
+    if (pathname === "/browse") {
+      return t.navFindHosts;
+    }
+    if (pathname === "/profile") {
+      return t.navMyProfile;
+    }
+    if (pathname === "/messages") {
+      return t.navMessages;
+    }
+    if (pathname === "/settings") {
+      return t.navSettings;
+    }
+    if (pathname === "/location-picker") {
+      return t.navLocationPicker;
+    }
+    if (pathname.startsWith("/profile/") || pathname.startsWith("/people/")) {
       return t.navProfile;
+    }
     return "";
   };
 

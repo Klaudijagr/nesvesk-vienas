@@ -21,6 +21,128 @@ type ProfileViewProps = {
   profile: Doc<"profiles">;
 };
 
+// Preference indicator component
+function PreferenceIndicator({
+  label,
+  allowed,
+}: {
+  label: string;
+  allowed: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-2 text-gray-600 text-sm">
+      {allowed ? (
+        <Check className="h-4 w-4 text-green-600" />
+      ) : (
+        <X className="h-4 w-4 text-red-600" />
+      )}
+      {label}
+    </div>
+  );
+}
+
+// Has pets indicator (different color when false)
+function HasPetsIndicator({ hasPets }: { hasPets: boolean }) {
+  return (
+    <div className="flex items-center gap-2 text-gray-600 text-sm">
+      {hasPets ? (
+        <Check className="h-4 w-4 text-green-600" />
+      ) : (
+        <X className="h-4 w-4 text-gray-400" />
+      )}
+      Has pets
+    </div>
+  );
+}
+
+// Tag list component
+function _TagList({
+  items,
+  colorClass,
+}: {
+  items: string[];
+  colorClass: string;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {items.map((item) => (
+        <span
+          className={`rounded-full px-3 py-1 text-sm ${colorClass}`}
+          key={item}
+        >
+          {item}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// Photo carousel component
+function PhotoCarousel({
+  photos,
+  currentIndex,
+  onPrev,
+  onNext,
+  onSelect,
+  profileName,
+  verified,
+}: {
+  photos: string[];
+  currentIndex: number;
+  onPrev: () => void;
+  onNext: () => void;
+  onSelect: (index: number) => void;
+  profileName: string;
+  verified: boolean;
+}) {
+  return (
+    <div className="relative aspect-[16/9] bg-gradient-to-br from-red-100 to-orange-100">
+      <Image
+        alt={`${profileName} - Photo ${currentIndex + 1}`}
+        className="h-full w-full object-cover"
+        fill
+        src={photos[currentIndex] || "/placeholder.svg"}
+      />
+      {verified && (
+        <div className="absolute top-4 right-4 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 font-medium text-green-700 text-sm shadow backdrop-blur-sm">
+          <ShieldCheck className="h-4 w-4" />
+          Verified
+        </div>
+      )}
+      {photos.length > 1 && (
+        <>
+          <button
+            className="-translate-y-1/2 absolute top-1/2 left-3 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
+            onClick={onPrev}
+            type="button"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+          <button
+            className="-translate-y-1/2 absolute top-1/2 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
+            onClick={onNext}
+            type="button"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </button>
+          <div className="-translate-x-1/2 absolute bottom-4 left-1/2 flex gap-1.5">
+            {photos.map((_, index) => (
+              <button
+                className={`h-2 w-2 rounded-full transition-colors ${
+                  index === currentIndex ? "bg-white" : "bg-white/50"
+                }`}
+                key={`photo-${index}`}
+                onClick={() => onSelect(index)}
+                type="button"
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export function ProfileView({ profile }: ProfileViewProps) {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
@@ -56,54 +178,15 @@ export function ProfileView({ profile }: ProfileViewProps) {
   return (
     <div className="space-y-6">
       <Card className="!py-0 overflow-hidden">
-        <div className="relative aspect-[16/9] bg-gradient-to-br from-red-100 to-orange-100">
-          <Image
-            alt={`${profile.firstName} - Photo ${currentPhotoIndex + 1}`}
-            className="h-full w-full object-cover"
-            fill
-            src={photos[currentPhotoIndex] || "/placeholder.svg"}
-          />
-          {profile.verified && (
-            <div className="absolute top-4 right-4 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 font-medium text-green-700 text-sm shadow backdrop-blur-sm">
-              <ShieldCheck className="h-4 w-4" />
-              Verified
-            </div>
-          )}
-
-          {/* Photo navigation arrows - only show if multiple photos */}
-          {photos.length > 1 && (
-            <>
-              <button
-                className="-translate-y-1/2 absolute top-1/2 left-3 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
-                onClick={prevPhoto}
-                type="button"
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </button>
-              <button
-                className="-translate-y-1/2 absolute top-1/2 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
-                onClick={nextPhoto}
-                type="button"
-              >
-                <ChevronRight className="h-6 w-6" />
-              </button>
-
-              {/* Photo indicators */}
-              <div className="-translate-x-1/2 absolute bottom-4 left-1/2 flex gap-1.5">
-                {photos.map((_, index) => (
-                  <button
-                    className={`h-2 w-2 rounded-full transition-colors ${
-                      index === currentPhotoIndex ? "bg-white" : "bg-white/50"
-                    }`}
-                    key={index}
-                    onClick={() => setCurrentPhotoIndex(index)}
-                    type="button"
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+        <PhotoCarousel
+          currentIndex={currentPhotoIndex}
+          onNext={nextPhoto}
+          onPrev={prevPhoto}
+          onSelect={setCurrentPhotoIndex}
+          photos={photos}
+          profileName={profile.firstName}
+          verified={profile.verified}
+        />
 
         <CardContent className="pt-6">
           <div className="flex items-start justify-between">
@@ -224,38 +307,19 @@ export function ProfileView({ profile }: ProfileViewProps) {
           )}
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-2 text-gray-600 text-sm">
-              {profile.smokingAllowed ? (
-                <Check className="h-4 w-4 text-green-600" />
-              ) : (
-                <X className="h-4 w-4 text-red-600" />
-              )}
-              Smoking
-            </div>
-            <div className="flex items-center gap-2 text-gray-600 text-sm">
-              {profile.drinkingAllowed ? (
-                <Check className="h-4 w-4 text-green-600" />
-              ) : (
-                <X className="h-4 w-4 text-red-600" />
-              )}
-              Alcohol
-            </div>
-            <div className="flex items-center gap-2 text-gray-600 text-sm">
-              {profile.petsAllowed ? (
-                <Check className="h-4 w-4 text-green-600" />
-              ) : (
-                <X className="h-4 w-4 text-red-600" />
-              )}
-              Pets welcome
-            </div>
-            <div className="flex items-center gap-2 text-gray-600 text-sm">
-              {profile.hasPets ? (
-                <Check className="h-4 w-4 text-green-600" />
-              ) : (
-                <X className="h-4 w-4 text-gray-400" />
-              )}
-              Has pets
-            </div>
+            <PreferenceIndicator
+              allowed={profile.smokingAllowed}
+              label="Smoking"
+            />
+            <PreferenceIndicator
+              allowed={profile.drinkingAllowed}
+              label="Alcohol"
+            />
+            <PreferenceIndicator
+              allowed={profile.petsAllowed}
+              label="Pets welcome"
+            />
+            <HasPetsIndicator hasPets={profile.hasPets} />
           </div>
         </CardContent>
       </Card>

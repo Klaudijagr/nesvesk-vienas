@@ -28,6 +28,280 @@ import { CITIES, HOLIDAY_DATES, LANGUAGES } from "@/lib/types";
 
 type Step = 1 | 2 | 3 | 4;
 
+// Step 1: Preferences
+function Step1Preferences({
+  hostingStatus,
+  setHostingStatus,
+  guestStatus,
+  setGuestStatus,
+  hostingDates,
+  toggleHostingDate,
+  guestDates,
+  toggleGuestDate,
+}: {
+  hostingStatus: string;
+  setHostingStatus: (v: string) => void;
+  guestStatus: string;
+  setGuestStatus: (v: string) => void;
+  hostingDates: (typeof HOLIDAY_DATES)[number][];
+  toggleHostingDate: (d: (typeof HOLIDAY_DATES)[number]) => void;
+  guestDates: (typeof HOLIDAY_DATES)[number][];
+  toggleGuestDate: (d: (typeof HOLIDAY_DATES)[number]) => void;
+}) {
+  const showHostingDates =
+    hostingStatus === "can-host" || hostingStatus === "may-host";
+  const showGuestDates =
+    guestStatus === "looking" || guestStatus === "maybe-guest";
+
+  return (
+    <div className="space-y-8">
+      <div className="space-y-3">
+        <Label className="font-medium text-base">
+          Are you open to hosting?
+        </Label>
+        <div className="grid grid-cols-3 gap-3">
+          {HOSTING_OPTIONS.map((option) => (
+            <PreferenceCard
+              isSelected={hostingStatus === option.id}
+              key={option.id}
+              onSelect={setHostingStatus}
+              option={option}
+            />
+          ))}
+        </div>
+        {showHostingDates && (
+          <div className="mt-4 rounded-lg bg-red-50 p-4">
+            <Label className="font-medium text-red-900 text-sm">
+              Which dates can you host?
+            </Label>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {HOLIDAY_DATES.map((date) => (
+                <Button
+                  key={date}
+                  onClick={() => toggleHostingDate(date)}
+                  size="sm"
+                  type="button"
+                  variant={hostingDates.includes(date) ? "default" : "outline"}
+                >
+                  {date}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-3">
+        <Label className="font-medium text-base">
+          Are you looking to be a guest?
+        </Label>
+        <div className="grid grid-cols-3 gap-3">
+          {GUEST_OPTIONS.map((option) => (
+            <PreferenceCard
+              isSelected={guestStatus === option.id}
+              key={option.id}
+              onSelect={setGuestStatus}
+              option={option}
+            />
+          ))}
+        </div>
+        {showGuestDates && (
+          <div className="mt-4 rounded-lg bg-blue-50 p-4">
+            <Label className="font-medium text-blue-900 text-sm">
+              Which dates are you free?
+            </Label>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {HOLIDAY_DATES.map((date) => (
+                <Button
+                  key={date}
+                  onClick={() => toggleGuestDate(date)}
+                  size="sm"
+                  type="button"
+                  variant={guestDates.includes(date) ? "default" : "outline"}
+                >
+                  {date}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Step 2: Basic Info
+function Step2BasicInfo({
+  formData,
+  setFormData,
+  userImageUrl,
+}: {
+  formData: {
+    firstName: string;
+    lastName: string;
+    age: string | number;
+    city: (typeof CITIES)[number];
+  };
+  setFormData: React.Dispatch<
+    React.SetStateAction<{
+      firstName: string;
+      lastName: string;
+      age: string | number;
+      city: (typeof CITIES)[number];
+    }>
+  >;
+  userImageUrl?: string;
+}) {
+  return (
+    <div className="space-y-4">
+      <PhotoGallery fallbackPhotoUrl={userImageUrl} />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <Label htmlFor="firstName">First Name *</Label>
+          <Input
+            id="firstName"
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, firstName: e.target.value }))
+            }
+            placeholder="Your first name"
+            value={formData.firstName}
+          />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="lastName">Last Name</Label>
+          <Input
+            id="lastName"
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, lastName: e.target.value }))
+            }
+            placeholder="Optional"
+            value={formData.lastName}
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <Label htmlFor="age">Age</Label>
+          <Input
+            id="age"
+            max={120}
+            min={18}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, age: e.target.value }))
+            }
+            placeholder="18+"
+            type="number"
+            value={formData.age}
+          />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="city">City</Label>
+          <select
+            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+            id="city"
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                city: e.target.value as (typeof CITIES)[number],
+              }))
+            }
+            value={formData.city}
+          >
+            {CITIES.map((city) => (
+              <option key={city} value={city}>
+                {city}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Step 3: Bio
+function Step3Bio({
+  bio,
+  setBio,
+}: {
+  bio: string;
+  setBio: (v: string) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-1">
+        <Label htmlFor="bio">Tell others about yourself *</Label>
+        <Textarea
+          className="min-h-[150px]"
+          id="bio"
+          onChange={(e) => setBio(e.target.value)}
+          placeholder="Share a bit about yourself, your interests, and what kind of holiday experience you're looking for..."
+          value={bio}
+        />
+        <p className="text-muted-foreground text-xs">
+          Minimum 10 characters ({bio.length}/10+)
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// Step 4: Languages
+function Step4Languages({
+  languages,
+  toggleLanguage,
+}: {
+  languages: (typeof LANGUAGES)[number][];
+  toggleLanguage: (l: (typeof LANGUAGES)[number]) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label>Languages you speak *</Label>
+        <p className="text-muted-foreground text-sm">
+          Select all languages you're comfortable communicating in
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {LANGUAGES.map((lang) => (
+            <Button
+              key={lang}
+              onClick={() => toggleLanguage(lang)}
+              size="lg"
+              type="button"
+              variant={languages.includes(lang) ? "default" : "outline"}
+            >
+              {lang}
+            </Button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Completed state
+function CompletedState({ onSkip }: { onSkip: () => void }) {
+  return (
+    <Card className="w-full max-w-2xl">
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl">All set!</CardTitle>
+        <CardDescription>
+          Your profile is saved. Verify your identity to build trust, or skip
+          for now.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3 md:flex-row md:justify-center">
+        <Button asChild>
+          <Link href="/verify">Verify identity</Link>
+        </Button>
+        <Button onClick={onSkip} variant="outline">
+          Skip for now
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function OnboardingPage() {
   const router = useRouter();
   const { user } = useUser();
@@ -191,45 +465,73 @@ export default function OnboardingPage() {
   const isStep3Valid = bio.length >= 10;
   const isStep4Valid = languages.length > 0;
 
-  const showHostingDates =
-    hostingStatus === "can-host" || hostingStatus === "may-host";
-  const showGuestDates =
-    guestStatus === "looking" || guestStatus === "maybe-guest";
+  // Step descriptions
+  const stepDescriptions: Record<Step, string> = {
+    1: "What brings you here this holiday season?",
+    2: "Tell us about yourself",
+    3: "Write a short bio",
+    4: "Almost done! Select your languages",
+  };
+
+  // Render current step content
+  const renderStepContent = () => {
+    switch (step) {
+      case 1:
+        return (
+          <Step1Preferences
+            guestDates={guestDates}
+            guestStatus={guestStatus}
+            hostingDates={hostingDates}
+            hostingStatus={hostingStatus}
+            setGuestStatus={setGuestStatus}
+            setHostingStatus={setHostingStatus}
+            toggleGuestDate={toggleGuestDate}
+            toggleHostingDate={toggleHostingDate}
+          />
+        );
+      case 2:
+        return (
+          <Step2BasicInfo
+            formData={formData}
+            setFormData={setFormData}
+            userImageUrl={user?.imageUrl}
+          />
+        );
+      case 3:
+        return <Step3Bio bio={bio} setBio={setBio} />;
+      case 4:
+        return (
+          <Step4Languages
+            languages={languages}
+            toggleLanguage={toggleLanguage}
+          />
+        );
+    }
+  };
+
+  // Check if current step is valid for next button
+  const isCurrentStepValid = () => {
+    if (step === 1) {
+      return isStep1Valid;
+    }
+    if (step === 2) {
+      return isStep2Valid;
+    }
+    if (step === 3) {
+      return isStep3Valid;
+    }
+    return true;
+  };
 
   if (completed) {
-    return (
-      <Card className="w-full max-w-2xl">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">All set!</CardTitle>
-          <CardDescription>
-            Your profile is saved. Verify your identity to build trust, or skip
-            for now.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3 md:flex-row md:justify-center">
-          <Button asChild>
-            <Link href="/verify">Verify identity</Link>
-          </Button>
-          <Button onClick={() => router.push("/browse")} variant="outline">
-            Skip for now
-          </Button>
-        </CardContent>
-      </Card>
-    );
+    return <CompletedState onSkip={() => router.push("/browse")} />;
   }
 
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Welcome to Nešvęsk vienas</CardTitle>
-        <CardDescription>
-          {step === 1 && "What brings you here this holiday season?"}
-          {step === 2 && "Tell us about yourself"}
-          {step === 3 && "Write a short bio"}
-          {step === 4 && "Almost done! Select your languages"}
-        </CardDescription>
-
-        {/* Step indicator */}
+        <CardDescription>{stepDescriptions[step]}</CardDescription>
         <div className="mt-4 flex justify-center gap-2">
           {[1, 2, 3, 4].map((s) => (
             <div
@@ -243,216 +545,8 @@ export default function OnboardingPage() {
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Step 1: Preference Cards */}
-        {step === 1 && (
-          <div className="space-y-8">
-            {/* Hosting Status */}
-            <div className="space-y-3">
-              <Label className="font-medium text-base">
-                Are you open to hosting?
-              </Label>
-              <div className="grid grid-cols-3 gap-3">
-                {HOSTING_OPTIONS.map((option) => (
-                  <PreferenceCard
-                    isSelected={hostingStatus === option.id}
-                    key={option.id}
-                    onSelect={setHostingStatus}
-                    option={option}
-                  />
-                ))}
-              </div>
+        {renderStepContent()}
 
-              {/* Hosting Dates Dropdown */}
-              {showHostingDates && (
-                <div className="mt-4 rounded-lg bg-red-50 p-4">
-                  <Label className="font-medium text-red-900 text-sm">
-                    Which dates can you host?
-                  </Label>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {HOLIDAY_DATES.map((date) => (
-                      <Button
-                        key={date}
-                        onClick={() => toggleHostingDate(date)}
-                        size="sm"
-                        type="button"
-                        variant={
-                          hostingDates.includes(date) ? "default" : "outline"
-                        }
-                      >
-                        {date}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Guest Status */}
-            <div className="space-y-3">
-              <Label className="font-medium text-base">
-                Are you looking to be a guest?
-              </Label>
-              <div className="grid grid-cols-3 gap-3">
-                {GUEST_OPTIONS.map((option) => (
-                  <PreferenceCard
-                    isSelected={guestStatus === option.id}
-                    key={option.id}
-                    onSelect={setGuestStatus}
-                    option={option}
-                  />
-                ))}
-              </div>
-
-              {/* Guest Dates Dropdown */}
-              {showGuestDates && (
-                <div className="mt-4 rounded-lg bg-blue-50 p-4">
-                  <Label className="font-medium text-blue-900 text-sm">
-                    Which dates are you free?
-                  </Label>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {HOLIDAY_DATES.map((date) => (
-                      <Button
-                        key={date}
-                        onClick={() => toggleGuestDate(date)}
-                        size="sm"
-                        type="button"
-                        variant={
-                          guestDates.includes(date) ? "default" : "outline"
-                        }
-                      >
-                        {date}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: Basic Info + Photo */}
-        {step === 2 && (
-          <div className="space-y-4">
-            <PhotoGallery fallbackPhotoUrl={user?.imageUrl} />
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label htmlFor="firstName">First Name *</Label>
-                <Input
-                  id="firstName"
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      firstName: e.target.value,
-                    }))
-                  }
-                  placeholder="Your first name"
-                  value={formData.firstName}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      lastName: e.target.value,
-                    }))
-                  }
-                  placeholder="Optional"
-                  value={formData.lastName}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label htmlFor="age">Age</Label>
-                <Input
-                  id="age"
-                  max={120}
-                  min={18}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      age: e.target.value,
-                    }))
-                  }
-                  placeholder="18+"
-                  type="number"
-                  value={formData.age}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="city">City</Label>
-                <select
-                  className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
-                  id="city"
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      city: e.target.value as (typeof CITIES)[number],
-                    }))
-                  }
-                  value={formData.city}
-                >
-                  {CITIES.map((city) => (
-                    <option key={city} value={city}>
-                      {city}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Bio */}
-        {step === 3 && (
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <Label htmlFor="bio">Tell others about yourself *</Label>
-              <Textarea
-                className="min-h-[150px]"
-                id="bio"
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="Share a bit about yourself, your interests, and what kind of holiday experience you're looking for..."
-                value={bio}
-              />
-              <p className="text-muted-foreground text-xs">
-                Minimum 10 characters ({bio.length}/10+)
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Step 4: Languages */}
-        {step === 4 && (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Languages you speak *</Label>
-              <p className="text-muted-foreground text-sm">
-                Select all languages you're comfortable communicating in
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {LANGUAGES.map((lang) => (
-                  <Button
-                    key={lang}
-                    onClick={() => toggleLanguage(lang)}
-                    size="lg"
-                    type="button"
-                    variant={languages.includes(lang) ? "default" : "outline"}
-                  >
-                    {lang}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Navigation */}
         <div className="flex justify-between pt-4">
           {step > 1 ? (
             <Button onClick={handleBack} type="button" variant="outline">
@@ -465,11 +559,7 @@ export default function OnboardingPage() {
 
           {step < 4 ? (
             <Button
-              disabled={
-                (step === 1 && !isStep1Valid) ||
-                (step === 2 && !isStep2Valid) ||
-                (step === 3 && !isStep3Valid)
-              }
+              disabled={!isCurrentStepValid()}
               onClick={handleNext}
               type="button"
             >
@@ -482,9 +572,7 @@ export default function OnboardingPage() {
               onClick={handleComplete}
               type="button"
             >
-              {isSaving ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
+              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Complete Setup
             </Button>
           )}

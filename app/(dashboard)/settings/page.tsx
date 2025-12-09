@@ -117,36 +117,36 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="mb-1 font-bold text-2xl">Settings</h1>
+        <h1 className="mb-1 font-bold text-2xl">{t.settingsTitle}</h1>
         <p className="mb-4 text-muted-foreground text-sm">
-          Manage your profile and account
+          {t.manageProfileAndAccount}
         </p>
 
         <Tabs className="space-y-4" defaultValue="profile">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile">
               <User className="mr-2 h-4 w-4" />
-              Profile
+              {t.profile}
             </TabsTrigger>
             <TabsTrigger value="account">
               <User className="mr-2 h-4 w-4" />
-              Account
+              {t.account}
             </TabsTrigger>
             <TabsTrigger value="security">
               <Shield className="mr-2 h-4 w-4" />
-              Security
+              {t.security}
             </TabsTrigger>
             <TabsTrigger value="notifications">
               <Bell className="mr-2 h-4 w-4" />
-              Notifications
+              {t.notifications}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent className="space-y-4" value="profile">
             <Card>
               <CardHeader>
-                <CardTitle>Profile Information</CardTitle>
-                <CardDescription>Update your public profile</CardDescription>
+                <CardTitle>{t.profileInformation}</CardTitle>
+                <CardDescription>{t.updateYourPublicProfile}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <PhotoGallery fallbackPhotoUrl={user?.imageUrl} />
@@ -154,11 +154,10 @@ export default function SettingsPage() {
                 <Separator />
 
                 <div className="space-y-1">
-                  <Label>I want to be a</Label>
+                  <Label>{t.iWantToBe}</Label>
                   <div className="flex gap-2">
                     {(["guest", "host", "both"] as const).map((r) => (
                       <Button
-                        className="capitalize"
                         key={r}
                         onClick={() =>
                           setFormData((prev) => ({ ...prev, role: r }))
@@ -166,7 +165,11 @@ export default function SettingsPage() {
                         type="button"
                         variant={formData.role === r ? "default" : "outline"}
                       >
-                        {r}
+                        {r === "guest"
+                          ? t.guest
+                          : r === "host"
+                            ? t.host
+                            : t.both}
                       </Button>
                     ))}
                   </div>
@@ -179,7 +182,7 @@ export default function SettingsPage() {
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
-                        <Label htmlFor="firstName">First Name</Label>
+                        <Label htmlFor="firstName">{t.firstName}</Label>
                         <Input
                           id="firstName"
                           onChange={(e) =>
@@ -192,7 +195,7 @@ export default function SettingsPage() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label htmlFor="lastName">Last Name</Label>
+                        <Label htmlFor="lastName">{t.lastName}</Label>
                         <Input
                           id="lastName"
                           onChange={(e) =>
@@ -207,7 +210,7 @@ export default function SettingsPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
-                        <Label htmlFor="age">Age</Label>
+                        <Label htmlFor="age">{t.age}</Label>
                         <Input
                           id="age"
                           max={120}
@@ -223,7 +226,7 @@ export default function SettingsPage() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label htmlFor="city">City</Label>
+                        <Label htmlFor="city">{t.city}</Label>
                         <select
                           className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
                           id="city"
@@ -247,7 +250,7 @@ export default function SettingsPage() {
 
                   {/* Right column: Bio */}
                   <div className="space-y-1">
-                    <Label htmlFor="bio">Bio</Label>
+                    <Label htmlFor="bio">{t.bio}</Label>
                     <Textarea
                       className="h-[106px] resize-none"
                       id="bio"
@@ -257,7 +260,7 @@ export default function SettingsPage() {
                           bio: e.target.value,
                         }))
                       }
-                      placeholder="Tell others about yourself..."
+                      placeholder={t.tellOthersAboutYourself}
                       value={formData.bio}
                     />
                   </div>
@@ -266,7 +269,7 @@ export default function SettingsPage() {
                 <Separator />
 
                 <div className="space-y-1">
-                  <Label>Languages</Label>
+                  <Label>{t.languages}</Label>
                   <div className="flex flex-wrap gap-2">
                     {LANGUAGES.map((lang) => (
                       <Button
@@ -287,7 +290,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <Label>Available Dates</Label>
+                  <Label>{t.availableDates}</Label>
                   <div className="flex flex-wrap gap-2">
                     {HOLIDAY_DATES.map((date) => (
                       <Button
@@ -316,7 +319,7 @@ export default function SettingsPage() {
                     ) : (
                       <Save className="mr-2 h-4 w-4" />
                     )}
-                    Save Changes
+                    {t.saveChanges}
                   </Button>
                 </div>
               </CardContent>
@@ -324,18 +327,16 @@ export default function SettingsPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Identity Verification</CardTitle>
-                <CardDescription>
-                  Verify your identity to build trust
-                </CardDescription>
+                <CardTitle>{t.identityVerification}</CardTitle>
+                <CardDescription>{t.verifyYourIdentity}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <p className="text-sm">
                       {profile?.verified
-                        ? "Your identity has been verified"
-                        : "Verify your identity with a photo"}
+                        ? t.yourIdentityVerified
+                        : t.verifyWithPhoto}
                     </p>
                   </div>
                   {profile?.verified ? (
@@ -343,11 +344,11 @@ export default function SettingsPage() {
                       className="border-green-200 bg-green-50 text-green-700"
                       variant="outline"
                     >
-                      Verified
+                      {t.verified}
                     </Badge>
                   ) : (
                     <Link href="/verify">
-                      <Button>Verify Now</Button>
+                      <Button>{t.verifyNow}</Button>
                     </Link>
                   )}
                 </div>
@@ -358,15 +359,13 @@ export default function SettingsPage() {
           <TabsContent className="space-y-4" value="account">
             <Card>
               <CardHeader>
-                <CardTitle>Account Settings</CardTitle>
-                <CardDescription>
-                  Manage your account preferences
-                </CardDescription>
+                <CardTitle>{t.accountSettings}</CardTitle>
+                <CardDescription>{t.manageAccountPreferences}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base">Email</Label>
+                    <Label className="text-base">{t.email}</Label>
                     <p className="text-muted-foreground text-sm">
                       {user?.primaryEmailAddress?.emailAddress}
                     </p>
@@ -375,24 +374,24 @@ export default function SettingsPage() {
                 <Separator />
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base">Account Status</Label>
+                    <Label className="text-base">{t.accountStatus}</Label>
                     <p className="text-muted-foreground text-sm">
-                      Your account is currently active
+                      {t.accountCurrentlyActive}
                     </p>
                   </div>
                   <Badge
                     className="border-green-200 bg-green-50 text-green-700"
                     variant="outline"
                   >
-                    Active
+                    {t.active}
                   </Badge>
                 </div>
                 <Separator />
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base">Profile Visibility</Label>
+                    <Label className="text-base">{t.profileVisibility}</Label>
                     <p className="text-muted-foreground text-sm">
-                      Make your profile visible to other users
+                      {t.makeProfileVisible}
                     </p>
                   </div>
                   <Switch defaultChecked />
@@ -402,35 +401,37 @@ export default function SettingsPage() {
 
             <Card className="border-destructive/50">
               <CardHeader>
-                <CardTitle className="text-destructive">Danger Zone</CardTitle>
-                <CardDescription>Irreversible actions</CardDescription>
+                <CardTitle className="text-destructive">
+                  {t.dangerZone}
+                </CardTitle>
+                <CardDescription>{t.irreversibleActions}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base">Sign Out</Label>
+                    <Label className="text-base">{t.signOutLabel}</Label>
                     <p className="text-muted-foreground text-sm">
-                      Sign out from your account
+                      {t.signOutFromAccount}
                     </p>
                   </div>
                   <SignOutButton>
                     <Button variant="outline">
                       <LogOut className="mr-2 h-4 w-4" />
-                      Sign Out
+                      {t.signOutLabel}
                     </Button>
                   </SignOutButton>
                 </div>
                 <Separator className="my-4" />
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base">Delete Account</Label>
+                    <Label className="text-base">{t.deleteAccount}</Label>
                     <p className="text-muted-foreground text-sm">
-                      Permanently delete your account and all data
+                      {t.permanentlyDeleteAccount}
                     </p>
                   </div>
                   <Button disabled variant="destructive">
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Delete Account
+                    {t.deleteAccount}
                   </Button>
                 </div>
               </CardContent>
@@ -440,45 +441,43 @@ export default function SettingsPage() {
           <TabsContent className="space-y-4" value="security">
             <Card>
               <CardHeader>
-                <CardTitle>Security Settings</CardTitle>
-                <CardDescription>Manage your account security</CardDescription>
+                <CardTitle>{t.securitySettings}</CardTitle>
+                <CardDescription>{t.manageAccountSecurity}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base">Password</Label>
+                    <Label className="text-base">{t.password}</Label>
                     <p className="text-muted-foreground text-sm">
-                      Managed by{" "}
+                      {t.managedBy}{" "}
                       {user?.primaryEmailAddress?.emailAddress?.includes(
                         "gmail"
                       )
-                        ? "Google"
-                        : "your auth provider"}
+                        ? t.google
+                        : t.yourAuthProvider}
                     </p>
                   </div>
                   <Button disabled variant="outline">
                     <Key className="mr-2 h-4 w-4" />
-                    Change Password
+                    {t.changePassword}
                   </Button>
                 </div>
                 <Separator />
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base">
-                      Two-Factor Authentication
-                    </Label>
+                    <Label className="text-base">{t.twoFactorAuth}</Label>
                     <p className="text-muted-foreground text-sm">
-                      Add an extra layer of security
+                      {t.addExtraSecurity}
                     </p>
                   </div>
-                  <Badge variant="outline">Coming Soon</Badge>
+                  <Badge variant="outline">{t.comingSoon}</Badge>
                 </div>
                 <Separator />
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base">Login Notifications</Label>
+                    <Label className="text-base">{t.loginNotifications}</Label>
                     <p className="text-muted-foreground text-sm">
-                      Get notified when someone logs in
+                      {t.getNotifiedOnLogin}
                     </p>
                   </div>
                   <Switch defaultChecked />
@@ -490,17 +489,15 @@ export default function SettingsPage() {
           <TabsContent className="space-y-4" value="notifications">
             <Card>
               <CardHeader>
-                <CardTitle>Notification Preferences</CardTitle>
-                <CardDescription>
-                  Choose what notifications you want to receive
-                </CardDescription>
+                <CardTitle>{t.notificationPreferences}</CardTitle>
+                <CardDescription>{t.chooseNotifications}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base">Email Notifications</Label>
+                    <Label className="text-base">{t.emailNotifications}</Label>
                     <p className="text-muted-foreground text-sm">
-                      Receive notifications via email
+                      {t.receiveEmailNotifications}
                     </p>
                   </div>
                   <Switch defaultChecked />
@@ -508,9 +505,9 @@ export default function SettingsPage() {
                 <Separator />
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base">New Invitation Alerts</Label>
+                    <Label className="text-base">{t.newInvitationAlerts}</Label>
                     <p className="text-muted-foreground text-sm">
-                      Get notified when you receive an invitation
+                      {t.getNotifiedOnInvitation}
                     </p>
                   </div>
                   <Switch defaultChecked />
@@ -518,9 +515,11 @@ export default function SettingsPage() {
                 <Separator />
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base">Message Notifications</Label>
+                    <Label className="text-base">
+                      {t.messageNotifications}
+                    </Label>
                     <p className="text-muted-foreground text-sm">
-                      Get notified when you receive new messages
+                      {t.getNotifiedOnMessage}
                     </p>
                   </div>
                   <Switch defaultChecked />
@@ -528,9 +527,9 @@ export default function SettingsPage() {
                 <Separator />
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base">Match Notifications</Label>
+                    <Label className="text-base">{t.matchNotifications}</Label>
                     <p className="text-muted-foreground text-sm">
-                      Get notified when someone accepts your invitation
+                      {t.getNotifiedOnMatch}
                     </p>
                   </div>
                   <Switch defaultChecked />
@@ -538,9 +537,9 @@ export default function SettingsPage() {
                 <Separator />
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <Label className="text-base">Marketing Emails</Label>
+                    <Label className="text-base">{t.marketingEmails}</Label>
                     <p className="text-muted-foreground text-sm">
-                      Receive emails about new features
+                      {t.receiveMarketingEmails}
                     </p>
                   </div>
                   <Switch />

@@ -127,6 +127,7 @@ Holiday hosting/guest matching platform for Lithuania.
 ### Onboarding Improvements
 
 - [ ] **Extended date range** - Dec 23 to Jan 2 (currently only 24, 25, 26, 31)
+- [ ] **Inline date selection in preference cards** - Dates should expand within/below the selected preference card itself (not in a separate colored box). When user selects "Can Host" or "Looking for Host", the date picker should feel like part of that card's expanded state - more cohesive single-choice experience
 - [ ] **Typeahead city search** - Instead of dropdown, autocomplete Lithuanian cities
 - [ ] **Profile completion indicator** - "You're 80% done!" encouragement UI
 - [ ] **State persistence** - Auto-save each step to Convex (no data loss on refresh)
@@ -195,14 +196,14 @@ Holiday hosting/guest matching platform for Lithuania.
 
 ### Dashboard i18n (~210-260 strings)
 
-- [ ] **app-sidebar.tsx** - Nav labels (~5 strings)
-- [ ] **top-bar.tsx** - Page titles (~5 strings)
+- [x] **app-sidebar.tsx** - Nav labels (~5 strings)
+- [x] **top-bar.tsx** - Page titles (~5 strings)
 - [ ] **verify-banner.tsx** - Banner message (~2 strings)
 - [ ] **onboarding/page.tsx** - Multi-step form (~30-35 strings)
-- [ ] **browse/page.tsx** - Filters, empty states, buttons (~30-35 strings)
+- [x] **browse/page.tsx** - Filters, empty states, buttons (~30-35 strings)
 - [ ] **profile/[id]/page.tsx** - Status messages, CTAs (~25-30 strings)
 - [ ] **location-picker/page.tsx** - Instructions, labels (~20-25 strings)
-- [ ] **settings/page.tsx** - Many labels & descriptions (~50-55 strings)
+- [x] **settings/page.tsx** - Many labels & descriptions (~50-55 strings)
 - [ ] **messages/page.tsx** - Modals, dynamic text, status messages (~35-40 strings)
 - [ ] **Dynamic text helpers** - Template interpolation for "{name}", "{count}", etc.
 
