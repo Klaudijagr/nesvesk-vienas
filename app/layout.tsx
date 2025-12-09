@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { DevPanel } from "@/components/DevPanel";
@@ -37,6 +38,7 @@ export default function RootLayout({
           <LocaleProvider>{children}</LocaleProvider>
           <DevPanel />
           <Toaster />
+          <Analytics />
         </ConvexClientProvider>
       </body>
     </html>
