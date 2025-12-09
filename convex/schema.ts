@@ -215,6 +215,9 @@ export default defineSchema({
     content: v.string(),
     read: v.boolean(),
 
+    // Message type (for special messages like invitations)
+    type: v.optional(v.string()),
+
     // Moderation (async - send first, moderate after)
     moderationStatus: v.optional(moderationStatus),
     moderationReason: v.optional(v.string()),
