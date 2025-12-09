@@ -218,6 +218,18 @@ export default defineSchema({
     // Message type (for special messages like invitations)
     type: v.optional(v.string()),
 
+    // Legacy event card data (deprecated - kept for backwards compat)
+    eventCard: v.optional(
+      v.object({
+        date: v.string(),
+        time: v.string(),
+        address: v.string(),
+        phone: v.string(),
+        whatToBring: v.string(),
+        note: v.string(),
+      })
+    ),
+
     // Moderation (async - send first, moderate after)
     moderationStatus: v.optional(moderationStatus),
     moderationReason: v.optional(v.string()),
