@@ -660,6 +660,11 @@ export default function OnboardingPage() {
 
       await upsertProfile({
         role: getRole(),
+        // Save the actual granular status and dates
+        hostingStatus: hostingStatus as "can-host" | "may-host" | "cant-host",
+        guestStatus: guestStatus as "looking" | "maybe-guest" | "not-looking",
+        hostingDates: hostingDates,
+        guestDates: guestDates,
         firstName: formData.firstName,
         lastName: formData.lastName || undefined,
         age:
@@ -669,7 +674,7 @@ export default function OnboardingPage() {
         city: formData.city,
         bio,
         languages,
-        availableDates,
+        availableDates, // Keep for backwards compat
         dietaryInfo: [],
         amenities: [],
         houseRules: [],

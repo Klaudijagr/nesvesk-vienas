@@ -12,7 +12,18 @@ type ConversationStatus =
 
 // Type definitions matching schema (only types that are actually used)
 type Language = "Lithuanian" | "English" | "Ukrainian" | "Russian";
-type HolidayDate = "24 Dec" | "25 Dec" | "26 Dec" | "31 Dec";
+type HolidayDate =
+  | "23 Dec"
+  | "24 Dec"
+  | "25 Dec"
+  | "26 Dec"
+  | "27 Dec"
+  | "28 Dec"
+  | "29 Dec"
+  | "30 Dec"
+  | "31 Dec"
+  | "1 Jan"
+  | "2 Jan";
 type Concept = "Party" | "Dinner" | "Hangout";
 
 // Seed data for testing - 10 Lithuanian users
@@ -364,7 +375,6 @@ export const seedDatabase = internalMutation({
       guestId: userIds[1], // Eglė (guest)
       hostId: userIds[0], // Marius (host)
       status: "accepted",
-      eventDate: "24 Dec",
       createdAt: now - 2 * 24 * 60 * 60 * 1000,
       lastMessageAt: now - 1 * 60 * 60 * 1000,
       requestMessage: "Labas! Norėčiau prisijungti prie jūsų Kūčių vakarienės.",
@@ -374,7 +384,6 @@ export const seedDatabase = internalMutation({
       guestId: userIds[6], // Paulius (guest)
       hostId: userIds[7], // Simona (host)
       status: "accepted",
-      eventDate: "31 Dec",
       createdAt: now - 3 * 24 * 60 * 60 * 1000,
       lastMessageAt: now - 2 * 60 * 60 * 1000,
     });
@@ -383,7 +392,6 @@ export const seedDatabase = internalMutation({
       guestId: userIds[8], // Jonas (guest)
       hostId: userIds[2], // Tomas (host)
       status: "requested",
-      eventDate: "24 Dec",
       createdAt: now - 1 * 60 * 60 * 1000,
       requestMessage: "Ieškau ramios Kūčių vakarienės.",
     });
@@ -394,7 +402,6 @@ export const seedDatabase = internalMutation({
       senderId: userIds[1],
       content: "Labas! Norėčiau prisijungti prie jūsų Kūčių vakarienės.",
       read: true,
-      type: "message",
       createdAt: now - 2 * 24 * 60 * 60 * 1000,
     });
 
@@ -404,7 +411,6 @@ export const seedDatabase = internalMutation({
       content:
         "Labas Egle! Džiaugiuosi, kad prisijungsite prie mūsų Kūčių vakarienės.",
       read: true,
-      type: "message",
       createdAt: now - 1.5 * 24 * 60 * 60 * 1000,
     });
 
@@ -414,7 +420,6 @@ export const seedDatabase = internalMutation({
       content:
         "Labas Mariau! Ačiū už kvietimą! Ar galiu atnešti ukrainietišką borsčą?",
       read: true,
-      type: "message",
       createdAt: now - 1 * 60 * 60 * 1000,
     });
 
@@ -610,17 +615,6 @@ export const clearSeedData = internalMutation({
       await ctx.db.delete(convId);
     }
 
-    // Delete events involving seed users
-    const events = await ctx.db.query("events").collect();
-    for (const event of events) {
-      if (
-        seedUserIdList.includes(event.hostId) ||
-        event.guestIds.some((gId) => seedUserIdList.includes(gId))
-      ) {
-        await ctx.db.delete(event._id);
-      }
-    }
-
     // Delete invitations (legacy table)
     const invitations = await ctx.db.query("invitations").collect();
     for (const inv of invitations) {
@@ -734,7 +728,6 @@ export const createTestConversations = mutation({
         guestId: currentUser._id,
         hostId: marius._id,
         status: "accepted" as ConversationStatus,
-        eventDate: "24 Dec" as HolidayDate,
         createdAt: now - 2 * 24 * 60 * 60 * 1000, // 2 days ago
         lastMessageAt: now - 30 * 60 * 1000, // 30 min ago
         requestMessage:
@@ -748,7 +741,6 @@ export const createTestConversations = mutation({
         content:
           "Labas Mariau! Norėčiau prisijungti prie jūsų Kūčių vakarienės. Esu naujas Vilniuje ir ieškau šiltos kompanijos šventėms.",
         read: true,
-        type: "message",
         createdAt: now - 2 * 24 * 60 * 60 * 1000,
       });
 
@@ -758,7 +750,6 @@ export const createTestConversations = mutation({
         content:
           "Sveiki! Džiaugiamės, kad norite prisijungti. Ar turite kokių nors maisto apribojimų?",
         read: true,
-        type: "message",
         createdAt: now - 1.5 * 24 * 60 * 60 * 1000,
       });
 
@@ -768,7 +759,6 @@ export const createTestConversations = mutation({
         content:
           "Ačiū už kvietimą! Ne, jokių apribojimų neturiu. Ar galiu ką nors atnešti?",
         read: true,
-        type: "message",
         createdAt: now - 1 * 24 * 60 * 60 * 1000,
       });
 
@@ -776,13 +766,12 @@ export const createTestConversations = mutation({
         conversationId: conv1,
         senderId: marius._id,
         content:
-          "Puiku! Jei norite, galite atnešti desertą arba vyną. Laukiame jūsų gruodžio 24 d. 18:00! 🎄",
+          "Puiku! Jei norite, galite atnešti desertą arba vyną. Laukiame jūsų!",
         read: false,
-        type: "message",
         createdAt: now - 30 * 60 * 1000,
       });
 
-      conversationsCreated.push("Marius (Dec 24 - accepted)");
+      conversationsCreated.push("Marius (accepted)");
     }
 
     // Create conversation 2: "Requested" status with Simona (host)
@@ -792,7 +781,6 @@ export const createTestConversations = mutation({
         guestId: currentUser._id,
         hostId: simona._id,
         status: "requested" as ConversationStatus,
-        eventDate: "31 Dec" as HolidayDate,
         createdAt: now - 1 * 60 * 60 * 1000, // 1 hour ago
         requestMessage: "Labas! Jūsų Naujųjų metų vakarėlis skamba nuostabiai!",
       });
@@ -803,21 +791,19 @@ export const createTestConversations = mutation({
         content:
           "Labas Simona! Jūsų Naujųjų metų vakarėlis skamba nuostabiai. Ar dar yra vietos?",
         read: false,
-        type: "message",
         createdAt: now - 1 * 60 * 60 * 1000,
       });
 
-      conversationsCreated.push("Simona (Dec 31 - requested)");
+      conversationsCreated.push("Simona (requested)");
     }
 
-    // Create conversation 3: "Invited" status with Tomas (host)
+    // Create conversation 3: "Accepted" status with Tomas (host)
     const tomas = seedUserRecords.find((u) => u.clerkId === "seed_tomas_003");
     if (tomas) {
       const conv3 = await ctx.db.insert("conversations", {
         guestId: currentUser._id,
         hostId: tomas._id,
-        status: "invited" as ConversationStatus,
-        eventDate: "24 Dec" as HolidayDate,
+        status: "accepted" as ConversationStatus,
         createdAt: now - 3 * 24 * 60 * 60 * 1000,
         lastMessageAt: now - 2 * 60 * 60 * 1000,
         requestMessage: "Ieškau ramios Kūčių vakarienės.",
@@ -829,7 +815,6 @@ export const createTestConversations = mutation({
         content:
           "Labas Tomai! Ieškau ramios Kūčių vakarienės. Jūsų aprašymas skamba puikiai.",
         read: true,
-        type: "message",
         createdAt: now - 3 * 24 * 60 * 60 * 1000,
       });
 
@@ -838,29 +823,19 @@ export const createTestConversations = mutation({
         senderId: tomas._id,
         content: "Sveiki! Mielai priimsiu. Papasakokite daugiau apie save.",
         read: true,
-        type: "message",
         createdAt: now - 2.5 * 24 * 60 * 60 * 1000,
       });
 
-      // Invitation card message
       await ctx.db.insert("messages", {
         conversationId: conv3,
         senderId: tomas._id,
-        content: "Štai oficialus kvietimas!",
+        content:
+          "Adresas: Laisvės al. 50, Kaunas. Ateikite alkani - bus daug maisto!",
         read: false,
-        type: "invitation_card",
-        eventCard: {
-          date: "24 Dec" as HolidayDate,
-          time: "17:00",
-          address: "Laisvės al. 50, Kaunas",
-          phone: "+370 600 54321",
-          note: "Ateikite alkani - bus daug maisto!",
-          whatToBring: "Desertą arba gėrimą",
-        },
         createdAt: now - 2 * 60 * 60 * 1000,
       });
 
-      conversationsCreated.push("Tomas (Dec 24 - invited, has event card!)");
+      conversationsCreated.push("Tomas (accepted)");
     }
 
     return {

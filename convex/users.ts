@@ -148,26 +148,7 @@ export const deleteFromClerk = internalMutation({
       await ctx.db.delete(inv._id);
     }
 
-    // 4. Delete events where user is host
-    const hostedEvents = await ctx.db
-      .query("events")
-      .withIndex("by_host", (q) => q.eq("hostId", userId))
-      .collect();
-    for (const event of hostedEvents) {
-      await ctx.db.delete(event._id);
-    }
-
-    // 5. Remove user from events they're attending as guest
-    const allEvents = await ctx.db.query("events").collect();
-    for (const event of allEvents) {
-      if (event.guestIds.includes(userId)) {
-        await ctx.db.patch(event._id, {
-          guestIds: event.guestIds.filter((id) => id !== userId),
-        });
-      }
-    }
-
-    // 6. Finally, delete the user
+    // 4. Finally, delete the user
     await ctx.db.delete(userId);
     console.log("User deleted successfully:", userId);
   },

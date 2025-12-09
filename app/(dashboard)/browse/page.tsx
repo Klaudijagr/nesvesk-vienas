@@ -281,16 +281,19 @@ function ListViewItem({
 // Loading skeleton
 function LoadingSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {[1, 2, 3, 4].map((i) => (
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
         <div
-          className="h-80 animate-pulse rounded-xl border border-gray-100 bg-white"
+          className="animate-pulse rounded-lg border border-gray-200 bg-white"
           key={i}
         >
-          <div className="h-48 rounded-t-xl bg-gray-200" />
-          <div className="space-y-3 p-4">
-            <div className="h-4 w-3/4 rounded bg-gray-200" />
-            <div className="h-3 w-1/2 rounded bg-gray-200" />
+          <div className="h-32 rounded-t-lg bg-gray-200" />
+          <div className="space-y-2 p-3">
+            <div className="h-2 w-1/2 rounded bg-gray-200" />
+            <div className="h-2 w-3/4 rounded bg-gray-200" />
+            <div className="mt-3 border-gray-100 border-t pt-2">
+              <div className="h-2 w-1/3 rounded bg-gray-200" />
+            </div>
           </div>
         </div>
       ))}
@@ -416,14 +419,9 @@ export default function BrowsePage() {
     }
     if (viewMode === "grid") {
       return (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {filteredProfiles.map((profile) => (
-            <ListingCard
-              key={profile._id}
-              onAccept={() => handleAccept(profile.userId)}
-              onInvite={() => handleInvite(profile.userId)}
-              profile={profile}
-            />
+            <ListingCard key={profile._id} profile={profile} />
           ))}
         </div>
       );

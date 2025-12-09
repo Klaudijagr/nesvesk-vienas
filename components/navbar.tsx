@@ -40,9 +40,7 @@ export function Navbar() {
           <Link className="flex items-center gap-2" href="/">
             <div
               className={`flex h-9 w-9 items-center justify-center rounded-lg ${
-                isScrolled
-                  ? "bg-gradient-to-br from-red-500 to-amber-500"
-                  : "bg-white/20 backdrop-blur-sm"
+                isScrolled ? "bg-red-500" : "bg-white/20 backdrop-blur-sm"
               }`}
             >
               <Gift className="h-5 w-5 text-white" />

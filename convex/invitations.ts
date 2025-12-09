@@ -160,7 +160,6 @@ export const respond = mutation({
           guestId: invitation.fromUserId,
           hostId: userId,
           status: "accepted",
-          eventDate: invitation.date,
           createdAt: now,
           lastMessageAt: now,
         });
@@ -171,7 +170,6 @@ export const respond = mutation({
           senderId: userId,
           content: "Connection accepted! You can now chat freely.",
           read: false,
-          type: "system",
           createdAt: now,
         });
       }

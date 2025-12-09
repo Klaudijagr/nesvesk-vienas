@@ -36,7 +36,7 @@ export function AppSidebar() {
     <div className="flex w-64 shrink-0 flex-col border-border border-r bg-sidebar p-4">
       {/* Logo */}
       <Link className="mb-2 flex items-center gap-3 px-2 py-3" href="/">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-amber-500">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500">
           <Gift className="h-6 w-6 text-white" />
         </div>
         <div className="flex flex-col">

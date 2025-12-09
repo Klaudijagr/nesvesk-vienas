@@ -169,6 +169,19 @@ export function DevPanel() {
                 >
                   Orig. Home
                 </Link>
+                <div className="col-span-2 my-1 border-indigo-100 border-t" />
+                <Link
+                  className="col-span-2 rounded bg-purple-50 px-2 py-1.5 text-center text-purple-700 text-xs hover:bg-purple-100"
+                  href="/profile8"
+                >
+                  Profile Options (8)
+                </Link>
+                <Link
+                  className="rounded bg-pink-50 px-2 py-1.5 text-center text-pink-700 text-xs hover:bg-pink-100"
+                  href="/preference-cards"
+                >
+                  Pref. Cards
+                </Link>
               </div>
 
               <button

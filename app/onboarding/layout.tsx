@@ -9,12 +9,12 @@ export default function OnboardingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="flex min-h-screen flex-col bg-gray-50">
       {/* Simple header with logo */}
       <header className="shrink-0 border-b bg-white/80 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4">
           <Link className="flex items-center gap-3" href="/">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-amber-500">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500">
               <Gift className="h-6 w-6 text-white" />
             </div>
             <div className="flex flex-col">

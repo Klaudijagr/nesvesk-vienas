@@ -94,7 +94,7 @@ export default function LandingPage() {
       {/* Story Section */}
       <div className="bg-white py-20" id="about">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center gap-8 rounded-2xl bg-gradient-to-br from-green-50 to-amber-50 p-8 md:flex-row md:p-12">
+          <div className="flex flex-col items-center gap-8 rounded-2xl bg-green-50 p-8 md:flex-row md:p-12">
             <div className="relative h-64 w-full md:w-1/3">
               <Image
                 alt="Friends sharing a meal"
@@ -209,7 +209,7 @@ export default function LandingPage() {
       </div>
 
       {/* CTA */}
-      <div className="bg-gradient-to-r from-red-600 to-red-700 py-20 text-white">
+      <div className="bg-red-600 py-20 text-white">
         <div className="mx-auto max-w-4xl px-4 text-center">
           <h2 className="mb-4 font-bold text-3xl">{t.finalCtaTitle}</h2>
           <p className="mx-auto mb-8 max-w-xl text-red-100">

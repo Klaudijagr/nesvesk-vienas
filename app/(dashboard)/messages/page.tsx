@@ -13,22 +13,15 @@ import {
   UserPlus,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { ProfileView } from "@/components/profile-view";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { HOLIDAY_DATES } from "@/lib/types";
@@ -39,6 +32,7 @@ type ProfileInfo = {
   firstName: string;
   photoUrl?: string;
   city: string;
+  username?: string;
 };
 
 type SidebarItem =
@@ -57,13 +51,6 @@ type SidebarItem =
       date: string;
       createdAt: number;
     };
-
-type EventCard = {
-  date: string;
-  address?: string;
-  phone?: string;
-  note?: string;
-};
 
 // Type for conversation from getConversations query
 type ConversationsResult = typeof api.messages.getConversations._returnType;
@@ -186,63 +173,18 @@ function MessageBubble({
   content,
   isOwn,
   timestamp,
-  eventCard,
 }: {
   content: string;
   isOwn: boolean;
   timestamp: number;
-  eventCard?: EventCard;
 }) {
-  if (eventCard) {
-    return (
-      <div className={cn("flex", isOwn ? "justify-end" : "justify-start")}>
-        <div className="w-72 overflow-hidden rounded-xl border bg-white shadow-sm">
-          <div className="bg-gradient-to-r from-red-500 to-amber-500 px-4 py-3 text-white">
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              <span className="font-semibold">Event Details</span>
-            </div>
-          </div>
-          <div className="space-y-3 p-4">
-            <div className="flex items-center gap-3">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{eventCard.date}</span>
-            </div>
-            {eventCard.address && (
-              <div className="flex items-start gap-3">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="text-sm">{eventCard.address}</span>
-              </div>
-            )}
-            {eventCard.phone && (
-              <div className="flex items-center gap-3">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{eventCard.phone}</span>
-              </div>
-            )}
-            {eventCard.note && (
-              <div className="border-t pt-3">
-                <p className="text-muted-foreground text-sm italic">
-                  "{eventCard.note}"
-                </p>
-              </div>
-            )}
-          </div>
-          <div className="border-t px-4 py-2 text-muted-foreground text-xs">
-            {formatShortTime(timestamp)}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={cn("flex", isOwn ? "justify-end" : "justify-start")}>
       <div
         className={cn(
           "max-w-[70%] rounded-2xl px-4 py-2",
           isOwn
-            ? "rounded-br-sm bg-gradient-to-r from-red-500 to-amber-500 text-white"
+            ? "rounded-br-sm bg-red-500 text-white"
             : "rounded-bl-sm bg-muted"
         )}
       >
@@ -287,12 +229,12 @@ function EmptyConversationsList({
 
 function RequestView({
   request,
-  profile,
+  profileUsername,
   isResponding,
   onRespond,
 }: {
   request: Extract<SidebarItem, { type: "request" }>;
-  profile: unknown;
+  profileUsername: string | undefined;
   isResponding: boolean;
   onRespond: (accept: boolean) => void;
 }) {
@@ -311,29 +253,13 @@ function RequestView({
             {request.profile?.city}
           </p>
         </div>
-        <Sheet>
-          <SheetTrigger asChild>
+        {profileUsername && (
+          <Link href={`/people/${profileUsername}`}>
             <Button size="sm" variant="outline">
               View Profile
             </Button>
-          </SheetTrigger>
-          <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
-            <SheetHeader className="mb-4">
-              <SheetTitle>Profile Details</SheetTitle>
-            </SheetHeader>
-            {profile ? (
-              <ProfileView
-                profile={
-                  profile as Parameters<typeof ProfileView>[0]["profile"]
-                }
-              />
-            ) : (
-              <div className="flex h-40 items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
-              </div>
-            )}
-          </SheetContent>
-        </Sheet>
+          </Link>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center p-8">
@@ -364,7 +290,7 @@ function RequestView({
             Decline
           </Button>
           <Button
-            className="gap-2 bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600"
+            className="gap-2 bg-red-500 hover:bg-red-600"
             disabled={isResponding}
             onClick={() => onRespond(true)}
             size="lg"
@@ -623,21 +549,13 @@ function ConversationView({
               Share Details
             </Button>
           )}
-          <Sheet>
-            <SheetTrigger asChild>
+          {conversation.profile?.username && (
+            <Link href={`/people/${conversation.profile.username}`}>
               <Button size="sm" variant="ghost">
                 View Profile
               </Button>
-            </SheetTrigger>
-            <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
-              <SheetHeader className="mb-4">
-                <SheetTitle>Profile Details</SheetTitle>
-              </SheetHeader>
-              {conversation.profile && (
-                <ProfileView profile={conversation.profile} />
-              )}
-            </SheetContent>
-          </Sheet>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -649,7 +567,6 @@ function ConversationView({
         {messages?.map((message) => (
           <MessageBubble
             content={message.content}
-            eventCard={message.eventCard}
             isOwn={message.senderId === myProfile?.userId}
             key={message._id}
             timestamp={message.createdAt}
@@ -673,7 +590,7 @@ function ConversationView({
             value={messageInput}
           />
           <Button
-            className="bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600"
+            className="bg-red-500 hover:bg-red-600"
             disabled={!messageInput.trim()}
             onClick={onSend}
           >
@@ -696,7 +613,7 @@ function ConversationView({
 function MainContentArea({
   activeRequest,
   activeConversation,
-  activeRequestProfile,
+  activeRequestProfileUsername,
   isResponding,
   onRespond,
   messages,
@@ -714,7 +631,7 @@ function MainContentArea({
 }: {
   activeRequest: Extract<SidebarItem, { type: "request" }> | null;
   activeConversation: ConversationSummary | null | undefined;
-  activeRequestProfile: unknown;
+  activeRequestProfileUsername: string | undefined;
   isResponding: boolean;
   onRespond: (accept: boolean) => void;
   messages:
@@ -742,7 +659,7 @@ function MainContentArea({
       <RequestView
         isResponding={isResponding}
         onRespond={onRespond}
-        profile={activeRequestProfile}
+        profileUsername={activeRequestProfileUsername}
         request={activeRequest}
       />
     );
@@ -909,7 +826,6 @@ function MessagesPageContent() {
   // Mutations
   const sendMessage = useMutation(api.messages.sendMessage);
   const respondToInvitation = useMutation(api.invitations.respond);
-  const sendEventCard = useMutation(api.messages.sendInvitationCard);
   const createTestConversations = useMutation(api.seed.createTestConversations);
 
   // Scroll and read management via hooks
@@ -963,12 +879,15 @@ function MessagesPageContent() {
     }
     setIsSendingCard(true);
     try {
-      await sendEventCard({
+      // Format event details as a message
+      const parts = [`📅 Event Details for ${data.date}`];
+      if (data.address) parts.push(`📍 ${data.address}`);
+      if (data.phone) parts.push(`📞 ${data.phone}`);
+      if (data.note) parts.push(`💬 ${data.note}`);
+
+      await sendMessage({
         conversationId: activeConversationId,
-        date: data.date as "24 Dec" | "25 Dec" | "26 Dec" | "31 Dec",
-        address: data.address || undefined,
-        phone: data.phone || undefined,
-        note: data.note || undefined,
+        content: parts.join("\n"),
       });
       setShowShareModal(false);
     } finally {
@@ -1017,7 +936,7 @@ function MessagesPageContent() {
         <MainContentArea
           activeConversation={activeConversation}
           activeRequest={activeRequest}
-          activeRequestProfile={activeRequestProfile}
+          activeRequestProfileUsername={activeRequestProfile?.username}
           isHost={isHost}
           isResponding={isResponding}
           isSendingCard={isSendingCard}

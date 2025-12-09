@@ -7,6 +7,16 @@ const userRole = v.union(
   v.literal("guest"),
   v.literal("both")
 );
+const hostingStatus = v.union(
+  v.literal("can-host"),
+  v.literal("may-host"),
+  v.literal("cant-host")
+);
+const guestStatus = v.union(
+  v.literal("looking"),
+  v.literal("maybe-guest"),
+  v.literal("not-looking")
+);
 const city = v.union(
   v.literal("Vilnius"),
   v.literal("Kaunas"),
@@ -102,26 +112,12 @@ const conversationStatus = v.union(
   v.literal("confirmed")
 );
 
-// Message types
-const messageType = v.union(
-  v.literal("message"),
-  v.literal("invitation_card"),
-  v.literal("system")
-);
-
 // Moderation status (async - always send, flag later if needed)
 const moderationStatus = v.union(
   v.literal("pending"),
   v.literal("clean"),
   v.literal("flagged"),
   v.literal("blocked")
-);
-
-// Event status
-const eventStatus = v.union(
-  v.literal("upcoming"),
-  v.literal("completed"),
-  v.literal("cancelled")
 );
 
 export default defineSchema({
@@ -143,7 +139,9 @@ export default defineSchema({
     username: v.optional(v.string()), // Unique, lowercase, alphanumeric + hyphens
 
     // Basic info
-    role: userRole,
+    role: userRole, // Derived from hostingStatus + guestStatus for backwards compat
+    hostingStatus: v.optional(hostingStatus), // "can-host" | "may-host" | "cant-host"
+    guestStatus: v.optional(guestStatus), // "looking" | "maybe-guest" | "not-looking"
     firstName: v.string(),
     lastName: v.optional(v.string()),
     age: v.optional(v.number()),
@@ -160,7 +158,9 @@ export default defineSchema({
 
     // Preferences
     languages: v.array(language),
-    availableDates: v.array(holidayDate),
+    availableDates: v.array(holidayDate), // Combined dates for backwards compat
+    hostingDates: v.optional(v.array(holidayDate)), // Dates when user can host
+    guestDates: v.optional(v.array(holidayDate)), // Dates when user wants to be a guest
     dietaryInfo: v.array(v.string()),
 
     // Host-specific
@@ -184,7 +184,7 @@ export default defineSchema({
     .index("by_city", ["city"])
     .index("by_role", ["role"]),
 
-  // Conversations between users (replaces simple invitations)
+  // Conversations between users
   conversations: defineTable({
     // Participants (guest is always participant1, host is participant2)
     guestId: v.id("users"),
@@ -192,9 +192,6 @@ export default defineSchema({
 
     // State
     status: conversationStatus,
-
-    // Context - which event date is this about
-    eventDate: holidayDate,
 
     // Timestamps for sorting
     lastMessageAt: v.optional(v.number()),
@@ -215,24 +212,9 @@ export default defineSchema({
     content: v.string(),
     read: v.boolean(),
 
-    // Message type
-    type: v.optional(messageType), // defaults to "message"
-
     // Moderation (async - send first, moderate after)
     moderationStatus: v.optional(moderationStatus),
     moderationReason: v.optional(v.string()),
-
-    // Optional event card for hosts to share event details
-    eventCard: v.optional(
-      v.object({
-        date: holidayDate,
-        time: v.optional(v.string()),
-        address: v.optional(v.string()),
-        phone: v.optional(v.string()),
-        note: v.optional(v.string()),
-        whatToBring: v.optional(v.string()),
-      })
-    ),
 
     // Timestamp
     createdAt: v.number(),
@@ -241,32 +223,7 @@ export default defineSchema({
     .index("by_sender", ["senderId"])
     .index("by_moderation", ["moderationStatus"]),
 
-  // Events (confirmed gatherings)
-  events: defineTable({
-    hostId: v.id("users"),
-    conversationId: v.optional(v.id("conversations")), // Link back to conversation
-
-    // Event details
-    eventDate: holidayDate,
-    title: v.optional(v.string()),
-    time: v.optional(v.string()),
-    address: v.optional(v.string()),
-    notes: v.optional(v.string()),
-
-    // Guests
-    guestIds: v.array(v.id("users")),
-
-    // Status
-    status: eventStatus,
-
-    // Timestamps
-    createdAt: v.number(),
-  })
-    .index("by_host", ["hostId"])
-    .index("by_date", ["eventDate"])
-    .index("by_status", ["status"]),
-
-  // Keep invitations for backwards compatibility (can remove later)
+  // Invitations (connection requests)
   invitations: defineTable({
     fromUserId: v.id("users"),
     toUserId: v.id("users"),

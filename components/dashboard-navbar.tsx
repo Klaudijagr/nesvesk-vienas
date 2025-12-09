@@ -2,15 +2,7 @@
 
 import { UserButton } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
-import {
-  Gift,
-  Home,
-  Menu,
-  MessageCircle,
-  Settings,
-  User,
-  X,
-} from "lucide-react";
+import { Gift, Home, Menu, MessageCircle, Settings, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -38,7 +30,6 @@ export function DashboardNavbar() {
       icon: MessageCircle,
       badge: totalBadge,
     },
-    { title: t.navProfile, url: "/profile", icon: User },
     { title: t.navSettings, url: "/settings", icon: Settings },
   ];
 
@@ -48,7 +39,7 @@ export function DashboardNavbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Left: Logo */}
           <Link className="flex items-center gap-3" href="/browse">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-amber-500">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500">
               <Gift className="h-6 w-6 text-white" />
             </div>
             <div className="hidden flex-col sm:flex">

@@ -2,14 +2,6 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getCurrentUserId } from "./lib/auth";
 
-// Holiday date type for reuse
-const holidayDate = v.union(
-  v.literal("24 Dec"),
-  v.literal("25 Dec"),
-  v.literal("26 Dec"),
-  v.literal("31 Dec")
-);
-
 // Get messages for a specific conversation
 export const getConversationMessages = query({
   args: { conversationId: v.id("conversations") },
@@ -155,7 +147,6 @@ export const sendMessage = mutation({
       senderId: userId,
       content: args.content,
       read: false,
-      type: "message",
       createdAt: now,
     });
 
@@ -233,11 +224,10 @@ export const getUnreadCount = query({
   },
 });
 
-// Request to join a host's event (creates a new conversation)
+// Request to connect with a host (creates a new conversation)
 export const requestToJoin = mutation({
   args: {
     hostId: v.id("users"),
-    eventDate: holidayDate,
     message: v.string(),
   },
   handler: async (ctx, args) => {
@@ -250,12 +240,7 @@ export const requestToJoin = mutation({
     const existing = await ctx.db
       .query("conversations")
       .withIndex("by_guest", (q) => q.eq("guestId", userId))
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("hostId"), args.hostId),
-          q.eq(q.field("eventDate"), args.eventDate)
-        )
-      )
+      .filter((q) => q.eq(q.field("hostId"), args.hostId))
       .first();
 
     if (existing) {
@@ -269,7 +254,6 @@ export const requestToJoin = mutation({
       guestId: userId,
       hostId: args.hostId,
       status: "requested",
-      eventDate: args.eventDate,
       createdAt: now,
       lastMessageAt: now,
       requestMessage: args.message,
@@ -281,7 +265,6 @@ export const requestToJoin = mutation({
       senderId: userId,
       content: args.message,
       read: false,
-      type: "message",
       createdAt: now,
     });
 
@@ -317,7 +300,6 @@ export const acceptRequest = mutation({
       senderId: userId,
       content: "Request accepted! You can now chat freely.",
       read: false,
-      type: "system",
       createdAt: Date.now(),
     });
 
@@ -343,131 +325,6 @@ export const declineRequest = mutation({
     }
 
     await ctx.db.patch(args.conversationId, { status: "declined" });
-
-    return { success: true };
-  },
-});
-
-// Send an invitation card (host sends event details)
-export const sendInvitationCard = mutation({
-  args: {
-    conversationId: v.id("conversations"),
-    date: holidayDate,
-    time: v.optional(v.string()),
-    address: v.optional(v.string()),
-    phone: v.optional(v.string()),
-    note: v.optional(v.string()),
-    whatToBring: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const userId = await getCurrentUserId(ctx);
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
-
-    const conversation = await ctx.db.get(args.conversationId);
-    if (!conversation) {
-      throw new Error("Conversation not found");
-    }
-    if (conversation.hostId !== userId) {
-      throw new Error("Only host can send invitation cards");
-    }
-    if (conversation.status !== "accepted") {
-      throw new Error("Must accept request before sending invitation");
-    }
-
-    const now = Date.now();
-
-    // Update conversation status to "invited"
-    await ctx.db.patch(args.conversationId, {
-      status: "invited",
-      lastMessageAt: now,
-    });
-
-    // Create invitation card message
-    const messageId = await ctx.db.insert("messages", {
-      conversationId: args.conversationId,
-      senderId: userId,
-      content: "📋 Invitation sent!",
-      read: false,
-      type: "invitation_card",
-      eventCard: {
-        date: args.date,
-        time: args.time,
-        address: args.address,
-        phone: args.phone,
-        note: args.note,
-        whatToBring: args.whatToBring,
-      },
-      createdAt: now,
-    });
-
-    return messageId;
-  },
-});
-
-// Confirm invitation (guest accepts the event invitation)
-export const confirmInvitation = mutation({
-  args: { conversationId: v.id("conversations") },
-  handler: async (ctx, args) => {
-    const userId = await getCurrentUserId(ctx);
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
-
-    const conversation = await ctx.db.get(args.conversationId);
-    if (!conversation) {
-      throw new Error("Conversation not found");
-    }
-    if (conversation.guestId !== userId) {
-      throw new Error("Only guest can confirm invitation");
-    }
-    if (conversation.status !== "invited") {
-      throw new Error("No pending invitation to confirm");
-    }
-
-    const now = Date.now();
-
-    // Update conversation status
-    await ctx.db.patch(args.conversationId, {
-      status: "confirmed",
-      lastMessageAt: now,
-    });
-
-    // Get the last invitation card to create an event
-    const invitationMessage = await ctx.db
-      .query("messages")
-      .withIndex("by_conversation", (q) =>
-        q.eq("conversationId", args.conversationId)
-      )
-      .filter((q) => q.eq(q.field("type"), "invitation_card"))
-      .order("desc")
-      .first();
-
-    // Create an event
-    if (invitationMessage?.eventCard) {
-      await ctx.db.insert("events", {
-        hostId: conversation.hostId,
-        conversationId: args.conversationId,
-        eventDate: conversation.eventDate,
-        time: invitationMessage.eventCard.time,
-        address: invitationMessage.eventCard.address,
-        notes: invitationMessage.eventCard.note,
-        guestIds: [userId],
-        status: "upcoming",
-        createdAt: now,
-      });
-    }
-
-    // Add system message
-    await ctx.db.insert("messages", {
-      conversationId: args.conversationId,
-      senderId: userId,
-      content: "🎉 Invitation confirmed! See you there!",
-      read: false,
-      type: "system",
-      createdAt: now,
-    });
 
     return { success: true };
   },

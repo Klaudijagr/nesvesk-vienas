@@ -1,22 +1,9 @@
 "use client";
 
-import {
-  Calendar,
-  Cigarette,
-  Dog,
-  MapPin,
-  MessageCircle,
-  ShieldCheck,
-  Sparkles,
-  User,
-  Users,
-  UtensilsCrossed,
-  Wine,
-} from "lucide-react";
+import { CheckCircle, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import type { Doc, Id } from "@/convex/_generated/dataModel";
-import { formatRelativeTime } from "@/lib/utils";
+import type { Doc } from "@/convex/_generated/dataModel";
 
 type ConnectionStatus =
   | "none"
@@ -31,269 +18,130 @@ interface ProfileWithStatus extends Doc<"profiles"> {
 
 type ListingCardProps = {
   profile: ProfileWithStatus;
-  onInvite?: (userId: Id<"users">) => void;
-  onAccept?: (userId: Id<"users">) => void;
+  onClick?: () => void;
 };
 
-// Helper to build preference icons
-function buildPreferenceIcons(profile: ProfileWithStatus) {
-  const icons: Array<{ icon: typeof Wine; label: string; color: string }> = [];
-  if (profile.drinkingAllowed) {
-    icons.push({ icon: Wine, label: "Alcohol OK", color: "text-purple-500" });
-  }
-  if (profile.smokingAllowed) {
-    icons.push({
-      icon: Cigarette,
-      label: "Smoking OK",
-      color: "text-gray-500",
-    });
-  }
-  if (profile.petsAllowed || profile.hasPets) {
-    icons.push({
-      icon: Dog,
-      label: profile.hasPets ? "Has pets" : "Pets OK",
-      color: "text-amber-500",
-    });
-  }
-  return icons;
-}
-
-// Connection action button component
-function ConnectionActionButton({
-  status,
-  userId,
-  onInvite,
-  onAccept,
-}: {
-  status: ConnectionStatus;
-  userId: Id<"users">;
-  onInvite?: (userId: Id<"users">) => void;
-  onAccept?: (userId: Id<"users">) => void;
-}) {
-  if (status === "matched") {
-    return (
-      <Link
-        className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-center font-medium text-sm text-white transition-colors hover:bg-green-700"
-        href="/messages"
-      >
-        Message
-      </Link>
-    );
-  }
-  if (status === "pending_sent") {
-    return (
-      <span className="flex flex-1 items-center justify-center rounded-lg border border-amber-500 bg-amber-50 px-4 py-2 font-medium text-amber-600 text-sm">
-        Pending
-      </span>
-    );
-  }
-  if (status === "pending_received" && onAccept) {
-    return (
-      <button
-        className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-blue-700"
-        onClick={() => onAccept(userId)}
-        type="button"
-      >
-        Accept
-      </button>
-    );
-  }
-  if (status === "none" && onInvite) {
-    return (
-      <button
-        className="flex-1 rounded-lg border border-red-600 bg-white px-4 py-2 font-medium text-red-600 text-sm transition-colors hover:bg-red-600 hover:text-white"
-        onClick={() => onInvite(userId)}
-        type="button"
-      >
-        Connect
-      </button>
-    );
-  }
-  return null;
-}
-
-// Role badges component
-function RoleBadges({
-  isHost,
-  isGuest,
-  capacity,
-  concept,
-}: {
-  isHost: boolean;
-  isGuest: boolean;
-  capacity?: number;
-  concept?: string;
-}) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {isHost && (
-        <span className="flex items-center gap-1 rounded-md bg-purple-50 px-2 py-1 font-medium text-purple-700 text-xs uppercase tracking-wider">
-          <Users className="h-3 w-3" /> Host ({capacity ?? "?"})
-        </span>
-      )}
-      {isGuest && (
-        <span className="flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 font-medium text-blue-700 text-xs uppercase tracking-wider">
-          <User className="h-3 w-3" /> Guest
-        </span>
-      )}
-      {isHost && concept && (
-        <span className="rounded-md bg-orange-50 px-2 py-1 font-medium text-orange-700 text-xs">
-          {concept}
-        </span>
-      )}
-    </div>
-  );
-}
-
-export function ListingCard({ profile, onInvite, onAccept }: ListingCardProps) {
-  const connectionStatus = profile.connectionStatus ?? "none";
+export function ListingCard({ profile, onClick }: ListingCardProps) {
   const isHost = profile.role === "host" || profile.role === "both";
   const isGuest = profile.role === "guest" || profile.role === "both";
   const profileUrl = profile.username
     ? `/people/${profile.username}`
     : `/profile/${profile.userId}`;
-  const preferenceIcons = buildPreferenceIcons(profile);
   const photoUrl =
     profile.photoUrl ||
     `https://api.dicebear.com/7.x/initials/svg?seed=${profile.firstName}`;
 
-  return (
-    <div className="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
-      <Link
-        className="relative block aspect-[4/3] overflow-hidden bg-gray-200"
-        href={profileUrl}
-      >
+  const card = (
+    <div className="group flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-lg border border-gray-200 bg-white text-left shadow-sm transition-all hover:shadow-md">
+      {/* Image - h-32 matching reference */}
+      <div className="relative h-32">
         <Image
           alt={profile.firstName}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="h-full w-full object-cover"
           fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+          sizes="200px"
           src={photoUrl}
         />
-        {profile.verified && (
-          <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 font-medium text-green-700 text-xs shadow-sm backdrop-blur-sm">
-            <ShieldCheck className="h-3 w-3" />
-            Verified
-          </div>
-        )}
-        <div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-          <h3 className="font-bold text-white text-xl">
+        <div className="absolute inset-0 bg-black/40" />
+
+        {/* Name and location overlay */}
+        <div className="absolute bottom-2 left-3 text-white">
+          <h3 className="font-bold text-sm drop-shadow-md">
             {profile.firstName}
-            {!isHost && profile.age ? `, ${profile.age}` : ""}
+            {profile.age ? `, ${profile.age}` : ""}
           </h3>
-          <div className="flex items-center gap-3 text-sm text-white/90">
-            <span className="flex items-center">
-              <MapPin className="mr-1 h-3 w-3" />
-              {profile.city}
-            </span>
-            {profile.lastActive && (
-              <span className="text-white/70 text-xs">
-                {formatRelativeTime(profile.lastActive)}
-              </span>
-            )}
-          </div>
-        </div>
-      </Link>
-
-      <div className="flex flex-grow flex-col gap-3 p-4">
-        <RoleBadges
-          capacity={profile.capacity}
-          concept={profile.concept}
-          isGuest={isGuest}
-          isHost={isHost}
-        />
-
-        {/* Bio */}
-        <Link className="block" href={profileUrl}>
-          <p className="line-clamp-2 text-gray-600 text-sm italic transition-colors hover:text-gray-900">
-            "{profile.bio}"
+          <p className="flex items-center gap-1 text-[10px] opacity-90">
+            <MapPin size={10} /> {profile.city}
           </p>
-        </Link>
+        </div>
 
-        {/* Vibes */}
-        {profile.vibes.length > 0 && (
-          <div className="flex items-start gap-2">
-            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-purple-500" />
-            <div className="flex flex-wrap gap-1">
-              {profile.vibes.slice(0, 3).map((vibe) => (
-                <span
-                  className="rounded-full border border-purple-200 bg-purple-50 px-2 py-0.5 text-purple-600 text-xs"
-                  key={vibe}
-                >
-                  {vibe}
-                </span>
-              ))}
-              {profile.vibes.length > 3 && (
-                <span className="text-gray-400 text-xs">
-                  +{profile.vibes.length - 3}
-                </span>
-              )}
+        {/* Verified badge */}
+        {profile.verified && (
+          <div className="absolute top-2 right-2">
+            <div className="rounded-full bg-white p-0.5">
+              <CheckCircle className="text-green-600" size={12} />
             </div>
           </div>
         )}
 
-        {/* Dietary */}
-        {profile.dietaryInfo.length > 0 && (
-          <div className="flex items-start gap-2">
-            <UtensilsCrossed className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
-            <span className="text-gray-600 text-xs">
-              {profile.dietaryInfo.slice(0, 3).join(", ")}
+        {/* Role badges */}
+        <div className="absolute top-2 left-2 flex gap-1">
+          {isHost && (
+            <span className="rounded bg-purple-600 px-1.5 py-0.5 font-medium text-[9px] text-white">
+              Host{profile.capacity ? ` · ${profile.capacity}` : ""}
             </span>
-          </div>
-        )}
+          )}
+          {isGuest && !isHost && (
+            <span className="rounded bg-blue-600 px-1.5 py-0.5 font-medium text-[9px] text-white">
+              Guest
+            </span>
+          )}
+        </div>
+      </div>
 
-        {/* Details */}
-        <div className="mt-auto space-y-2">
-          <div className="flex items-start gap-2 text-gray-500 text-sm">
-            <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+      {/* Content - compact like reference */}
+      <div className="flex flex-1 flex-col justify-between p-3">
+        <div>
+          {/* Status badge + dates */}
+          <div className="mb-2 flex items-center justify-between">
             <div className="flex flex-wrap gap-1">
-              {profile.availableDates.map((d) => (
+              {profile.availableDates.slice(0, 2).map((d) => (
                 <span
-                  className="rounded bg-gray-100 px-1.5 text-gray-700 text-xs"
+                  className="rounded bg-red-50 px-1.5 py-0.5 font-medium text-[9px] text-red-700"
                   key={d}
                 >
                   {d}
                 </span>
               ))}
+              {profile.availableDates.length > 2 && (
+                <span className="text-[9px] text-gray-400">
+                  +{profile.availableDates.length - 2}
+                </span>
+              )}
             </div>
+            {profile.concept && (
+              <span className="text-[9px] text-gray-400">
+                {profile.concept}
+              </span>
+            )}
           </div>
 
-          <div className="flex items-start gap-2 text-gray-500 text-sm">
-            <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
-            <span className="text-xs">{profile.languages.join(", ")}</span>
-          </div>
+          {/* Bio - like reference */}
+          <p className="line-clamp-2 text-[11px] text-gray-600 leading-relaxed">
+            {profile.bio}
+          </p>
+        </div>
 
-          {/* Preference Icons */}
-          {preferenceIcons.length > 0 && (
-            <div className="flex items-center gap-3">
-              {preferenceIcons.map(({ icon: Icon, label, color }) => (
-                <div
-                  className={`flex items-center gap-1 ${color}`}
-                  key={label}
-                  title={label}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                </div>
-              ))}
-            </div>
-          )}
+        {/* Footer stats - like reference */}
+        <div className="mt-3 border-gray-100 border-t pt-2">
+          <div className="flex items-center gap-3 text-[10px] text-gray-500">
+            <span className="font-semibold text-gray-700">
+              {profile.languages.slice(0, 2).join(", ")}
+            </span>
+            {profile.vibes && profile.vibes.length > 0 && (
+              <span className="text-gray-400">{profile.vibes[0]}</span>
+            )}
+          </div>
         </div>
       </div>
-
-      <div className="mt-auto flex gap-2 border-gray-100 border-t p-4">
-        <Link
-          className="flex-1 rounded-lg bg-gray-50 px-4 py-2 text-center font-medium text-gray-700 text-sm transition-colors hover:bg-gray-100"
-          href={profileUrl}
-        >
-          View Details
-        </Link>
-        <ConnectionActionButton
-          onAccept={onAccept}
-          onInvite={onInvite}
-          status={connectionStatus}
-          userId={profile.userId}
-        />
-      </div>
     </div>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        className="h-full w-full text-left"
+        onClick={onClick}
+        type="button"
+      >
+        {card}
+      </button>
+    );
+  }
+
+  return (
+    <Link className="h-full w-full" href={profileUrl}>
+      {card}
+    </Link>
   );
 }

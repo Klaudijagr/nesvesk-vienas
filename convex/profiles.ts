@@ -100,6 +100,16 @@ export const listProfiles = query({
     const currentUserId = await getCurrentUserId(ctx);
     let profiles = await ctx.db.query("profiles").collect();
 
+    // Filter out profiles where the user no longer exists (orphaned profiles)
+    const validProfiles = [];
+    for (const p of profiles) {
+      const user = await ctx.db.get(p.userId);
+      if (user) {
+        validProfiles.push(p);
+      }
+    }
+    profiles = validProfiles;
+
     // Only show visible profiles (unless it's the current user's profile)
     profiles = profiles.filter(
       (p) => p.isVisible !== false || p.userId === currentUserId
@@ -184,6 +194,55 @@ export const listProfiles = query({
 export const upsertProfile = mutation({
   args: {
     role: v.union(v.literal("host"), v.literal("guest"), v.literal("both")),
+    // New granular status fields
+    hostingStatus: v.optional(
+      v.union(
+        v.literal("can-host"),
+        v.literal("may-host"),
+        v.literal("cant-host")
+      )
+    ),
+    guestStatus: v.optional(
+      v.union(
+        v.literal("looking"),
+        v.literal("maybe-guest"),
+        v.literal("not-looking")
+      )
+    ),
+    hostingDates: v.optional(
+      v.array(
+        v.union(
+          v.literal("23 Dec"),
+          v.literal("24 Dec"),
+          v.literal("25 Dec"),
+          v.literal("26 Dec"),
+          v.literal("27 Dec"),
+          v.literal("28 Dec"),
+          v.literal("29 Dec"),
+          v.literal("30 Dec"),
+          v.literal("31 Dec"),
+          v.literal("1 Jan"),
+          v.literal("2 Jan")
+        )
+      )
+    ),
+    guestDates: v.optional(
+      v.array(
+        v.union(
+          v.literal("23 Dec"),
+          v.literal("24 Dec"),
+          v.literal("25 Dec"),
+          v.literal("26 Dec"),
+          v.literal("27 Dec"),
+          v.literal("28 Dec"),
+          v.literal("29 Dec"),
+          v.literal("30 Dec"),
+          v.literal("31 Dec"),
+          v.literal("1 Jan"),
+          v.literal("2 Jan")
+        )
+      )
+    ),
     firstName: v.string(),
     lastName: v.optional(v.string()),
     age: v.optional(v.number()),
@@ -575,6 +634,49 @@ export const setUsername = mutation({
     // Update username
     await ctx.db.patch(profile._id, { username: normalized });
     return normalized;
+  },
+});
+
+// Update just role and available dates (for settings page)
+export const updatePreferences = mutation({
+  args: {
+    role: v.union(v.literal("host"), v.literal("guest"), v.literal("both")),
+    availableDates: v.array(
+      v.union(
+        v.literal("23 Dec"),
+        v.literal("24 Dec"),
+        v.literal("25 Dec"),
+        v.literal("26 Dec"),
+        v.literal("27 Dec"),
+        v.literal("28 Dec"),
+        v.literal("29 Dec"),
+        v.literal("30 Dec"),
+        v.literal("31 Dec"),
+        v.literal("1 Jan"),
+        v.literal("2 Jan")
+      )
+    ),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getCurrentUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    await ctx.db.patch(profile._id, {
+      role: args.role,
+      availableDates: args.availableDates,
+      lastActive: Date.now(),
+    });
   },
 });
 

@@ -9,7 +9,6 @@
  */
 
 import type * as email from "../email.js";
-import type * as events from "../events.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as invitations from "../invitations.js";
@@ -27,7 +26,6 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   email: typeof email;
-  events: typeof events;
   files: typeof files;
   http: typeof http;
   invitations: typeof invitations;
