@@ -56,10 +56,11 @@ export function DevPanel() {
     }
   };
 
-  // Only show in development
-  if (process.env.NODE_ENV !== "development") {
-    return null;
-  }
+  // Show in all environments for client review
+  // TODO: Re-enable this check before going live
+  // if (process.env.NODE_ENV !== "development") {
+  //   return null;
+  // }
 
   return (
     <div className="fixed right-4 bottom-4 z-50">
