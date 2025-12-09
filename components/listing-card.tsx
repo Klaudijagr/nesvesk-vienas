@@ -16,6 +16,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
+import { formatRelativeTime } from "@/lib/utils";
 
 type ConnectionStatus =
   | "none"
@@ -180,9 +181,16 @@ export function ListingCard({ profile, onInvite, onAccept }: ListingCardProps) {
             {profile.firstName}
             {!isHost && profile.age ? `, ${profile.age}` : ""}
           </h3>
-          <div className="flex items-center text-sm text-white/90">
-            <MapPin className="mr-1 h-3 w-3" />
-            {profile.city}
+          <div className="flex items-center gap-3 text-sm text-white/90">
+            <span className="flex items-center">
+              <MapPin className="mr-1 h-3 w-3" />
+              {profile.city}
+            </span>
+            {profile.lastActive && (
+              <span className="text-white/70 text-xs">
+                {formatRelativeTime(profile.lastActive)}
+              </span>
+            )}
           </div>
         </div>
       </Link>

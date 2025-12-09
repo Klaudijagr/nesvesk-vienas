@@ -2,7 +2,7 @@
 
 Holiday hosting/guest matching platform for Lithuania.
 
-**Last updated**: December 8, 2024
+**Last updated**: December 9, 2024
 
 ---
 
@@ -79,6 +79,15 @@ Holiday hosting/guest matching platform for Lithuania.
 - [x] Convex → Clerk delete - `deleteUser` action removes from both systems
 - [x] Cascading deletes - User deletion removes all related data
 
+### Auth Flow (Clerk + Convex)
+
+- [x] **Fixed auth sync issues** - Use `useConvexAuth` instead of Clerk's `useAuth`
+  - Updated `app/(dashboard)/layout.tsx` - Wait for Convex auth before querying profiles
+  - Updated `app/onboarding/page.tsx` - Skip profile query until auth is ready
+  - Updated `app/(landing)/page.tsx` - Use `useConvexAuth` for consistent auth state
+  - Prevents onboarding flash on page load
+  - Fixed redirect issues after sign-in/sign-up
+
 ---
 
 ## High Priority - UI/UX Redesign
@@ -121,6 +130,38 @@ Holiday hosting/guest matching platform for Lithuania.
   - Reference: `docs/couchsurfing-reimagined/components/ProfileView.tsx`
   - Instant status change from profile card
   - "Wants to Meet Up" option for non-hosting scenarios
+
+### Profile Card Unification (PRIORITY)
+
+**Problem**: Data flows from onboarding → Convex but not all fields display in cards/profile views.
+
+**Current state**:
+- `ListingCard` (`components/listing-card.tsx`) - Grid card for browse page
+- `ProfileView` (`components/profile-view.tsx`) - Full profile page display
+- Both use different subsets of profile data
+
+**Reference**: `docs/reference-projects/user-identity-card.tsx` - Multi-variant card component
+
+**Action items**:
+- [ ] **Audit data flow** - Map all profile fields from onboarding → schema → card display
+- [ ] **Create `UserIdentityCard` component** - Single component with variants:
+  - `dashboard-grid` - Browse page grid card
+  - `dashboard-list` - Browse page list view
+  - `inbox-sidebar` - Chat sidebar mini-profile
+  - `profile-header` - Full profile page header
+- [ ] **Add missing fields to cards**:
+  - Response time / last active
+  - References count (when implemented)
+  - Friends count (when implemented)
+  - Quick info section (joined date, occupation)
+- [ ] **Status indicators** - Online/offline dot, hosting status color
+
+**Data Model**:
+Current schema has all needed fields. Key ones not yet displayed:
+- `lastActive` - Show "Active recently" or "Last seen X days ago"
+- `concept` - Party/Dinner/Hangout (only shown if host)
+- `capacity` - Max guests (only shown if host)
+- `amenities`, `houseRules` - Host details (profile page only)
 
 ---
 
@@ -311,6 +352,64 @@ Holiday hosting/guest matching platform for Lithuania.
 - [x] Set up Convex testing with vitest (`bun run test`) - 3 tests passing
 - [ ] Reduce component complexity (BrowsePage, MessagesPage, ProfilePages) - partially done, still has warnings
 - [ ] **[Future] Migrate images to Cloudflare R2** - Zero egress fees vs Convex bandwidth limits (50GB/mo on Pro). Not urgent now, consider if scaling past 1K active users.
+
+---
+
+## Known Issues
+
+### Clerk Image 404 Error
+
+**Error**: `upstream image response failed for https://img.clerk.com/... 404`
+
+**Cause**: When a user deletes their account in Clerk, the OAuth profile image URL becomes invalid (404). The `syncGooglePhoto` function in `convex/files.ts` syncs the Clerk/Google image URL directly to the profile. When the user is deleted from Clerk, this URL breaks.
+
+**Impact**: Browse page shows broken images for deleted/stale users. Real-time sync with Convex means deleted users may still appear briefly.
+
+**Solutions**:
+1. **Short-term**: Fallback to DiceBear avatar when image fails to load (already in place in `listing-card.tsx`)
+2. **Medium-term**: Store OAuth images in Convex storage instead of linking to Clerk URLs
+3. **Long-term**: Clean up orphaned profiles when Clerk webhook fires `user.deleted`
+
+**Status**: Fallback implemented. Consider migrating to Convex storage for OAuth photos.
+
+---
+
+## Data Model Freeze Plan
+
+**Goal**: Finalize schema before accepting real users to avoid migrations.
+
+### Current Schema Status
+
+**Stable (ready for users)**:
+- `users` - Clerk sync working ✅
+- `profiles` - All core fields present ✅
+- `invitations` - Working but may deprecate for `conversations`
+- `messages` - Working ✅
+
+**Needs review before freeze**:
+- [ ] `conversations` - New chat system, may replace `invitations`
+- [ ] `events` - Not yet used in UI
+- [ ] `bannedWords` - Content moderation (not urgent)
+
+### Fields to Add Before Freeze
+
+**Profile fields**:
+- [ ] `occupation` - Job/profession (for Quick Info display)
+- [ ] `joinedAt` - Registration date (auto-set on profile creation)
+- [ ] `responseRate` - Track invitation response time
+- [ ] `hostingStatus` - "accepting" | "maybe" | "not_accepting" (vs role)
+
+**Future consideration (can add later with defaults)**:
+- `interests` - Hobbies/interests array (beyond vibes)
+- `referencesCount` - Denormalized count for display
+- `friendsCount` - When friends system added
+
+### Migration Strategy
+
+Once schema is frozen:
+1. All new fields must have `v.optional()` with sensible defaults
+2. Use `generateXxx` mutations for backfilling (like `generateMissingUsernames`)
+3. Never delete fields - mark as deprecated with comments
 
 ---
 

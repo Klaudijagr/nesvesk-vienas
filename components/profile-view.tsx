@@ -16,6 +16,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Doc } from "@/convex/_generated/dataModel";
+import { formatRelativeTime } from "@/lib/utils";
 
 type ProfileViewProps = {
   profile: Doc<"profiles">;
@@ -208,7 +209,7 @@ export function ProfileView({ profile }: ProfileViewProps) {
                 {profile.lastActive && (
                   <span className="flex items-center gap-1 text-sm">
                     <Clock className="h-4 w-4" />
-                    Active recently
+                    {formatRelativeTime(profile.lastActive)}
                   </span>
                 )}
               </div>

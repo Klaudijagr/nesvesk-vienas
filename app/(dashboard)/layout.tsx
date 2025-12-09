@@ -1,9 +1,9 @@
 "use client";
 
-import { useConvexAuth, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { DashboardNavbar } from "@/components/dashboard-navbar";
 import { VerifyBanner } from "@/components/verify-banner";
 import { useLocale } from "@/contexts/locale-context";
@@ -17,12 +17,22 @@ export default function DashboardLayout({
   const { t } = useLocale();
   const router = useRouter();
   const { isLoading: isAuthLoading, isAuthenticated } = useConvexAuth();
+  const updateLastActive = useMutation(api.profiles.updateLastActive);
+  const hasUpdatedLastActive = useRef(false);
 
   // Only query profile after auth is ready and user is authenticated
   const profile = useQuery(
     api.profiles.getMyProfile,
     isAuthLoading || !isAuthenticated ? "skip" : undefined
   );
+
+  // Update lastActive timestamp when user visits dashboard
+  useEffect(() => {
+    if (isAuthenticated && profile && !hasUpdatedLastActive.current) {
+      hasUpdatedLastActive.current = true;
+      updateLastActive();
+    }
+  }, [isAuthenticated, profile, updateLastActive]);
 
   // Redirect to onboarding if no profile or profile incomplete
   useEffect(() => {
