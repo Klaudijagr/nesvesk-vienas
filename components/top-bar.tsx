@@ -4,29 +4,33 @@ import { UserButton } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { Bell } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { useLocale } from "@/contexts/locale-context";
 import { api } from "@/convex/_generated/api";
+import { LanguageSelector } from "./language-selector";
 import { Button } from "./ui/button";
-
-const PAGE_TITLES: Record<string, string> = {
-  "/browse": "Find Hosts",
-  "/profile": "My Profile",
-  "/messages": "Messages",
-  "/settings": "Settings",
-  "/location-picker": "Location Picker",
-};
 
 export function TopBar() {
   const router = useRouter();
   const pathname = usePathname();
+  const { t } = useLocale();
   const unreadCount = useQuery(api.messages.getUnreadCount) ?? 0;
   const pendingInvites = useQuery(api.invitations.getPendingCount) ?? 0;
 
   const totalNotifications = unreadCount + pendingInvites;
 
-  // Get page title from pathname
-  const pageTitle =
-    PAGE_TITLES[pathname] ||
-    (pathname.startsWith("/profile/") ? "Profile" : "");
+  // Get page title from pathname with i18n
+  const getPageTitle = () => {
+    if (pathname === "/browse") return t.navFindHosts;
+    if (pathname === "/profile") return t.navMyProfile;
+    if (pathname === "/messages") return t.navMessages;
+    if (pathname === "/settings") return t.navSettings;
+    if (pathname === "/location-picker") return t.navLocationPicker;
+    if (pathname.startsWith("/profile/") || pathname.startsWith("/people/"))
+      return t.navProfile;
+    return "";
+  };
+
+  const pageTitle = getPageTitle();
 
   return (
     <header className="shrink-0 border-b bg-background">
@@ -38,6 +42,9 @@ export function TopBar() {
         <div className="flex-1" />
 
         <div className="flex items-center gap-3">
+          {/* Language Selector */}
+          <LanguageSelector />
+
           {/* Notifications */}
           <Button
             className="relative"

@@ -101,7 +101,7 @@ Holiday hosting/guest matching platform for Lithuania.
   - [x] Phase 5: Update all profile links (listing-card, browse, DevPanel, profile redirect)
   - [x] Keep `/profile/[id]` for backwards compatibility
   - [x] `generateMissingUsernames` mutation for existing profiles
-  - [ ] Run `generateMissingUsernames` on production to assign usernames
+  - [x] Run `generateMissingUsernames` on production to assign usernames
 
 ### Profile Card in Chat
 

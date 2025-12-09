@@ -4,12 +4,14 @@ import { useQuery } from "convex/react";
 import { Gift, Home, MessageCircle, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLocale } from "@/contexts/locale-context";
 import { api } from "@/convex/_generated/api";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { t } = useLocale();
   const unreadCount = useQuery(api.messages.getUnreadCount) ?? 0;
   const pendingInvites = useQuery(api.invitations.getPendingCount) ?? 0;
 
@@ -19,15 +21,15 @@ export function AppSidebar() {
   const totalBadge = unreadCount + pendingInvites;
 
   const navItems = [
-    { title: "Home", url: "/browse", icon: Home },
-    { title: "Profile", url: "/profile", icon: User },
+    { title: t.navHome, url: "/browse", icon: Home },
+    { title: t.navProfile, url: "/profile", icon: User },
     {
-      title: "Messages",
+      title: t.navMessages,
       url: "/messages",
       icon: MessageCircle,
       badge: totalBadge,
     },
-    { title: "Settings", url: "/settings", icon: Settings },
+    { title: t.navSettings, url: "/settings", icon: Settings },
   ];
 
   return (
@@ -38,11 +40,9 @@ export function AppSidebar() {
           <Gift className="h-6 w-6 text-white" />
         </div>
         <div className="flex flex-col">
-          <span className="font-bold text-foreground text-lg">
-            Nešvęsk vienas
-          </span>
+          <span className="font-bold text-foreground text-lg">{t.appName}</span>
           <span className="text-muted-foreground text-xs">
-            Don't Celebrate Alone
+            {t.dontCelebrateAlone}
           </span>
         </div>
       </Link>

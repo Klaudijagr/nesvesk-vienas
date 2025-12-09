@@ -172,10 +172,10 @@ export default function BrowsePage() {
               >
                 <SelectTrigger className="h-12 w-full flex-1 rounded-lg border-gray-200 bg-white shadow-sm hover:border-gray-300">
                   <Calendar className="mr-2 h-4 w-4 text-gray-400" />
-                  <SelectValue placeholder="Any Dates" />
+                  <SelectValue placeholder={t.anyDates} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__all__">Any Dates</SelectItem>
+                  <SelectItem value="__all__">{t.anyDates}</SelectItem>
                   {HOLIDAY_DATES.map((date) => (
                     <SelectItem key={date} value={date}>
                       {date}
@@ -193,10 +193,10 @@ export default function BrowsePage() {
               >
                 <SelectTrigger className="h-12 w-full flex-1 rounded-lg border-gray-200 bg-white shadow-sm hover:border-gray-300">
                   <Globe className="mr-2 h-4 w-4 text-gray-400" />
-                  <SelectValue placeholder="Any Language" />
+                  <SelectValue placeholder={t.anyLanguage} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__all__">Any Language</SelectItem>
+                  <SelectItem value="__all__">{t.anyLanguage}</SelectItem>
                   {LANGUAGES.map((lang) => (
                     <SelectItem key={lang} value={lang}>
                       {lang}
@@ -210,7 +210,7 @@ export default function BrowsePage() {
                 <button
                   className="flex h-12 items-center justify-center rounded-lg border border-transparent px-4 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
                   onClick={clearFilters}
-                  title="Clear Filters"
+                  title={t.clearFilters}
                   type="button"
                 >
                   <X className="h-5 w-5" />
@@ -226,8 +226,8 @@ export default function BrowsePage() {
         <div className="mb-6 flex items-center justify-between">
           <h2 className="font-bold text-gray-900 text-xl">
             {isLoading
-              ? "Loading..."
-              : `${filteredProfiles.length} ${activeTab === "host" ? "Hosts" : "Guests"} found`}
+              ? t.loading
+              : `${filteredProfiles.length} ${activeTab === "host" ? t.hostsFound : t.guestsFound}`}
           </h2>
 
           <div className="flex items-center gap-3">
@@ -236,9 +236,9 @@ export default function BrowsePage() {
                 className="flex items-center gap-2 font-medium text-gray-700 text-sm hover:text-black"
                 type="button"
               >
-                Sort by:{" "}
+                {t.sortBy}{" "}
                 <span className="font-bold text-black capitalize">
-                  {sortBy}
+                  {sortBy === "recommended" ? t.recommended : t.newest}
                 </span>
                 <ChevronDown className="h-4 w-4" />
               </button>
@@ -248,14 +248,14 @@ export default function BrowsePage() {
                   onClick={() => setSortBy("recommended")}
                   type="button"
                 >
-                  Recommended
+                  {t.recommended}
                 </button>
                 <button
                   className="block w-full px-4 py-2 text-left text-gray-700 text-sm hover:bg-gray-50"
                   onClick={() => setSortBy("newest")}
                   type="button"
                 >
-                  Newest
+                  {t.newest}
                 </button>
               </div>
             </div>
@@ -361,7 +361,7 @@ export default function BrowsePage() {
                           : "border-gray-100 bg-gray-50 text-gray-500"
                       }`}
                     >
-                      {profile.verified ? "Verified" : "Unverified"}
+                      {profile.verified ? t.verified : t.unverified}
                     </span>
                   </div>
 
@@ -383,7 +383,7 @@ export default function BrowsePage() {
                 <div className="flex w-full flex-col justify-between gap-3 border-gray-100 border-t py-1 pl-0 md:w-48 md:border-t-0 md:border-l md:pl-6">
                   <div>
                     <p className="font-semibold text-gray-900 text-xs uppercase tracking-wide">
-                      Availability
+                      {t.availability}
                     </p>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {profile.availableDates.map((d) => (
@@ -405,19 +405,19 @@ export default function BrowsePage() {
                           : `/profile/${profile.userId}`
                       }
                     >
-                      View Profile
+                      {t.viewProfile}
                     </Link>
                     {profile.connectionStatus === "matched" && (
                       <Link
                         className="block w-full rounded-lg bg-green-600 px-3 py-2 text-center font-medium text-white text-xs transition-colors hover:bg-green-700"
                         href="/messages"
                       >
-                        Message
+                        {t.message}
                       </Link>
                     )}
                     {profile.connectionStatus === "pending_sent" && (
                       <span className="block w-full rounded-lg border border-amber-500 bg-amber-50 px-3 py-2 text-center font-medium text-amber-600 text-xs">
-                        Pending
+                        {t.pending}
                       </span>
                     )}
                     {profile.connectionStatus === "pending_received" && (
@@ -426,7 +426,7 @@ export default function BrowsePage() {
                         onClick={() => handleAccept(profile.userId)}
                         type="button"
                       >
-                        Accept
+                        {t.accept}
                       </button>
                     )}
                     {(profile.connectionStatus === "none" ||
@@ -436,9 +436,7 @@ export default function BrowsePage() {
                         onClick={() => handleInvite(profile.userId)}
                         type="button"
                       >
-                        {activeTab === "host"
-                          ? "Request to Join"
-                          : "Send Request"}
+                        {activeTab === "host" ? t.requestToJoin : t.sendRequest}
                       </button>
                     )}
                   </div>
@@ -453,17 +451,17 @@ export default function BrowsePage() {
           <div className="rounded-xl border border-gray-300 border-dashed bg-white py-20 text-center">
             <SlidersHorizontal className="mx-auto h-12 w-12 text-gray-300" />
             <h3 className="mt-2 font-medium text-gray-900 text-sm">
-              No matches found
+              {t.noMatchesFound}
             </h3>
             <p className="mt-1 text-gray-500 text-sm">
-              Try adjusting your filters or dates.
+              {t.tryAdjustingFilters}
             </p>
             <button
               className="mt-4 font-medium text-red-600 text-sm hover:underline"
               onClick={clearFilters}
               type="button"
             >
-              Clear all filters
+              {t.clearAllFilters}
             </button>
           </div>
         )}
