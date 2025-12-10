@@ -79,7 +79,7 @@ export default function LandingMagicPage() {
               className="rounded-full bg-amber-400/10 px-4 py-2 font-medium text-amber-200 text-sm backdrop-blur-sm transition-all hover:bg-amber-400/20"
               href={isSignedIn ? "/browse" : "/sign-in"}
             >
-              {isSignedIn ? t.browse : t.signIn}
+              {isSignedIn ? t.browseHosts : t.signIn}
             </Link>
           </div>
         </div>
@@ -218,7 +218,7 @@ export default function LandingMagicPage() {
               {t.safetyTitle}
             </h2>
             <p className="mx-auto max-w-2xl text-blue-100/70">
-              {t.safetySubtitle}
+              {t.howItWorksSubtitle}
             </p>
           </div>
 
