@@ -50,7 +50,9 @@ export default function ProfilePage() {
     | undefined;
 
   const handleSendRequest = async () => {
-    if (!(id && defaultDate)) return;
+    if (!(id && defaultDate)) {
+      return;
+    }
 
     setIsSending(true);
     try {
@@ -64,7 +66,9 @@ export default function ProfilePage() {
   };
 
   const handleRespond = async (accept: boolean) => {
-    if (!connectionStatus?.invitationId) return;
+    if (!connectionStatus?.invitationId) {
+      return;
+    }
     setIsSending(true);
     try {
       await respondToInvitation({
@@ -95,7 +99,9 @@ export default function ProfilePage() {
 
   // Render action button based on connection status
   const renderActionButton = () => {
-    if (isOwnProfile || !isAuthenticated) return null;
+    if (isOwnProfile || !isAuthenticated) {
+      return null;
+    }
 
     const status = connectionStatus?.status;
 

@@ -101,7 +101,7 @@ export const listProfiles = query({
     let profiles = await ctx.db.query("profiles").collect();
 
     // Filter out profiles where the user no longer exists (orphaned profiles)
-    const validProfiles = [];
+    const validProfiles: typeof profiles = [];
     for (const p of profiles) {
       const user = await ctx.db.get(p.userId);
       if (user) {

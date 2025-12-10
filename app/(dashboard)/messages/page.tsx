@@ -878,9 +878,15 @@ function MessagesPageContent() {
     try {
       // Format event details as a message
       const parts = [`📅 Event Details for ${data.date}`];
-      if (data.address) parts.push(`📍 ${data.address}`);
-      if (data.phone) parts.push(`📞 ${data.phone}`);
-      if (data.note) parts.push(`💬 ${data.note}`);
+      if (data.address) {
+        parts.push(`📍 ${data.address}`);
+      }
+      if (data.phone) {
+        parts.push(`📞 ${data.phone}`);
+      }
+      if (data.note) {
+        parts.push(`💬 ${data.note}`);
+      }
 
       await sendMessage({
         conversationId: activeConversationId,

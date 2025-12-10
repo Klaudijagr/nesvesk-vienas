@@ -79,8 +79,12 @@ function statusesToRole(
 ): "host" | "guest" | "both" {
   const isHost = hostingStatus === "can-host" || hostingStatus === "may-host";
   const isGuest = guestStatus === "looking" || guestStatus === "maybe-guest";
-  if (isHost && isGuest) return "both";
-  if (isHost) return "host";
+  if (isHost && isGuest) {
+    return "both";
+  }
+  if (isHost) {
+    return "host";
+  }
   return "guest";
 }
 
@@ -130,8 +134,12 @@ export function ProfileView({ profile, isOwnProfile }: ProfileViewProps) {
   // Build photos array
   const photos = useMemo(() => {
     const allPhotos: string[] = [];
-    if (profile.photoUrl) allPhotos.push(profile.photoUrl);
-    if (profile.photos) allPhotos.push(...profile.photos);
+    if (profile.photoUrl) {
+      allPhotos.push(profile.photoUrl);
+    }
+    if (profile.photos) {
+      allPhotos.push(...profile.photos);
+    }
     return allPhotos.length > 0
       ? allPhotos
       : [
@@ -181,7 +189,7 @@ export function ProfileView({ profile, isOwnProfile }: ProfileViewProps) {
       });
       setIsEditing(false);
       toast.success("Profile saved!");
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to save profile");
     } finally {
       setIsSaving(false);

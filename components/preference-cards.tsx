@@ -283,8 +283,12 @@ function statusesToRole(hostingStatus: string, guestStatus: string): UserRole {
   const isHost = hostingStatus === "can-host" || hostingStatus === "may-host";
   const isGuest = guestStatus === "looking" || guestStatus === "maybe-guest";
 
-  if (isHost && isGuest) return "both";
-  if (isHost) return "host";
+  if (isHost && isGuest) {
+    return "both";
+  }
+  if (isHost) {
+    return "host";
+  }
   return "guest";
 }
 
