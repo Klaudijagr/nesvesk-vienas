@@ -851,3 +851,42 @@ export const getFilterCounts = query({
     };
   },
 });
+
+// ===== DEV ONLY =====
+
+// Get all users with their profiles for dev switcher
+// This should only be used in development mode
+export const devGetAllUsers = query({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+
+    const usersWithProfiles = await Promise.all(
+      users.map(async (user) => {
+        const profile = await ctx.db
+          .query("profiles")
+          .withIndex("by_userId", (q) => q.eq("userId", user._id))
+          .first();
+
+        return {
+          userId: user._id,
+          clerkId: user.clerkId,
+          email: user.email,
+          name: user.name,
+          imageUrl: user.imageUrl,
+          profile: profile
+            ? {
+                firstName: profile.firstName,
+                lastName: profile.lastName,
+                role: profile.role,
+                city: profile.city,
+                username: profile.username,
+              }
+            : null,
+        };
+      })
+    );
+
+    return usersWithProfiles;
+  },
+});

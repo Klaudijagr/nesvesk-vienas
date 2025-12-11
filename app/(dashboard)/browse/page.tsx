@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ListingCard } from "@/components/listing-card";
+import { ProfileActionButton } from "@/components/profile-action-button";
 import {
   Select,
   SelectContent,
@@ -23,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { UnifiedProfileCard } from "@/components/unified-profile-card";
 import { useLocale } from "@/contexts/locale-context";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -400,6 +402,8 @@ export default function BrowsePage() {
   const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<"host" | "guest">("host");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+  const [isSending, setIsSending] = useState(false);
 
   // Filters
   const [selectedCity, setSelectedCity] = useState<string>("");
@@ -426,6 +430,14 @@ export default function BrowsePage() {
   // Get my pending invitations to find invitation IDs for Accept
   const myInvitations = useQuery(api.invitations.getMyInvitations);
 
+  // Get connection status for selected profile
+  const connectionStatus = useQuery(
+    api.invitations.getConnectionStatus,
+    selectedProfile?.userId
+      ? { otherUserId: selectedProfile.userId as Id<"users"> }
+      : "skip"
+  );
+
   const handleInvite = async (userId: Id<"users">) => {
     try {
       await sendInvitation({
@@ -440,6 +452,52 @@ export default function BrowsePage() {
       } else {
         toast.error(`${t.failedToSendRequest}: ${message}`);
       }
+    }
+  };
+
+  const handleSheetInvite = async () => {
+    if (!selectedProfile) return;
+    setIsSending(true);
+    // Find first available date that matches the valid invitation dates
+    const validDates = ["24 Dec", "25 Dec", "26 Dec", "31 Dec"] as const;
+    const firstValidDate =
+      selectedProfile.availableDates?.find((d) =>
+        validDates.includes(d as (typeof validDates)[number])
+      ) || "24 Dec";
+    try {
+      await sendInvitation({
+        toUserId: selectedProfile.userId as Id<"users">,
+        date: firstValidDate as "24 Dec" | "25 Dec" | "26 Dec" | "31 Dec",
+      });
+      toast.success(t.requestSent);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      if (message.includes("already sent")) {
+        toast.error(t.alreadySentRequest);
+      } else {
+        toast.error(`${t.failedToSendRequest}: ${message}`);
+      }
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleSheetRespond = async (accept: boolean) => {
+    if (!connectionStatus?.invitationId) return;
+    setIsSending(true);
+    try {
+      await respondToInvitation({
+        invitationId: connectionStatus.invitationId,
+        accept,
+      });
+      if (accept) {
+        toast.success(t.youreMatched);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      toast.error(`${t.failedToAccept}: ${message}`);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -495,7 +553,11 @@ export default function BrowsePage() {
       return (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {filteredProfiles.map((profile) => (
-            <ListingCard key={profile._id} profile={profile} />
+            <ListingCard
+              key={profile._id}
+              onClick={() => setSelectedProfile(profile)}
+              profile={profile}
+            />
           ))}
         </div>
       );
@@ -633,6 +695,36 @@ export default function BrowsePage() {
 
         {renderResults()}
       </div>
+
+      {/* Profile Card Modal */}
+      {selectedProfile && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setSelectedProfile(null)}
+        >
+          <div
+            className="slide-in-from-right-full animate-in duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <UnifiedProfileCard
+              actionButton={
+                <ProfileActionButton
+                  hasAvailableDates={
+                    (selectedProfile.availableDates?.length ?? 0) > 0
+                  }
+                  isSending={isSending}
+                  onAccept={() => handleSheetRespond(true)}
+                  onConnect={handleSheetInvite}
+                  onDecline={() => handleSheetRespond(false)}
+                  status={connectionStatus?.status}
+                  userId={selectedProfile.userId}
+                />
+              }
+              profile={selectedProfile}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -296,9 +296,11 @@ function VerificationDot({
 export function UnifiedProfileCard({
   profile,
   className = "",
+  actionButton,
 }: {
   profile: Doc<"profiles">;
   className?: string;
+  actionButton?: React.ReactNode;
 }) {
   const hostingDates = profile.hostingDates || [];
   const guestDates = profile.guestDates || [];
@@ -354,6 +356,11 @@ export function UnifiedProfileCard({
           </div>
         </div>
       </div>
+
+      {/* Optional Action Button */}
+      {actionButton && (
+        <div className="border-gray-100 border-t px-5 py-3">{actionButton}</div>
+      )}
     </div>
   );
 }

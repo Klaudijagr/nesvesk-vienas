@@ -454,19 +454,19 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Separator before CTA */}
-      <div className="mx-auto max-w-xs px-4 py-8 sm:max-w-md sm:py-12">
-        <div className="flex items-center gap-4">
-          <div className="h-px flex-1 bg-linear-to-r from-transparent to-amber-400/30" />
-          <div className="h-1.5 w-1.5 rounded-full bg-amber-400/50" />
-          <div className="h-px flex-1 bg-linear-to-l from-transparent to-amber-400/30" />
-        </div>
-      </div>
-
       {/* CTA */}
-      <div className="relative overflow-hidden pb-12 sm:pb-16 md:pb-24">
+      <div className="relative overflow-hidden pt-8 pb-12 sm:pt-12 sm:pb-16 md:pt-16 md:pb-24">
         <div className="absolute inset-0 bg-linear-to-br from-amber-600/20 via-rose-600/10 to-amber-600/20" />
         <div className="-translate-x-1/2 pointer-events-none absolute top-0 left-1/2 h-32 w-[400px] rounded-full bg-amber-500/20 blur-[80px] sm:h-64 sm:w-[800px] sm:blur-[120px]" />
+
+        {/* Separator at top of CTA */}
+        <div className="relative mx-auto mb-8 max-w-xs px-4 sm:mb-12 sm:max-w-md">
+          <div className="flex items-center gap-4">
+            <div className="h-px flex-1 bg-linear-to-r from-transparent to-amber-400/30" />
+            <div className="h-1.5 w-1.5 rounded-full bg-amber-400/50" />
+            <div className="h-px flex-1 bg-linear-to-l from-transparent to-amber-400/30" />
+          </div>
+        </div>
 
         <div className="relative mx-auto max-w-xs px-4 text-center sm:max-w-4xl">
           <Flame className="mx-auto mb-4 h-8 w-8 text-amber-400 sm:mb-6 sm:h-10 sm:w-10 md:h-12 md:w-12" />

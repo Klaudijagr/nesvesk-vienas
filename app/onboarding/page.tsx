@@ -28,9 +28,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/convex/_generated/api";
 import type { HolidayDate } from "@/lib/types";
-import { CITIES, HOLIDAY_DATES, LANGUAGES } from "@/lib/types";
+import {
+  CITIES,
+  DIETARY_OPTIONS,
+  HOLIDAY_DATES,
+  LANGUAGES,
+  VIBES_OPTIONS,
+} from "@/lib/types";
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 type IconType = "check" | "question" | "x";
 type ColorType = "green" | "amber" | "red";
@@ -43,6 +49,107 @@ type PreferenceOption = {
   colorType: ColorType;
   showDates: boolean;
 };
+
+// Step 0: GDPR Consent
+function Step0Consent({
+  termsAccepted,
+  setTermsAccepted,
+  privacyAccepted,
+  setPrivacyAccepted,
+}: {
+  termsAccepted: boolean;
+  setTermsAccepted: (v: boolean) => void;
+  privacyAccepted: boolean;
+  setPrivacyAccepted: (v: boolean) => void;
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+        <p className="text-amber-800 text-sm">
+          Before you continue, please review and accept our Terms of Service and
+          Privacy Policy. This is required to use our platform.
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors hover:bg-gray-50">
+          <input
+            checked={termsAccepted}
+            className="mt-0.5 h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
+            onChange={(e) => setTermsAccepted(e.target.checked)}
+            type="checkbox"
+          />
+          <div className="flex-1">
+            <p className="font-medium text-gray-900">Terms of Service</p>
+            <p className="mt-1 text-gray-600 text-sm">
+              I have read and agree to the{" "}
+              <Link
+                className="font-medium text-red-600 underline hover:text-red-700"
+                href="/terms"
+                target="_blank"
+              >
+                Terms of Service
+              </Link>
+              , including the community guidelines and acceptable use policy.
+            </p>
+          </div>
+        </label>
+
+        <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors hover:bg-gray-50">
+          <input
+            checked={privacyAccepted}
+            className="mt-0.5 h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
+            onChange={(e) => setPrivacyAccepted(e.target.checked)}
+            type="checkbox"
+          />
+          <div className="flex-1">
+            <p className="font-medium text-gray-900">Privacy Policy</p>
+            <p className="mt-1 text-gray-600 text-sm">
+              I have read and agree to the{" "}
+              <Link
+                className="font-medium text-red-600 underline hover:text-red-700"
+                href="/privacy"
+                target="_blank"
+              >
+                Privacy Policy
+              </Link>
+              , and I consent to the processing of my personal data as described
+              therein.
+            </p>
+          </div>
+        </label>
+
+        <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors hover:bg-gray-50">
+          <input
+            checked={termsAccepted && privacyAccepted}
+            className="mt-0.5 h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
+            disabled
+            type="checkbox"
+          />
+          <div className="flex-1">
+            <p className="font-medium text-gray-900">Safety Guidelines</p>
+            <p className="mt-1 text-gray-600 text-sm">
+              I understand and agree to follow the{" "}
+              <Link
+                className="font-medium text-red-600 underline hover:text-red-700"
+                href="/safety"
+                target="_blank"
+              >
+                Safety Guidelines
+              </Link>{" "}
+              when meeting other users.
+            </p>
+          </div>
+        </label>
+      </div>
+
+      <p className="text-center text-gray-500 text-xs">
+        By continuing, you confirm you are at least 18 years old and agree to
+        receive important communications about your account.
+      </p>
+    </div>
+  );
+}
 
 const HOSTING_OPTIONS: PreferenceOption[] = [
   {
@@ -505,6 +612,205 @@ function Step4Languages({
   );
 }
 
+// Step 5: Dietary & Vibes
+function Step5DietaryVibes({
+  dietaryInfo,
+  toggleDietary,
+  vibes,
+  toggleVibe,
+}: {
+  dietaryInfo: (typeof DIETARY_OPTIONS)[number][];
+  toggleDietary: (d: (typeof DIETARY_OPTIONS)[number]) => void;
+  vibes: (typeof VIBES_OPTIONS)[number][];
+  toggleVibe: (v: (typeof VIBES_OPTIONS)[number]) => void;
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <Label>Dietary preferences</Label>
+        <p className="text-muted-foreground text-sm">
+          Let hosts know about your dietary needs (optional)
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {DIETARY_OPTIONS.map((diet) => (
+            <Button
+              key={diet}
+              onClick={() => toggleDietary(diet)}
+              size="sm"
+              type="button"
+              variant={dietaryInfo.includes(diet) ? "default" : "outline"}
+            >
+              {diet}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label>What vibe are you looking for?</Label>
+        <p className="text-muted-foreground text-sm">
+          Help others understand what kind of gathering you prefer
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {VIBES_OPTIONS.map((vibe) => (
+            <Button
+              key={vibe}
+              onClick={() => toggleVibe(vibe)}
+              size="sm"
+              type="button"
+              variant={vibes.includes(vibe) ? "default" : "outline"}
+            >
+              {vibe}
+            </Button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Step 6: Lifestyle preferences
+function Step6Lifestyle({
+  smokingAllowed,
+  setSmokingAllowed,
+  drinkingAllowed,
+  setDrinkingAllowed,
+  petsAllowed,
+  setPetsAllowed,
+  hasPets,
+  setHasPets,
+}: {
+  smokingAllowed: boolean;
+  setSmokingAllowed: (v: boolean) => void;
+  drinkingAllowed: boolean;
+  setDrinkingAllowed: (v: boolean) => void;
+  petsAllowed: boolean;
+  setPetsAllowed: (v: boolean) => void;
+  hasPets: boolean;
+  setHasPets: (v: boolean) => void;
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <Label className="text-base">Lifestyle preferences</Label>
+        <p className="text-muted-foreground text-sm">
+          These help match you with compatible hosts and guests
+        </p>
+
+        <div className="space-y-4 rounded-lg border p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Alcohol</p>
+              <p className="text-muted-foreground text-sm">
+                Are you okay with alcohol at gatherings?
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setDrinkingAllowed(true)}
+                size="sm"
+                type="button"
+                variant={drinkingAllowed ? "default" : "outline"}
+              >
+                Yes
+              </Button>
+              <Button
+                onClick={() => setDrinkingAllowed(false)}
+                size="sm"
+                type="button"
+                variant={drinkingAllowed ? "outline" : "default"}
+              >
+                No
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Smoking</p>
+              <p className="text-muted-foreground text-sm">
+                Are you okay with smoking?
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setSmokingAllowed(true)}
+                size="sm"
+                type="button"
+                variant={smokingAllowed ? "default" : "outline"}
+              >
+                Yes
+              </Button>
+              <Button
+                onClick={() => setSmokingAllowed(false)}
+                size="sm"
+                type="button"
+                variant={smokingAllowed ? "outline" : "default"}
+              >
+                No
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Pets welcome</p>
+              <p className="text-muted-foreground text-sm">
+                Are you okay with pets at gatherings?
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setPetsAllowed(true)}
+                size="sm"
+                type="button"
+                variant={petsAllowed ? "default" : "outline"}
+              >
+                Yes
+              </Button>
+              <Button
+                onClick={() => setPetsAllowed(false)}
+                size="sm"
+                type="button"
+                variant={petsAllowed ? "outline" : "default"}
+              >
+                No
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">I have pets</p>
+              <p className="text-muted-foreground text-sm">
+                Do you have pets that might be present?
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setHasPets(true)}
+                size="sm"
+                type="button"
+                variant={hasPets ? "default" : "outline"}
+              >
+                Yes
+              </Button>
+              <Button
+                onClick={() => setHasPets(false)}
+                size="sm"
+                type="button"
+                variant={hasPets ? "outline" : "default"}
+              >
+                No
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Completed state
 function CompletedState({ onSkip }: { onSkip: () => void }) {
   return (
@@ -541,9 +847,13 @@ export default function OnboardingPage() {
   const upsertProfile = useMutation(api.profiles.upsertProfile);
   const syncGooglePhoto = useMutation(api.files.syncGooglePhoto);
 
-  const [step, setStep] = useState<Step>(1);
+  const [step, setStep] = useState<Step>(0);
   const [isSaving, setIsSaving] = useState(false);
   const [completed, setCompleted] = useState(false);
+
+  // Step 0: GDPR Consent
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
   // Step 1: Preferences
   const [hostingStatus, setHostingStatus] = useState("cant-host");
@@ -564,6 +874,18 @@ export default function OnboardingPage() {
 
   // Step 4: Languages
   const [languages, setLanguages] = useState<(typeof LANGUAGES)[number][]>([]);
+
+  // Step 5: Dietary & Vibes
+  const [dietaryInfo, setDietaryInfo] = useState<
+    (typeof DIETARY_OPTIONS)[number][]
+  >([]);
+  const [vibes, setVibes] = useState<(typeof VIBES_OPTIONS)[number][]>([]);
+
+  // Step 6: Lifestyle
+  const [smokingAllowed, setSmokingAllowed] = useState(false);
+  const [drinkingAllowed, setDrinkingAllowed] = useState(true);
+  const [petsAllowed, setPetsAllowed] = useState(false);
+  const [hasPets, setHasPets] = useState(false);
 
   // Pre-fill from Clerk user data
   useEffect(() => {
@@ -637,14 +959,26 @@ export default function OnboardingPage() {
     );
   };
 
+  const toggleDietary = (diet: (typeof DIETARY_OPTIONS)[number]) => {
+    setDietaryInfo((prev) =>
+      prev.includes(diet) ? prev.filter((d) => d !== diet) : [...prev, diet]
+    );
+  };
+
+  const toggleVibe = (vibe: (typeof VIBES_OPTIONS)[number]) => {
+    setVibes((prev) =>
+      prev.includes(vibe) ? prev.filter((v) => v !== vibe) : [...prev, vibe]
+    );
+  };
+
   const handleNext = () => {
-    if (step < 4) {
+    if (step < 6) {
       setStep((step + 1) as Step);
     }
   };
 
   const handleBack = () => {
-    if (step > 1) {
+    if (step > 0) {
       setStep((step - 1) as Step);
     }
   };
@@ -675,14 +1009,14 @@ export default function OnboardingPage() {
         bio,
         languages,
         availableDates, // Keep for backwards compat
-        dietaryInfo: [],
+        dietaryInfo,
         amenities: [],
         houseRules: [],
-        vibes: [],
-        smokingAllowed: false,
-        drinkingAllowed: true,
-        petsAllowed: false,
-        hasPets: false,
+        vibes,
+        smokingAllowed,
+        drinkingAllowed,
+        petsAllowed,
+        hasPets,
       });
       setCompleted(true);
     } finally {
@@ -691,6 +1025,7 @@ export default function OnboardingPage() {
   };
 
   // Validation
+  const isStep0Valid = termsAccepted && privacyAccepted;
   const isStep1Valid =
     (hostingStatus !== "cant-host" ? hostingDates.length > 0 : true) ||
     (guestStatus !== "not-looking" ? guestDates.length > 0 : true);
@@ -700,15 +1035,27 @@ export default function OnboardingPage() {
 
   // Step descriptions
   const stepDescriptions: Record<Step, string> = {
+    0: "Review and accept our policies",
     1: "What brings you here this holiday season?",
     2: "Tell us about yourself",
     3: "Write a short bio",
-    4: "Almost done! Select your languages",
+    4: "Select your languages",
+    5: "Dietary preferences & vibes",
+    6: "Almost done! Lifestyle preferences",
   };
 
   // Render current step content
   const renderStepContent = () => {
     switch (step) {
+      case 0:
+        return (
+          <Step0Consent
+            privacyAccepted={privacyAccepted}
+            setPrivacyAccepted={setPrivacyAccepted}
+            setTermsAccepted={setTermsAccepted}
+            termsAccepted={termsAccepted}
+          />
+        );
       case 1:
         return (
           <Step1Preferences
@@ -739,6 +1086,28 @@ export default function OnboardingPage() {
             toggleLanguage={toggleLanguage}
           />
         );
+      case 5:
+        return (
+          <Step5DietaryVibes
+            dietaryInfo={dietaryInfo}
+            toggleDietary={toggleDietary}
+            toggleVibe={toggleVibe}
+            vibes={vibes}
+          />
+        );
+      case 6:
+        return (
+          <Step6Lifestyle
+            drinkingAllowed={drinkingAllowed}
+            hasPets={hasPets}
+            petsAllowed={petsAllowed}
+            setDrinkingAllowed={setDrinkingAllowed}
+            setHasPets={setHasPets}
+            setPetsAllowed={setPetsAllowed}
+            setSmokingAllowed={setSmokingAllowed}
+            smokingAllowed={smokingAllowed}
+          />
+        );
       default:
         return null;
     }
@@ -746,6 +1115,9 @@ export default function OnboardingPage() {
 
   // Check if current step is valid for next button
   const isCurrentStepValid = () => {
+    if (step === 0) {
+      return isStep0Valid;
+    }
     if (step === 1) {
       return isStep1Valid;
     }
@@ -755,6 +1127,10 @@ export default function OnboardingPage() {
     if (step === 3) {
       return isStep3Valid;
     }
+    if (step === 4) {
+      return isStep4Valid;
+    }
+    // Steps 5 and 6 are optional, always valid
     return true;
   };
 
@@ -777,9 +1153,9 @@ export default function OnboardingPage() {
         <CardTitle className="text-2xl">Welcome to Nešvęsk vienas</CardTitle>
         <CardDescription>{stepDescriptions[step]}</CardDescription>
         <div className="mt-4 flex justify-center gap-2">
-          {[1, 2, 3, 4].map((s) => (
+          {[0, 1, 2, 3, 4, 5, 6].map((s) => (
             <div
-              className={`h-2 w-8 rounded-full transition-colors ${
+              className={`h-2 w-6 rounded-full transition-colors ${
                 s <= step ? "bg-red-500" : "bg-gray-200"
               }`}
               key={s}
@@ -792,7 +1168,7 @@ export default function OnboardingPage() {
         {renderStepContent()}
 
         <div className="flex justify-between pt-4">
-          {step > 1 ? (
+          {step > 0 ? (
             <Button onClick={handleBack} type="button" variant="outline">
               <ChevronLeft className="mr-1 h-4 w-4" />
               Back
@@ -801,21 +1177,17 @@ export default function OnboardingPage() {
             <div />
           )}
 
-          {step < 4 ? (
+          {step < 6 ? (
             <Button
               disabled={!isCurrentStepValid()}
               onClick={handleNext}
               type="button"
             >
-              Next
+              {step === 0 ? "I Agree & Continue" : "Next"}
               <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           ) : (
-            <Button
-              disabled={!isStep4Valid || isSaving}
-              onClick={handleComplete}
-              type="button"
-            >
+            <Button disabled={isSaving} onClick={handleComplete} type="button">
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Complete Setup
             </Button>

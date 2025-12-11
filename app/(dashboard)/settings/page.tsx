@@ -1,9 +1,22 @@
 "use client";
 
 import { SignOutButton, useUser } from "@clerk/nextjs";
-import { useQuery } from "convex/react";
-import { Bell, Key, LogOut, Shield, Trash2 } from "lucide-react";
+import { useAction, useQuery } from "convex/react";
+import { Bell, Key, Loader2, LogOut, Shield, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +26,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
@@ -22,7 +36,37 @@ import { api } from "@/convex/_generated/api";
 export default function SettingsPage() {
   const { t } = useLocale();
   const { user } = useUser();
+  const router = useRouter();
   const profile = useQuery(api.profiles.getMyProfile);
+  const deleteUser = useAction(api.users.deleteUser);
+
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (!profile?.userId) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const result = await deleteUser({ userId: profile.userId });
+      if (result.success) {
+        toast.success("Account deleted successfully");
+        router.push("/");
+      } else {
+        toast.error(result.error || "Failed to delete account");
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete account"
+      );
+    } finally {
+      setIsDeleting(false);
+      setDialogOpen(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -236,15 +280,93 @@ export default function SettingsPage() {
                     {t.permanentlyDeleteAccount}
                   </p>
                 </div>
-                <Button disabled variant="destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  {t.deleteAccount}
-                </Button>
+                <DeleteAccountDialog
+                  confirmText={confirmText}
+                  isDeleting={isDeleting}
+                  onConfirm={handleDeleteAccount}
+                  onConfirmTextChange={setConfirmText}
+                  onOpenChange={setDialogOpen}
+                  open={dialogOpen}
+                  t={t}
+                />
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
+  );
+}
+
+function DeleteAccountDialog({
+  open,
+  onOpenChange,
+  confirmText,
+  onConfirmTextChange,
+  isDeleting,
+  onConfirm,
+  t,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  confirmText: string;
+  onConfirmTextChange: (text: string) => void;
+  isDeleting: boolean;
+  onConfirm: () => void;
+  t: ReturnType<typeof useLocale>["t"];
+}) {
+  const isConfirmValid = confirmText === "DELETE";
+
+  return (
+    <AlertDialog onOpenChange={onOpenChange} open={open}>
+      <AlertDialogTrigger asChild>
+        <Button variant="destructive">
+          <Trash2 className="mr-2 h-4 w-4" />
+          {t.deleteAccount}
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription className="space-y-3">
+            <span className="block">
+              This action cannot be undone. This will permanently delete your
+              account and remove all your data from our servers, including:
+            </span>
+            <ul className="list-inside list-disc space-y-1 text-sm">
+              <li>Your profile and photos</li>
+              <li>All your messages and conversations</li>
+              <li>Your connection history</li>
+              <li>Any pending invitations</li>
+            </ul>
+            <span className="block pt-2">
+              Type <strong>DELETE</strong> to confirm:
+            </span>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <Input
+          onChange={(e) => onConfirmTextChange(e.target.value)}
+          placeholder="Type DELETE to confirm"
+          value={confirmText}
+        />
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <Button
+            disabled={!isConfirmValid || isDeleting}
+            onClick={onConfirm}
+            variant="destructive"
+          >
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              "Delete Account"
+            )}
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

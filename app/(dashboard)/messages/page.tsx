@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery } from "convex/react";
 import {
+  ArrowLeft,
   ArrowRight,
   Ban,
   Check,
@@ -9,6 +10,7 @@ import {
   Flag,
   MapPin,
   MessageCircle,
+  MoreVertical,
   Search,
   Share2,
   UserPlus,
@@ -21,6 +23,13 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/convex/_generated/api";
@@ -469,67 +478,77 @@ function ReportModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-        <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
-            <Flag className="h-5 w-5 text-red-600" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-lg">Report {userName}</h3>
-            <p className="text-muted-foreground text-sm">
-              Help us keep the community safe
-            </p>
-          </div>
-        </div>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Reason for report *</Label>
-            <div className="space-y-2">
-              {REPORT_REASONS.map((r) => (
-                <label
-                  className={cn(
-                    "flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors",
-                    reason === r.value
-                      ? "border-red-500 bg-red-50"
-                      : "hover:bg-gray-50"
-                  )}
-                  key={r.value}
-                >
-                  <input
-                    checked={reason === r.value}
-                    className="h-4 w-4 text-red-500"
-                    name="report-reason"
-                    onChange={() => setReason(r.value)}
-                    type="radio"
-                  />
-                  <span className="text-sm">{r.label}</span>
-                </label>
-              ))}
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-4"
+      onClick={onClose}
+    >
+      <div className="flex min-h-full items-center justify-center">
+        <div
+          className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
+              <Flag className="h-5 w-5 text-red-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg">Report {userName}</h3>
+              <p className="text-muted-foreground text-sm">
+                Help us keep the community safe
+              </p>
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="reportDetails">Additional details (optional)</Label>
-            <textarea
-              className="min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              id="reportDetails"
-              onChange={(e) => setDetails(e.target.value)}
-              placeholder="Provide any additional context..."
-              value={details}
-            />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Reason for report *</Label>
+              <div className="space-y-2">
+                {REPORT_REASONS.map((r) => (
+                  <label
+                    className={cn(
+                      "flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors",
+                      reason === r.value
+                        ? "border-red-500 bg-red-50"
+                        : "hover:bg-gray-50"
+                    )}
+                    key={r.value}
+                  >
+                    <input
+                      checked={reason === r.value}
+                      className="h-4 w-4 text-red-500"
+                      name="report-reason"
+                      onChange={() => setReason(r.value)}
+                      type="radio"
+                    />
+                    <span className="text-sm">{r.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reportDetails">
+                Additional details (optional)
+              </Label>
+              <textarea
+                className="min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                id="reportDetails"
+                onChange={(e) => setDetails(e.target.value)}
+                placeholder="Provide any additional context..."
+                value={details}
+              />
+            </div>
           </div>
-        </div>
-        <div className="mt-6 flex gap-3">
-          <Button className="flex-1" onClick={onClose} variant="outline">
-            Cancel
-          </Button>
-          <Button
-            className="flex-1 bg-red-500 hover:bg-red-600"
-            disabled={!reason || isSubmitting}
-            onClick={() => reason && onSubmit(reason, details || undefined)}
-          >
-            {isSubmitting ? "Reporting..." : "Submit Report"}
-          </Button>
+          <div className="mt-6 flex gap-3">
+            <Button className="flex-1" onClick={onClose} variant="outline">
+              Cancel
+            </Button>
+            <Button
+              className="flex-1 bg-red-500 hover:bg-red-600"
+              disabled={!reason || isSubmitting}
+              onClick={() => reason && onSubmit(reason, details || undefined)}
+            >
+              {isSubmitting ? "Reporting..." : "Submit Report"}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
@@ -746,8 +765,16 @@ function MessagesSidebar({
     );
   };
 
+  const hasActiveChat = activeId !== null;
+
   return (
-    <div className="flex w-80 shrink-0 flex-col border-r bg-background">
+    <div
+      className={cn(
+        "flex w-full shrink-0 flex-col border-r bg-background md:w-80",
+        // Hide on mobile when chat is active
+        hasActiveChat && "hidden md:flex"
+      )}
+    >
       <div className="flex h-[72px] items-center border-b px-4">
         <div className="relative w-full">
           <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
@@ -781,6 +808,9 @@ function ConversationView({
   isSendingCard,
   isBlocked,
   otherUserVerified,
+  onBlock,
+  onReport,
+  onBack,
 }: {
   conversation: ConversationSummary;
   messages:
@@ -804,18 +834,30 @@ function ConversationView({
   isSendingCard: boolean;
   isBlocked: boolean;
   otherUserVerified?: boolean;
+  onBlock: () => void;
+  onReport: () => void;
+  onBack: () => void;
 }) {
   return (
     <>
       {/* Conversation header */}
-      <div className="flex h-[72px] items-center gap-3 border-b px-4">
-        <Avatar className="h-12 w-12">
+      <div className="flex h-[72px] items-center gap-2 border-b px-2 sm:gap-3 sm:px-4">
+        {/* Back button - mobile only */}
+        <Button
+          className="shrink-0 md:hidden"
+          onClick={onBack}
+          size="icon"
+          variant="ghost"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <Avatar className="h-10 w-10 shrink-0 sm:h-12 sm:w-12">
           <AvatarImage src={conversation.profile?.photoUrl} />
           <AvatarFallback>
             {conversation.profile?.firstName?.charAt(0) ?? "?"}
           </AvatarFallback>
         </Avatar>
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h2 className="font-semibold">{conversation.profile?.firstName}</h2>
             {otherUserVerified && (
@@ -832,20 +874,74 @@ function ConversationView({
             {conversation.profile?.city}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          {/* Share Details - hide on small screens */}
           {isHost && !isBlocked && (
-            <Button onClick={onShowShareModal} size="sm" variant="outline">
+            <Button
+              className="hidden sm:inline-flex"
+              onClick={onShowShareModal}
+              size="sm"
+              variant="outline"
+            >
               <Share2 className="mr-1 h-4 w-4" />
               Share Details
             </Button>
           )}
+          {/* View Profile - hide on small screens */}
           {conversation.profile?.username && (
-            <Link href={`/people/${conversation.profile.username}`}>
+            <Link
+              className="hidden sm:inline-flex"
+              href={`/people/${conversation.profile.username}`}
+            >
               <Button size="sm" variant="ghost">
                 View Profile
               </Button>
             </Link>
           )}
+          {/* 3-dot menu - always visible */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="icon" variant="ghost">
+                <MoreVertical className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {/* Mobile-only items */}
+              {isHost && !isBlocked && (
+                <DropdownMenuItem
+                  className="sm:hidden"
+                  onClick={onShowShareModal}
+                >
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Share Details
+                </DropdownMenuItem>
+              )}
+              {conversation.profile?.username && (
+                <DropdownMenuItem asChild className="sm:hidden">
+                  <Link href={`/people/${conversation.profile.username}`}>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    View Profile
+                  </Link>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator className="sm:hidden" />
+              {/* Always visible items */}
+              <DropdownMenuItem
+                className="text-amber-600 focus:text-amber-600"
+                onClick={onBlock}
+              >
+                <Ban className="mr-2 h-4 w-4" />
+                {isBlocked ? "Unblock User" : "Block User"}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-red-600 focus:text-red-600"
+                onClick={onReport}
+              >
+                <Flag className="mr-2 h-4 w-4" />
+                Report User
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -927,6 +1023,9 @@ function MainContentArea({
   isSendingCard,
   isBlocked,
   otherUserVerified,
+  onBlock,
+  onReport,
+  onBack,
 }: {
   activeRequest: Extract<SidebarItem, { type: "request" }> | null;
   activeConversation: ConversationSummary | null | undefined;
@@ -954,6 +1053,9 @@ function MainContentArea({
   isSendingCard: boolean;
   isBlocked: boolean;
   otherUserVerified?: boolean;
+  onBlock: () => void;
+  onReport: () => void;
+  onBack: () => void;
 }) {
   if (activeRequest) {
     return (
@@ -977,8 +1079,11 @@ function MainContentArea({
         messages={messages}
         messagesContainerRef={messagesContainerRef}
         myProfile={myProfile}
+        onBack={onBack}
+        onBlock={onBlock}
         onCloseShareModal={onCloseShareModal}
         onMessageInputChange={onMessageInputChange}
+        onReport={onReport}
         onSend={onSend}
         onShareEventDetails={onShareEventDetails}
         onShowShareModal={onShowShareModal}
@@ -1117,9 +1222,10 @@ function MessagesPageContent() {
       : null;
 
   // Get the other user's ID for block/report
-  const otherUserId = activeConversation?.otherUserId as
-    | Id<"users">
-    | undefined;
+  // For conversations, use otherUserId from the conversation
+  // For requests, use the oderId (the other person in the invitation)
+  const otherUserId = (activeConversation?.otherUserId ||
+    activeRequest?.oderId) as Id<"users"> | undefined;
 
   // More queries
   const messages = useQuery(
@@ -1251,6 +1357,12 @@ function MessagesPageContent() {
     details?: string
   ) => {
     if (!otherUserId) {
+      toast.error("Unable to identify user to report");
+      return;
+    }
+    // Prevent reporting yourself (sanity check)
+    if (myProfile?.userId === otherUserId) {
+      toast.error("Cannot report yourself");
       return;
     }
     setIsReporting(true);
@@ -1290,7 +1402,13 @@ function MessagesPageContent() {
         pendingCount={pendingCount}
         searchQuery={searchQuery}
       />
-      <div className="flex flex-1 flex-col">
+      <div
+        className={cn(
+          "flex flex-1 flex-col",
+          // Hide on mobile when no chat is active
+          !activeId && "hidden md:flex"
+        )}
+      >
         <MainContentArea
           activeConversation={activeConversation}
           activeRequest={activeRequest}
@@ -1303,8 +1421,11 @@ function MessagesPageContent() {
           messages={messages}
           messagesContainerRef={messagesContainerRef}
           myProfile={myProfile}
+          onBack={() => router.push("/messages")}
+          onBlock={handleBlock}
           onCloseShareModal={() => setShowShareModal(false)}
           onMessageInputChange={setMessageInput}
+          onReport={() => setShowReportModal(true)}
           onRespond={handleRespond}
           onSend={handleSend}
           onShareEventDetails={handleShareEventDetails}
