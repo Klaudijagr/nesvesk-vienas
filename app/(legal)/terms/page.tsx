@@ -24,7 +24,7 @@ const termsContent: TermsContent = {
     title: "Paslaugų teikimo sąlygos",
     lastUpdated: "Paskutinį kartą atnaujinta: 2024 m. gruodžio mėn.",
     intro:
-      "PRAŠOME ATIDŽIAI PERSKAITYTI ŠIAS NAUDOJIMO SĄLYGAS. REGISTRUODAMIESI PASKYRĄ ARBA NAUDODAMIESI PASLAUGOMIS, JŪS SUTINKATE LAIKYTIS ŠIŲ NAUDOJIMO SĄLYGŲ IR VISŲ ĮTRAUKTŲ SĄLYGŲ. JEI NESUTINKATE SU VISOMIS ŠIOMIS SĄLYGOMIS, NENAUDOKITE PASLAUGŲ.",
+      "Prašome atidžiai perskaityti šias naudojimo sąlygas. Registruodamiesi paskyrą arba naudodamiesi paslaugomis, jūs sutinkate laikytis šių naudojimo sąlygų ir visų įtrauktų sąlygų. Jei nesutinkate su visomis šiomis sąlygomis, nenaudokite paslaugų.",
     sections: [
       {
         title: "1. Tinkamumas ir registracija",
@@ -92,7 +92,7 @@ const termsContent: TermsContent = {
     title: "Terms of Service",
     lastUpdated: "Last updated: December 2024",
     intro:
-      "PLEASE READ THESE TERMS OF USE CAREFULLY. BY REGISTERING FOR AN ACCOUNT OR BY ACCESSING OR USING THE SERVICES, YOU AGREE TO BE BOUND BY THESE TERMS OF USE AND ALL TERMS INCORPORATED BY REFERENCE. IF YOU DO NOT AGREE TO ALL OF THESE TERMS, DO NOT ACCESS OR USE THE SERVICES.",
+      "Please read these terms of use carefully. By registering for an account or by accessing or using the services, you agree to be bound by these terms of use and all terms incorporated by reference. If you do not agree to all of these terms, do not access or use the services.",
     sections: [
       {
         title: "1. Eligibility and Registration",
@@ -160,7 +160,7 @@ const termsContent: TermsContent = {
     title: "Условия использования",
     lastUpdated: "Последнее обновление: декабрь 2024 г.",
     intro:
-      "ПОЖАЛУЙСТА, ВНИМАТЕЛЬНО ПРОЧИТАЙТЕ НАСТОЯЩИЕ УСЛОВИЯ ИСПОЛЬЗОВАНИЯ. РЕГИСТРИРУЯ УЧЕТНУЮ ЗАПИСЬ ИЛИ ИСПОЛЬЗУЯ УСЛУГИ, ВЫ СОГЛАШАЕТЕСЬ СОБЛЮДАТЬ НАСТОЯЩИЕ УСЛОВИЯ И ВСЕ ВКЛЮЧЕННЫЕ УСЛОВИЯ. ЕСЛИ ВЫ НЕ СОГЛАСНЫ СО ВСЕМИ ЭТИМИ УСЛОВИЯМИ, НЕ ИСПОЛЬЗУЙТЕ УСЛУГИ.",
+      "Пожалуйста, внимательно прочитайте настоящие условия использования. Регистрируя учетную запись или используя услуги, вы соглашаетесь соблюдать настоящие условия и все включенные условия. Если вы не согласны со всеми этими условиями, не используйте услуги.",
     sections: [
       {
         title: "1. Право на использование и регистрация",
@@ -228,7 +228,7 @@ const termsContent: TermsContent = {
     title: "Умови використання",
     lastUpdated: "Останнє оновлення: грудень 2024 р.",
     intro:
-      "БУДЬ ЛАСКА, УВАЖНО ПРОЧИТАЙТЕ ЦІ УМОВИ ВИКОРИСТАННЯ. РЕЄСТРУЮЧИ ОБЛІКОВИЙ ЗАПИС АБО ВИКОРИСТОВУЮЧИ ПОСЛУГИ, ВИ ПОГОДЖУЄТЕСЯ ДОТРИМУВАТИСЯ ЦИХ УМОВ ТА ВСІХ ВКЛЮЧЕНИХ УМОВ. ЯКЩО ВИ НЕ ПОГОДЖУЄТЕСЯ З УСІМА ЦИМИ УМОВАМИ, НЕ ВИКОРИСТОВУЙТЕ ПОСЛУГИ.",
+      "Будь ласка, уважно прочитайте ці умови використання. Реєструючи обліковий запис або використовуючи послуги, ви погоджуєтеся дотримуватися цих умов та всіх включених умов. Якщо ви не погоджуєтеся з усіма цими умовами, не використовуйте послуги.",
     sections: [
       {
         title: "1. Право на використання та реєстрація",

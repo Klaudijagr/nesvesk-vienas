@@ -18,7 +18,7 @@ export const translations = {
     messages: "Žinutės",
     settings: "Nustatymai",
     about: "Apie mus",
-    goToApp: "Į platformą",
+    goToApp: "į platformą",
 
     // Hero
     heroTitle: "Šiemet",
