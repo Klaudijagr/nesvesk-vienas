@@ -34,6 +34,95 @@ type Profile = NonNullable<
   ReturnType<typeof useQuery<typeof api.profiles.listProfiles>>
 >[number];
 
+// Sort and view mode controls
+function ResultsHeader({
+  isLoading,
+  count,
+  activeTab,
+  sortBy,
+  onSortChange,
+  viewMode,
+  onViewModeChange,
+  t,
+}: {
+  isLoading: boolean;
+  count: number;
+  activeTab: "host" | "guest";
+  sortBy: string;
+  onSortChange: (sort: string) => void;
+  viewMode: "grid" | "list";
+  onViewModeChange: (mode: "grid" | "list") => void;
+  t: ReturnType<typeof useLocale>["t"];
+}) {
+  return (
+    <div className="mb-6 flex items-center justify-between">
+      <h2 className="font-bold text-gray-900 text-xl">
+        {isLoading
+          ? t.loading
+          : `${count} ${activeTab === "host" ? t.hostsFound : t.guestsFound}`}
+      </h2>
+
+      <div className="flex items-center gap-3">
+        <div className="group relative">
+          <button
+            className="flex items-center gap-2 font-medium text-gray-700 text-sm hover:text-black"
+            type="button"
+          >
+            {t.sortBy}{" "}
+            <span className="font-bold text-black capitalize">
+              {sortBy === "recommended" ? t.recommended : t.newest}
+            </span>
+            <ChevronDown className="h-4 w-4" />
+          </button>
+          <div className="absolute right-0 z-50 mt-2 hidden w-40 overflow-hidden rounded-lg border border-gray-100 bg-white shadow-lg group-hover:block">
+            <button
+              className="block w-full px-4 py-2 text-left text-gray-700 text-sm hover:bg-gray-50"
+              onClick={() => onSortChange("recommended")}
+              type="button"
+            >
+              {t.recommended}
+            </button>
+            <button
+              className="block w-full px-4 py-2 text-left text-gray-700 text-sm hover:bg-gray-50"
+              onClick={() => onSortChange("newest")}
+              type="button"
+            >
+              {t.newest}
+            </button>
+          </div>
+        </div>
+
+        <div className="mx-2 h-6 w-px bg-gray-300" />
+
+        <div className="flex rounded-lg bg-gray-100 p-0.5">
+          <button
+            className={`rounded-md p-2 ${
+              viewMode === "grid"
+                ? "bg-white text-black shadow-sm"
+                : "text-gray-400 hover:text-gray-600"
+            }`}
+            onClick={() => onViewModeChange("grid")}
+            type="button"
+          >
+            <Grid className="h-4 w-4" />
+          </button>
+          <button
+            className={`rounded-md p-2 ${
+              viewMode === "list"
+                ? "bg-white text-black shadow-sm"
+                : "text-gray-400 hover:text-gray-600"
+            }`}
+            onClick={() => onViewModeChange("list")}
+            type="button"
+          >
+            <List className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Filter bar component
 function FilterBar({
   selectedCity,
@@ -631,93 +720,41 @@ export default function BrowsePage() {
 
       {/* Results */}
       <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="font-bold text-gray-900 text-xl">
-            {isLoading
-              ? t.loading
-              : `${filteredProfiles.length} ${activeTab === "host" ? t.hostsFound : t.guestsFound}`}
-          </h2>
-
-          <div className="flex items-center gap-3">
-            <div className="group relative">
-              <button
-                className="flex items-center gap-2 font-medium text-gray-700 text-sm hover:text-black"
-                type="button"
-              >
-                {t.sortBy}{" "}
-                <span className="font-bold text-black capitalize">
-                  {sortBy === "recommended" ? t.recommended : t.newest}
-                </span>
-                <ChevronDown className="h-4 w-4" />
-              </button>
-              <div className="absolute right-0 z-50 mt-2 hidden w-40 overflow-hidden rounded-lg border border-gray-100 bg-white shadow-lg group-hover:block">
-                <button
-                  className="block w-full px-4 py-2 text-left text-gray-700 text-sm hover:bg-gray-50"
-                  onClick={() => setSortBy("recommended")}
-                  type="button"
-                >
-                  {t.recommended}
-                </button>
-                <button
-                  className="block w-full px-4 py-2 text-left text-gray-700 text-sm hover:bg-gray-50"
-                  onClick={() => setSortBy("newest")}
-                  type="button"
-                >
-                  {t.newest}
-                </button>
-              </div>
-            </div>
-
-            <div className="mx-2 h-6 w-px bg-gray-300" />
-
-            <div className="flex rounded-lg bg-gray-100 p-0.5">
-              <button
-                className={`rounded-md p-2 ${
-                  viewMode === "grid"
-                    ? "bg-white text-black shadow-sm"
-                    : "text-gray-400 hover:text-gray-600"
-                }`}
-                onClick={() => setViewMode("grid")}
-                type="button"
-              >
-                <Grid className="h-4 w-4" />
-              </button>
-              <button
-                className={`rounded-md p-2 ${
-                  viewMode === "list"
-                    ? "bg-white text-black shadow-sm"
-                    : "text-gray-400 hover:text-gray-600"
-                }`}
-                onClick={() => setViewMode("list")}
-                type="button"
-              >
-                <List className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
+        <ResultsHeader
+          activeTab={activeTab}
+          count={filteredProfiles.length}
+          isLoading={isLoading}
+          onSortChange={setSortBy}
+          onViewModeChange={setViewMode}
+          sortBy={sortBy}
+          t={t}
+          viewMode={viewMode}
+        />
 
         {renderResults()}
       </div>
 
       {/* Profile Card Modal */}
       {selectedProfile && (
-        <dialog
+        <div
+          aria-label="Profile modal"
           aria-modal="true"
           className="fixed inset-0 z-50 m-0 flex h-full w-full max-w-none items-center justify-center border-none bg-black/50 p-4"
-          onClick={() => setSelectedProfile(null)}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") {
-              setSelectedProfile(null);
-            }
-          }}
-          open
+          role="dialog"
         >
-          <div
-            className="slide-in-from-right-full animate-in duration-300"
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
-          >
+          {/* Backdrop button for closing */}
+          <button
+            aria-label="Close modal"
+            className="absolute inset-0 h-full w-full cursor-default bg-transparent"
+            onClick={() => setSelectedProfile(null)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                setSelectedProfile(null);
+              }
+            }}
+            type="button"
+          />
+          <div className="slide-in-from-right-full relative animate-in duration-300">
             <UnifiedProfileCard
               actionButton={
                 <ProfileActionButton
@@ -735,7 +772,7 @@ export default function BrowsePage() {
               profile={selectedProfile}
             />
           </div>
-        </dialog>
+        </div>
       )}
     </div>
   );

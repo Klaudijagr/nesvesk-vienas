@@ -170,8 +170,7 @@ function Step0Consent({
       </div>
 
       <p className="text-center text-gray-500 text-xs">
-        By continuing, you confirm you are at least 18 years old and agree to
-        receive important communications about your account.
+        By continuing, you confirm you are at least 18 years old.
       </p>
     </div>
   );
@@ -872,6 +871,7 @@ export default function OnboardingPage() {
   );
   const upsertProfile = useMutation(api.profiles.upsertProfile);
   const syncGooglePhoto = useMutation(api.files.syncGooglePhoto);
+  const recordConsents = useMutation(api.consents.recordMultipleConsents);
 
   const [step, setStep] = useState<Step>(0);
   const [isSaving, setIsSaving] = useState(false);
@@ -1019,6 +1019,29 @@ export default function OnboardingPage() {
         availableDates.push(...HOLIDAY_DATES);
       }
 
+      // Record GDPR consents first
+      const consentsToRecord: {
+        purpose:
+          | "terms_of_service"
+          | "privacy_policy"
+          | "marketing_emails"
+          | "analytics_cookies";
+        consentMethod: "checkbox" | "button" | "cookie_banner";
+      }[] = [
+        { purpose: "terms_of_service", consentMethod: "checkbox" },
+        { purpose: "privacy_policy", consentMethod: "checkbox" },
+      ];
+
+      // Only record marketing consent if user opted in
+      if (marketingConsent) {
+        consentsToRecord.push({
+          purpose: "marketing_emails",
+          consentMethod: "checkbox",
+        });
+      }
+
+      await recordConsents({ consents: consentsToRecord });
+
       await upsertProfile({
         role: getRole(),
         // Save the actual granular status and dates
@@ -1031,7 +1054,7 @@ export default function OnboardingPage() {
         age:
           typeof formData.age === "number"
             ? formData.age
-            : Number.parseInt(formData.age as string, 10) || undefined,
+            : Number.parseInt(formData.age as string, 10),
         city: formData.city,
         bio,
         languages,
@@ -1044,6 +1067,8 @@ export default function OnboardingPage() {
         drinkingAllowed,
         petsAllowed,
         hasPets,
+        // Also save marketing preference to profile
+        marketingEmails: marketingConsent,
       });
       setCompleted(true);
     } finally {
@@ -1056,7 +1081,12 @@ export default function OnboardingPage() {
   const isStep1Valid =
     (hostingStatus !== "cant-host" ? hostingDates.length > 0 : true) ||
     (guestStatus !== "not-looking" ? guestDates.length > 0 : true);
-  const isStep2Valid = formData.firstName.length > 0;
+  const ageValue =
+    typeof formData.age === "number"
+      ? formData.age
+      : Number.parseInt(formData.age as string, 10);
+  const isStep2Valid =
+    formData.firstName.length > 0 && !Number.isNaN(ageValue) && ageValue >= 18;
   const isStep3Valid = bio.length >= 10;
   const isStep4Valid = languages.length > 0;
 

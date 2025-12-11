@@ -5,13 +5,47 @@ import type { MutationCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 import { getCurrentUserId, getOrCreateUser } from "./lib/auth";
 
-// Helper to get user email from users table
-async function getUserEmail(
+// Helper to check if user wants invitation notifications
+async function shouldSendInvitationEmail(
   ctx: MutationCtx,
   userId: Id<"users">
-): Promise<string | null> {
+): Promise<{ shouldSend: boolean; email: string | null }> {
   const user = await ctx.db.get(userId);
-  return user?.email || null;
+  const profile = await ctx.db
+    .query("profiles")
+    .withIndex("by_userId", (q) => q.eq("userId", userId))
+    .first();
+
+  // Check if user wants invitation notifications (default true)
+  const wantsNotifications =
+    profile?.emailNotifications !== false &&
+    profile?.notifyOnInvitation !== false;
+
+  return {
+    shouldSend: wantsNotifications && !!user?.email,
+    email: user?.email || null,
+  };
+}
+
+// Helper to check if user wants match notifications
+async function shouldSendMatchEmail(
+  ctx: MutationCtx,
+  userId: Id<"users">
+): Promise<{ shouldSend: boolean; email: string | null }> {
+  const user = await ctx.db.get(userId);
+  const profile = await ctx.db
+    .query("profiles")
+    .withIndex("by_userId", (q) => q.eq("userId", userId))
+    .first();
+
+  // Check if user wants match notifications (default true)
+  const wantsNotifications =
+    profile?.emailNotifications !== false && profile?.notifyOnMatch !== false;
+
+  return {
+    shouldSend: wantsNotifications && !!user?.email,
+    email: user?.email || null,
+  };
 }
 
 // Get invitations for current user (both sent and received)
@@ -103,16 +137,16 @@ export const send = mutation({
       date: args.date,
     });
 
-    // Send email notification to recipient
-    const recipientEmail = await getUserEmail(ctx, args.toUserId);
+    // Send email notification to recipient (if they want it)
+    const recipientCheck = await shouldSendInvitationEmail(ctx, args.toUserId);
     const senderProfile = await ctx.db
       .query("profiles")
       .withIndex("by_userId", (q) => q.eq("userId", userId))
       .first();
 
-    if (recipientEmail && senderProfile) {
+    if (recipientCheck.shouldSend && recipientCheck.email && senderProfile) {
       await ctx.scheduler.runAfter(0, internal.email.sendEmail, {
-        to: recipientEmail,
+        to: recipientCheck.email,
         type: "invitationReceived",
         senderName: senderProfile.firstName,
         date: args.date,
@@ -180,16 +214,20 @@ export const respond = mutation({
       }
     }
 
-    // Send email notification to the sender
-    const senderEmail = await getUserEmail(ctx, invitation.fromUserId);
+    // Send email notification to the sender (if they want it)
+    // Use match notification preference for accepted, invitation preference for declined
+    const senderCheck = args.accept
+      ? await shouldSendMatchEmail(ctx, invitation.fromUserId)
+      : await shouldSendInvitationEmail(ctx, invitation.fromUserId);
+
     const responderProfile = await ctx.db
       .query("profiles")
       .withIndex("by_userId", (q) => q.eq("userId", userId))
       .first();
 
-    if (senderEmail && responderProfile) {
+    if (senderCheck.shouldSend && senderCheck.email && responderProfile) {
       await ctx.scheduler.runAfter(0, internal.email.sendEmail, {
-        to: senderEmail,
+        to: senderCheck.email,
         type: args.accept ? "invitationAccepted" : "invitationDeclined",
         senderName: responderProfile.firstName,
         date: invitation.date,

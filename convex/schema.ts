@@ -120,6 +120,22 @@ const moderationStatus = v.union(
   v.literal("blocked")
 );
 
+// Consent tracking for GDPR compliance
+const consentPurpose = v.union(
+  v.literal("terms_of_service"),
+  v.literal("privacy_policy"),
+  v.literal("marketing_emails"),
+  v.literal("analytics_cookies")
+);
+
+const consentStatus = v.union(v.literal("active"), v.literal("withdrawn"));
+
+const consentMethod = v.union(
+  v.literal("checkbox"),
+  v.literal("button"),
+  v.literal("cookie_banner")
+);
+
 export default defineSchema({
   // Users table (linked to Clerk via tokenIdentifier)
   users: defineTable({
@@ -143,7 +159,7 @@ export default defineSchema({
     guestStatus: v.optional(guestStatus), // "looking" | "maybe-guest" | "not-looking"
     firstName: v.string(),
     lastName: v.optional(v.string()),
-    age: v.optional(v.number()),
+    age: v.number(), // Required, must be 18+
     city,
     bio: v.string(),
     photoUrl: v.optional(v.string()), // Main/primary photo (first in gallery)
@@ -208,6 +224,12 @@ export default defineSchema({
 
     // Event date (for confirmed events)
     eventDate: v.optional(holidayDate),
+
+    // Archive support (per-user archiving stored separately, this is for conversation-level)
+    isArchivedByGuest: v.optional(v.boolean()),
+    isArchivedByHost: v.optional(v.boolean()),
+    archivedByGuestAt: v.optional(v.number()),
+    archivedByHostAt: v.optional(v.number()),
   })
     .index("by_guest", ["guestId"])
     .index("by_host", ["hostId"])
@@ -301,5 +323,22 @@ export default defineSchema({
   })
     .index("by_reporter", ["reporterId"])
     .index("by_reported", ["reportedUserId"])
+    .index("by_status", ["status"]),
+
+  // User consent records for GDPR compliance audit trail
+  userConsents: defineTable({
+    userId: v.id("users"),
+    purpose: consentPurpose, // What they consented to
+    policyVersion: v.string(), // e.g., "2024-12-01" - version of T&Cs at consent time
+    status: consentStatus, // active or withdrawn
+    consentMethod, // How consent was given (checkbox, button, etc.)
+    consentTimestamp: v.number(), // When consent was given
+    withdrawnAt: v.optional(v.number()), // When consent was withdrawn (if applicable)
+    ipAddress: v.optional(v.string()), // IP at time of consent (for audit)
+    userAgent: v.optional(v.string()), // Browser info (for audit)
+    createdAt: v.number(),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_purpose", ["userId", "purpose"])
     .index("by_status", ["status"]),
 });

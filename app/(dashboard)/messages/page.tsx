@@ -104,6 +104,43 @@ type SidebarItem =
 type ConversationsResult = typeof api.messages.getConversations._returnType;
 type ConversationSummary = NonNullable<ConversationsResult>[number];
 
+// Helper to resolve active items from URL params
+function resolveActiveItems(
+  activeId: string | null,
+  activeType: "conversation" | "request" | null,
+  sidebarItems: SidebarItem[],
+  conversations: ConversationSummary[]
+) {
+  const activeItem = sidebarItems.find((item) => item.oderId === activeId);
+
+  const activeConversation =
+    activeItem?.type === "conversation" || activeType === "conversation"
+      ? (conversations.find((c) => c.oderId === activeId) ?? null)
+      : null;
+
+  const activeRequest =
+    activeItem?.type === "request"
+      ? (activeItem as Extract<SidebarItem, { type: "request" }>)
+      : null;
+
+  const activeSentRequest =
+    activeItem?.type === "sent_request"
+      ? (activeItem as Extract<SidebarItem, { type: "sent_request" }>)
+      : null;
+
+  const otherUserId = (activeConversation?.otherUserId ||
+    activeRequest?.oderId ||
+    activeSentRequest?.oderId) as Id<"users"> | undefined;
+
+  return {
+    activeItem,
+    activeConversation,
+    activeRequest,
+    activeSentRequest,
+    otherUserId,
+  };
+}
+
 // Utility functions
 function formatTime(timestamp: number): string {
   const date = new Date(timestamp);
@@ -573,23 +610,26 @@ function ReportModal({
   }
 
   return (
-    <dialog
+    <div
+      aria-label="Report user modal"
       aria-modal="true"
       className="fixed inset-0 z-50 m-0 h-full w-full max-w-none overflow-y-auto border-none bg-black/50 p-4"
-      onClick={onClose}
-      onKeyDown={(e) => {
-        if (e.key === "Escape") {
-          onClose();
-        }
-      }}
-      open
+      role="dialog"
     >
+      {/* Backdrop button for closing */}
+      <button
+        aria-label="Close modal"
+        className="absolute inset-0 h-full w-full cursor-default bg-transparent"
+        onClick={onClose}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") {
+            onClose();
+          }
+        }}
+        type="button"
+      />
       <div className="flex min-h-full items-center justify-center">
-        <div
-          className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
-        >
+        <div className="relative w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
               <Flag className="h-5 w-5 text-red-600" />
@@ -654,7 +694,7 @@ function ReportModal({
           </div>
         </div>
       </div>
-    </dialog>
+    </div>
   );
 }
 
@@ -1351,31 +1391,11 @@ function MessagesPageContent() {
     | "request"
     | null;
 
-  // Build sidebar items
+  // Build sidebar items and resolve active items
   const sidebarItems = buildSidebarItems(invitations, conversations);
-
-  // Active items
-  const activeItem = sidebarItems.find((item) => item.oderId === activeId);
-  const activeConversation =
-    activeItem?.type === "conversation" || activeType === "conversation"
-      ? conversations.find((c) => c.oderId === activeId)
-      : null;
+  const { activeConversation, activeRequest, activeSentRequest, otherUserId } =
+    resolveActiveItems(activeId, activeType, sidebarItems, conversations);
   const activeConversationId = activeConversation?.conversation?._id;
-  const activeRequest =
-    activeItem?.type === "request"
-      ? (activeItem as Extract<SidebarItem, { type: "request" }>)
-      : null;
-  const activeSentRequest =
-    activeItem?.type === "sent_request"
-      ? (activeItem as Extract<SidebarItem, { type: "sent_request" }>)
-      : null;
-
-  // Get the other user's ID for block/report
-  // For conversations, use otherUserId from the conversation
-  // For requests, use the oderId (the other person in the invitation)
-  const otherUserId = (activeConversation?.otherUserId ||
-    activeRequest?.oderId ||
-    activeSentRequest?.oderId) as Id<"users"> | undefined;
 
   // More queries
   const messages = useQuery(

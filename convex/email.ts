@@ -2,9 +2,20 @@
 
 import { v } from "convex/values";
 import { action, internalAction } from "./_generated/server";
+import {
+  renderInvitationAccepted,
+  renderInvitationDeclined,
+  renderInvitationReceived,
+  renderNewMessage,
+  renderTestEmail,
+} from "./emailTemplates";
 
 // Maileroo API configuration
 const MAILEROO_API_URL = "https://smtp.maileroo.com/api/v2/emails";
+
+// Regex patterns for parsing email addresses (top-level for performance)
+const EMAIL_ADDRESS_REGEX = /<(.+)>/;
+const EMAIL_NAME_REGEX = /^(.+)\s*</;
 
 // Get Maileroo API key from environment
 const getMailerooKey = () => {
@@ -42,8 +53,10 @@ async function sendMailerooEmail(params: {
       },
       body: JSON.stringify({
         from: {
-          address: fromAddress.match(/<(.+)>/)?.[1] || fromAddress,
-          name: fromAddress.match(/^(.+)\s*</)?.[1]?.trim() || "Nešvęsk vienas",
+          address: fromAddress.match(EMAIL_ADDRESS_REGEX)?.[1] || fromAddress,
+          name:
+            fromAddress.match(EMAIL_NAME_REGEX)?.[1]?.trim() ||
+            "Nešvęsk vienas",
         },
         to: [{ address: params.to }],
         subject: params.subject,
@@ -65,70 +78,16 @@ async function sendMailerooEmail(params: {
   }
 }
 
-// Email templates
-const templates = {
-  invitationReceived: (senderName: string, date: string) => ({
-    subject: `${senderName} wants to celebrate ${date} with you!`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #dc2626;">You have a new invitation!</h1>
-        <p><strong>${senderName}</strong> has invited you to celebrate <strong>${date}</strong> together.</p>
-        <p>Log in to Nešvęsk vienas to view the invitation and respond:</p>
-        <a href="${process.env.SITE_URL || "http://localhost:3000"}/dashboard"
-           style="display: inline-block; background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin: 16px 0;">
-          View Invitation
-        </a>
-        <p style="color: #666; font-size: 14px;">Don't celebrate alone this holiday season!</p>
-      </div>
-    `,
-  }),
-
-  invitationAccepted: (accepterName: string, date: string) => ({
-    subject: `${accepterName} accepted your invitation for ${date}!`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #16a34a;">Great news! You have a match!</h1>
-        <p><strong>${accepterName}</strong> has accepted your invitation to celebrate <strong>${date}</strong> together.</p>
-        <p>You can now see their full contact details and coordinate your celebration!</p>
-        <a href="${process.env.SITE_URL || "http://localhost:3000"}/matches"
-           style="display: inline-block; background: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin: 16px 0;">
-          View Match Details
-        </a>
-        <p style="color: #666; font-size: 14px;">Don't celebrate alone this holiday season!</p>
-      </div>
-    `,
-  }),
-
-  invitationDeclined: (declinerName: string, date: string) => ({
-    subject: `Update on your ${date} invitation`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #6b7280;">Invitation Update</h1>
-        <p><strong>${declinerName}</strong> is unable to join you for <strong>${date}</strong> this time.</p>
-        <p>Don't worry! There are many other people looking for company. Keep browsing!</p>
-        <a href="${process.env.SITE_URL || "http://localhost:3000"}/browse"
-           style="display: inline-block; background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin: 16px 0;">
-          Browse More Profiles
-        </a>
-        <p style="color: #666; font-size: 14px;">Don't celebrate alone this holiday season!</p>
-      </div>
-    `,
-  }),
-
-  newMessage: (senderName: string) => ({
-    subject: `New message from ${senderName}`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #dc2626;">You have a new message!</h1>
-        <p><strong>${senderName}</strong> sent you a message.</p>
-        <a href="${process.env.SITE_URL || "http://localhost:3000"}/dashboard"
-           style="display: inline-block; background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin: 16px 0;">
-          Read Message
-        </a>
-        <p style="color: #666; font-size: 14px;">Don't celebrate alone this holiday season!</p>
-      </div>
-    `,
-  }),
+// Email subject lines
+const subjects = {
+  invitationReceived: (senderName: string, date: string) =>
+    `${senderName} wants to celebrate ${date} with you!`,
+  invitationAccepted: (accepterName: string, date: string) =>
+    `${accepterName} accepted your invitation for ${date}!`,
+  invitationDeclined: (_declinerName: string, date: string) =>
+    `Update on your ${date} invitation`,
+  newMessage: (senderName: string) => `New message from ${senderName}`,
+  test: () => "Test Email from Nešvęsk vienas",
 };
 
 // Internal action to send emails (called from mutations)
@@ -153,29 +112,26 @@ export const sendEmail = internalAction({
         return { success: true, skipped: true };
       }
 
-      let template: { subject: string; html: string };
+      let subject: string;
+      let html: string;
+      const date = args.date || "the holidays";
 
       switch (args.type) {
         case "invitationReceived":
-          template = templates.invitationReceived(
-            args.senderName,
-            args.date || ""
-          );
+          subject = subjects.invitationReceived(args.senderName, date);
+          html = await renderInvitationReceived(args.senderName, date);
           break;
         case "invitationAccepted":
-          template = templates.invitationAccepted(
-            args.senderName,
-            args.date || ""
-          );
+          subject = subjects.invitationAccepted(args.senderName, date);
+          html = await renderInvitationAccepted(args.senderName, date);
           break;
         case "invitationDeclined":
-          template = templates.invitationDeclined(
-            args.senderName,
-            args.date || ""
-          );
+          subject = subjects.invitationDeclined(args.senderName, date);
+          html = await renderInvitationDeclined(args.senderName, date);
           break;
         case "newMessage":
-          template = templates.newMessage(args.senderName);
+          subject = subjects.newMessage(args.senderName);
+          html = await renderNewMessage(args.senderName);
           break;
         default:
           throw new Error(`Unknown email type: ${args.type}`);
@@ -183,8 +139,8 @@ export const sendEmail = internalAction({
 
       const result = await sendMailerooEmail({
         to: args.to,
-        subject: template.subject,
-        html: template.html,
+        subject,
+        html,
       });
 
       if (!result.success) {
@@ -204,20 +160,53 @@ export const sendEmail = internalAction({
 export const testEmail = action({
   args: {
     to: v.string(),
+    type: v.optional(
+      v.union(
+        v.literal("test"),
+        v.literal("invitationReceived"),
+        v.literal("invitationAccepted"),
+        v.literal("invitationDeclined"),
+        v.literal("newMessage")
+      )
+    ),
   },
   handler: async (_ctx, args) => {
+    const emailType = args.type || "test";
+
+    let subject: string;
+    let html: string;
+
+    switch (emailType) {
+      case "test":
+        subject = subjects.test();
+        html = await renderTestEmail();
+        break;
+      case "invitationReceived":
+        subject = subjects.invitationReceived("Test User", "24 Dec");
+        html = await renderInvitationReceived("Test User", "24 Dec");
+        break;
+      case "invitationAccepted":
+        subject = subjects.invitationAccepted("Test User", "24 Dec");
+        html = await renderInvitationAccepted("Test User", "24 Dec");
+        break;
+      case "invitationDeclined":
+        subject = subjects.invitationDeclined("Test User", "24 Dec");
+        html = await renderInvitationDeclined("Test User", "24 Dec");
+        break;
+      case "newMessage":
+        subject = subjects.newMessage("Test User");
+        html = await renderNewMessage("Test User");
+        break;
+      default:
+        subject = subjects.test();
+        html = await renderTestEmail();
+    }
+
     const result = await sendMailerooEmail({
       to: args.to,
-      subject: "Test Email from Nešvęsk vienas",
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #dc2626;">Email Test Successful!</h1>
-          <p>This is a test email from the Nešvęsk vienas platform.</p>
-          <p>If you received this, the Maileroo integration is working correctly.</p>
-          <p style="color: #666; font-size: 14px;">Sent at: ${new Date().toISOString()}</p>
-        </div>
-      `,
+      subject,
+      html,
     });
-    return result;
+    return { ...result, type: emailType };
   },
 });

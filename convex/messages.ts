@@ -1,6 +1,71 @@
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
+import type { Doc, Id } from "./_generated/dataModel";
+import type { MutationCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 import { getCurrentUserId } from "./lib/auth";
+
+// Helper to check if messaging is blocked between users
+async function isMessagingBlocked(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  otherId: Id<"users">
+): Promise<boolean> {
+  const blockedByMe = await ctx.db
+    .query("blocks")
+    .withIndex("by_blocker", (q) => q.eq("blockerId", userId))
+    .filter((q) => q.eq(q.field("blockedId"), otherId))
+    .first();
+
+  const blockedMe = await ctx.db
+    .query("blocks")
+    .withIndex("by_blocker", (q) => q.eq("blockerId", otherId))
+    .filter((q) => q.eq(q.field("blockedId"), userId))
+    .first();
+
+  return !!(blockedByMe || blockedMe);
+}
+
+// Helper to validate conversation status for messaging
+function canSendMessageInConversation(
+  conversation: Doc<"conversations">,
+  userId: Id<"users">
+): { allowed: boolean; error?: string } {
+  const isDeclined = conversation.status === "declined";
+  const isRequested = conversation.status === "requested";
+  const isHost = conversation.hostId === userId;
+
+  if (isDeclined) {
+    return { allowed: false, error: "This conversation has been declined" };
+  }
+  // For requested status, only host can respond (but should use accept/decline)
+  if (isRequested && !isHost) {
+    return { allowed: true }; // Guest can't send but won't throw
+  }
+  return { allowed: true };
+}
+
+// Helper to get user email and check notification preferences
+async function shouldSendMessageEmail(
+  ctx: MutationCtx,
+  userId: Id<"users">
+): Promise<{ shouldSend: boolean; email: string | null; firstName: string }> {
+  const user = await ctx.db.get(userId);
+  const profile = await ctx.db
+    .query("profiles")
+    .withIndex("by_userId", (q) => q.eq("userId", userId))
+    .first();
+
+  // Check if user wants message notifications (default true)
+  const wantsNotifications =
+    profile?.emailNotifications !== false && profile?.notifyOnMessage !== false;
+
+  return {
+    shouldSend: wantsNotifications && !!user?.email,
+    email: user?.email || null,
+    firstName: profile?.firstName || "Someone",
+  };
+}
 
 // Get messages for a specific conversation
 export const getConversationMessages = query({
@@ -40,16 +105,18 @@ export const getMyConversations = query({
       return [];
     }
 
-    // Get conversations where user is guest
+    // Get conversations where user is guest (exclude archived)
     const asGuest = await ctx.db
       .query("conversations")
       .withIndex("by_guest", (q) => q.eq("guestId", userId))
+      .filter((q) => q.neq(q.field("isArchivedByGuest"), true))
       .collect();
 
-    // Get conversations where user is host
+    // Get conversations where user is host (exclude archived)
     const asHost = await ctx.db
       .query("conversations")
       .withIndex("by_host", (q) => q.eq("hostId", userId))
+      .filter((q) => q.neq(q.field("isArchivedByHost"), true))
       .collect();
 
     const allConversations = [...asGuest, ...asHost];
@@ -153,46 +220,28 @@ export const sendMessage = mutation({
     if (!conversation) {
       throw new Error("Conversation not found");
     }
-    if (conversation.guestId !== userId && conversation.hostId !== userId) {
+    const isParticipant =
+      conversation.guestId === userId || conversation.hostId === userId;
+    if (!isParticipant) {
       throw new Error("Not authorized");
     }
 
-    // Check if either user has blocked the other
+    // Get the other user in the conversation
     const otherId =
       conversation.guestId === userId
         ? conversation.hostId
         : conversation.guestId;
 
-    const blockedByMe = await ctx.db
-      .query("blocks")
-      .withIndex("by_blocker", (q) => q.eq("blockerId", userId))
-      .filter((q) => q.eq(q.field("blockedId"), otherId))
-      .first();
-
-    const blockedMe = await ctx.db
-      .query("blocks")
-      .withIndex("by_blocker", (q) => q.eq("blockerId", otherId))
-      .filter((q) => q.eq(q.field("blockedId"), userId))
-      .first();
-
-    if (blockedByMe || blockedMe) {
+    // Check blocking status
+    const blocked = await isMessagingBlocked(ctx, userId, otherId);
+    if (blocked) {
       throw new Error("Cannot send messages in this conversation");
     }
 
-    // Check conversation status - only allow messaging if accepted or higher
-    if (
-      conversation.status === "requested" ||
-      conversation.status === "declined"
-    ) {
-      // Only host can respond to requests
-      if (
-        conversation.status === "requested" &&
-        conversation.hostId === userId
-      ) {
-        // Host responding - this is okay, but should use accept/decline
-      } else if (conversation.status === "declined") {
-        throw new Error("This conversation has been declined");
-      }
+    // Check conversation status
+    const statusCheck = canSendMessageInConversation(conversation, userId);
+    if (!statusCheck.allowed && statusCheck.error) {
+      throw new Error(statusCheck.error);
     }
 
     // Check for banned words
@@ -212,6 +261,21 @@ export const sendMessage = mutation({
 
     // Update conversation's lastMessageAt
     await ctx.db.patch(args.conversationId, { lastMessageAt: now });
+
+    // Send email notification to the recipient
+    const senderProfile = await ctx.db
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    const recipientCheck = await shouldSendMessageEmail(ctx, otherId);
+    if (recipientCheck.shouldSend && recipientCheck.email && senderProfile) {
+      await ctx.scheduler.runAfter(0, internal.email.sendEmail, {
+        to: recipientCheck.email,
+        type: "newMessage" as const,
+        senderName: senderProfile.firstName,
+      });
+    }
 
     return messageId;
   },
@@ -424,6 +488,152 @@ export const getPendingRequests = query({
         };
       })
     );
+  },
+});
+
+// Archive a conversation
+export const archiveConversation = mutation({
+  args: { conversationId: v.id("conversations") },
+  handler: async (ctx, args) => {
+    const userId = await getCurrentUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+
+    // Check user is part of conversation
+    const isGuest = conversation.guestId === userId;
+    const isHost = conversation.hostId === userId;
+    if (!(isGuest || isHost)) {
+      throw new Error("Not authorized");
+    }
+
+    const now = Date.now();
+    if (isGuest) {
+      await ctx.db.patch(args.conversationId, {
+        isArchivedByGuest: true,
+        archivedByGuestAt: now,
+      });
+    } else {
+      await ctx.db.patch(args.conversationId, {
+        isArchivedByHost: true,
+        archivedByHostAt: now,
+      });
+    }
+
+    return { success: true };
+  },
+});
+
+// Unarchive a conversation
+export const unarchiveConversation = mutation({
+  args: { conversationId: v.id("conversations") },
+  handler: async (ctx, args) => {
+    const userId = await getCurrentUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+
+    // Check user is part of conversation
+    const isGuest = conversation.guestId === userId;
+    const isHost = conversation.hostId === userId;
+    if (!(isGuest || isHost)) {
+      throw new Error("Not authorized");
+    }
+
+    if (isGuest) {
+      await ctx.db.patch(args.conversationId, {
+        isArchivedByGuest: false,
+        archivedByGuestAt: undefined,
+      });
+    } else {
+      await ctx.db.patch(args.conversationId, {
+        isArchivedByHost: false,
+        archivedByHostAt: undefined,
+      });
+    }
+
+    return { success: true };
+  },
+});
+
+// Get archived conversations for current user
+export const getArchivedConversations = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getCurrentUserId(ctx);
+    if (!userId) {
+      return [];
+    }
+
+    // Get conversations where user is guest and archived
+    const asGuest = await ctx.db
+      .query("conversations")
+      .withIndex("by_guest", (q) => q.eq("guestId", userId))
+      .filter((q) => q.eq(q.field("isArchivedByGuest"), true))
+      .collect();
+
+    // Get conversations where user is host and archived
+    const asHost = await ctx.db
+      .query("conversations")
+      .withIndex("by_host", (q) => q.eq("hostId", userId))
+      .filter((q) => q.eq(q.field("isArchivedByHost"), true))
+      .collect();
+
+    const allArchived = [...asGuest, ...asHost];
+
+    // Build summaries with profiles
+    const summaries = await Promise.all(
+      allArchived.map(async (conv) => {
+        const isGuest = conv.guestId === userId;
+        const otherId = isGuest ? conv.hostId : conv.guestId;
+        const archivedAt = isGuest
+          ? conv.archivedByGuestAt
+          : conv.archivedByHostAt;
+
+        const profile = await ctx.db
+          .query("profiles")
+          .withIndex("by_userId", (q) => q.eq("userId", otherId))
+          .first();
+
+        // Get last message
+        const messages = await ctx.db
+          .query("messages")
+          .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
+          .collect();
+
+        const lastMessage = messages.sort(
+          (a, b) => b.createdAt - a.createdAt
+        )[0];
+
+        return {
+          type: "archived" as const,
+          oderId: otherId,
+          conversationId: conv._id,
+          profile: profile
+            ? {
+                firstName: profile.firstName,
+                photoUrl: profile.photoUrl,
+                city: profile.city,
+              }
+            : null,
+          lastMessage,
+          archivedAt: archivedAt ?? conv.lastMessageAt ?? conv.createdAt,
+        };
+      })
+    );
+
+    // Sort by archived date (most recent first)
+    return summaries.sort((a, b) => (b.archivedAt ?? 0) - (a.archivedAt ?? 0));
   },
 });
 

@@ -129,7 +129,7 @@ export const getBlockedUsers = query({
   },
 });
 
-// Report a user
+// Report a user - also auto-blocks them
 export const reportUser = mutation({
   args: {
     userId: v.id("users"),
@@ -169,6 +169,7 @@ export const reportUser = mutation({
       throw new Error("You already have a pending report for this user");
     }
 
+    // Create the report
     await ctx.db.insert("reports", {
       reporterId: currentUserId,
       reportedUserId: args.userId,
@@ -179,7 +180,22 @@ export const reportUser = mutation({
       createdAt: Date.now(),
     });
 
-    return { success: true };
+    // Auto-block the reported user (if not already blocked)
+    const existingBlock = await ctx.db
+      .query("blocks")
+      .withIndex("by_blocker", (q) => q.eq("blockerId", currentUserId))
+      .filter((q) => q.eq(q.field("blockedId"), args.userId))
+      .first();
+
+    if (!existingBlock) {
+      await ctx.db.insert("blocks", {
+        blockerId: currentUserId,
+        blockedId: args.userId,
+        createdAt: Date.now(),
+      });
+    }
+
+    return { success: true, autoBlocked: !existingBlock };
   },
 });
 

@@ -253,7 +253,7 @@ export const upsertProfile = mutation({
     ),
     firstName: v.string(),
     lastName: v.optional(v.string()),
-    age: v.optional(v.number()),
+    age: v.number(), // Required, must be 18+
     city: v.union(
       v.literal("Vilnius"),
       v.literal("Kaunas"),
@@ -353,6 +353,8 @@ export const upsertProfile = mutation({
     petsAllowed: v.boolean(),
     hasPets: v.boolean(),
     isVisible: v.optional(v.boolean()),
+    // Notification preferences
+    marketingEmails: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     // Get or create user from Clerk identity

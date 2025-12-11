@@ -97,6 +97,7 @@ export const addProfilePhoto = mutation({
         userId,
         role: "guest",
         firstName: "",
+        age: 18, // Placeholder - will be updated during onboarding
         city: "Vilnius",
         bio: "",
         verified: false,
@@ -245,6 +246,7 @@ export const syncGooglePhoto = mutation({
         userId,
         role: "guest",
         firstName: "",
+        age: 18, // Placeholder - will be updated during onboarding
         city: "Vilnius",
         bio: "",
         verified: false,

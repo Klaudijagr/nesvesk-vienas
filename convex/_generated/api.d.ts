@@ -8,7 +8,9 @@
  * @module
  */
 
+import type * as consents from "../consents.js";
 import type * as email from "../email.js";
+import type * as emailTemplates from "../emailTemplates.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as invitations from "../invitations.js";
@@ -25,7 +27,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  consents: typeof consents;
   email: typeof email;
+  emailTemplates: typeof emailTemplates;
   files: typeof files;
   http: typeof http;
   invitations: typeof invitations;

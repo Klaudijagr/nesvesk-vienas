@@ -21,6 +21,40 @@ import { useFaceVerification } from "@/hooks/use-face-verification";
 
 type VerificationState = "idle" | "verifying" | "success" | "failed";
 
+// Camera error messages mapped by error name
+const CAMERA_ERROR_MESSAGES: Record<string, string> = {
+  NotAllowedError:
+    "Camera access was denied. To enable it:\n" +
+    "• Click the camera/lock icon in your browser's address bar\n" +
+    "• Select 'Allow' for camera access\n" +
+    "• Refresh this page and try again",
+  PermissionDeniedError:
+    "Camera access was denied. To enable it:\n" +
+    "• Click the camera/lock icon in your browser's address bar\n" +
+    "• Select 'Allow' for camera access\n" +
+    "• Refresh this page and try again",
+  NotFoundError:
+    "No camera found. Please ensure your device has a camera connected and try again.",
+  DevicesNotFoundError:
+    "No camera found. Please ensure your device has a camera connected and try again.",
+  NotReadableError:
+    "Camera is in use by another application. Please close other apps using the camera and try again.",
+  TrackStartError:
+    "Camera is in use by another application. Please close other apps using the camera and try again.",
+};
+
+const DEFAULT_CAMERA_ERROR =
+  "Could not access camera. Please check that:\n" +
+  "• Your browser has permission to use the camera\n" +
+  "• No other application is using the camera\n" +
+  "• Your device has a working camera";
+
+// Helper to get camera error message
+function getCameraErrorMessage(err: unknown): string {
+  const errorName = err instanceof Error ? err.name : "";
+  return CAMERA_ERROR_MESSAGES[errorName] ?? DEFAULT_CAMERA_ERROR;
+}
+
 // Loading state component
 function LoadingState() {
   return (
@@ -347,40 +381,7 @@ export default function VerifyPage() {
       setStream(mediaStream);
       setShowCamera(true);
     } catch (err) {
-      // Provide helpful guidance based on error type
-      const errorName = err instanceof Error ? err.name : "";
-      if (
-        errorName === "NotAllowedError" ||
-        errorName === "PermissionDeniedError"
-      ) {
-        setError(
-          "Camera access was denied. To enable it:\n" +
-            "• Click the camera/lock icon in your browser's address bar\n" +
-            "• Select 'Allow' for camera access\n" +
-            "• Refresh this page and try again"
-        );
-      } else if (
-        errorName === "NotFoundError" ||
-        errorName === "DevicesNotFoundError"
-      ) {
-        setError(
-          "No camera found. Please ensure your device has a camera connected and try again."
-        );
-      } else if (
-        errorName === "NotReadableError" ||
-        errorName === "TrackStartError"
-      ) {
-        setError(
-          "Camera is in use by another application. Please close other apps using the camera and try again."
-        );
-      } else {
-        setError(
-          "Could not access camera. Please check that:\n" +
-            "• Your browser has permission to use the camera\n" +
-            "• No other application is using the camera\n" +
-            "• Your device has a working camera"
-        );
-      }
+      setError(getCameraErrorMessage(err));
     }
   };
 

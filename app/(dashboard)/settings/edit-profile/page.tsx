@@ -39,6 +39,46 @@ import {
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6;
 
+// Type for profile from getMyProfile query
+type ProfileData = NonNullable<
+  ReturnType<typeof useQuery<typeof api.profiles.getMyProfile>>
+>;
+
+// Default values for profile initialization
+const DEFAULT_HOSTING_STATUS = "cant-host";
+const DEFAULT_GUEST_STATUS = "looking";
+const DEFAULT_CITY = "Vilnius";
+
+// Helper to extract form data from profile
+function getFormDataFromProfile(profile: ProfileData) {
+  return {
+    firstName: profile.firstName ?? "",
+    lastName: profile.lastName ?? "",
+    age: profile.age ?? "",
+    city: profile.city ?? DEFAULT_CITY,
+  };
+}
+
+// Helper to extract profile state initialization
+function getInitialStateFromProfile(profile: ProfileData) {
+  return {
+    hostingStatus: profile.hostingStatus ?? DEFAULT_HOSTING_STATUS,
+    guestStatus: profile.guestStatus ?? DEFAULT_GUEST_STATUS,
+    hostingDates: (profile.hostingDates ?? []) as HolidayDate[],
+    guestDates: (profile.guestDates ?? []) as HolidayDate[],
+    formData: getFormDataFromProfile(profile),
+    bio: profile.bio ?? "",
+    languages: (profile.languages ?? []) as (typeof LANGUAGES)[number][],
+    dietaryInfo: (profile.dietaryInfo ??
+      []) as (typeof DIETARY_OPTIONS)[number][],
+    vibes: (profile.vibes ?? []) as (typeof VIBES_OPTIONS)[number][],
+    smokingAllowed: profile.smokingAllowed ?? false,
+    drinkingAllowed: profile.drinkingAllowed ?? true,
+    petsAllowed: profile.petsAllowed ?? false,
+    hasPets: profile.hasPets ?? false,
+  };
+}
+
 type IconType = "check" | "question" | "x";
 type ColorType = "green" | "amber" | "red";
 
@@ -756,38 +796,20 @@ export default function EditProfilePage() {
   // Initialize form data from existing profile
   useEffect(() => {
     if (profile && !isInitialized) {
-      // Set hosting/guest status
-      setHostingStatus(profile.hostingStatus || "cant-host");
-      setGuestStatus(profile.guestStatus || "looking");
-      setHostingDates((profile.hostingDates as HolidayDate[]) || []);
-      setGuestDates((profile.guestDates as HolidayDate[]) || []);
-
-      // Basic info
-      setFormData({
-        firstName: profile.firstName || "",
-        lastName: profile.lastName || "",
-        age: profile.age || "",
-        city: profile.city || "Vilnius",
-      });
-
-      // Bio
-      setBio(profile.bio || "");
-
-      // Languages
-      setLanguages((profile.languages as (typeof LANGUAGES)[number][]) || []);
-
-      // Dietary & Vibes
-      setDietaryInfo(
-        (profile.dietaryInfo as (typeof DIETARY_OPTIONS)[number][]) || []
-      );
-      setVibes((profile.vibes as (typeof VIBES_OPTIONS)[number][]) || []);
-
-      // Lifestyle
-      setSmokingAllowed(profile.smokingAllowed ?? false);
-      setDrinkingAllowed(profile.drinkingAllowed ?? true);
-      setPetsAllowed(profile.petsAllowed ?? false);
-      setHasPets(profile.hasPets ?? false);
-
+      const initial = getInitialStateFromProfile(profile);
+      setHostingStatus(initial.hostingStatus);
+      setGuestStatus(initial.guestStatus);
+      setHostingDates(initial.hostingDates);
+      setGuestDates(initial.guestDates);
+      setFormData(initial.formData);
+      setBio(initial.bio);
+      setLanguages(initial.languages);
+      setDietaryInfo(initial.dietaryInfo);
+      setVibes(initial.vibes);
+      setSmokingAllowed(initial.smokingAllowed);
+      setDrinkingAllowed(initial.drinkingAllowed);
+      setPetsAllowed(initial.petsAllowed);
+      setHasPets(initial.hasPets);
       setIsInitialized(true);
     }
   }, [profile, isInitialized]);
@@ -874,7 +896,7 @@ export default function EditProfilePage() {
         age:
           typeof formData.age === "number"
             ? formData.age
-            : Number.parseInt(formData.age as string, 10) || undefined,
+            : Number.parseInt(formData.age as string, 10),
         city: formData.city,
         bio,
         languages,
