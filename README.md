@@ -149,6 +149,41 @@ See the [docs](./docs) folder for additional documentation:
 - [TODO](./docs/TODO.md) - Upcoming tasks
 - [Editing Guide](./docs/EDITING.md) - For non-technical content editors
 
+## Privacy / Compliance (operational notes)
+
+This section is **not legal advice**. It documents how this repo behaves today and what you should keep consistent when operating in production.
+
+### Processors / Subprocessors (what we use)
+
+- **Vercel (hosting)**: serves the Next.js app and may process technical request metadata/logs for reliability and security.
+- **Convex (database + server functions)**: stores app data (profiles, messages, invitations, consent records).
+- **Clerk (authentication)**: stores account identity/authentication details (e.g., email, auth events) and issues session tokens/cookies.
+- **Maileroo (transactional email)**: receives email address + email content needed to send service emails.
+- **Sentry (error monitoring)**: receives technical diagnostics about crashes/errors. Client replay is enabled only after analytics consent.
+- **Vercel Analytics + Speed Insights (analytics/performance)**: mounted only after analytics consent via [`AnalyticsGate`](components/analytics-gate.tsx:12).
+
+If you add a new third-party service that can access personal data, update the legal pages:
+- [`PrivacyPage`](app/(legal)/privacy/page.tsx:369)
+- [`CookiesPage`](app/(legal)/cookies/page.tsx:197)
+
+### Consent records (audit trail)
+
+This repo **already records user consent** in Convex via [`api.consents.recordConsent`](convex/consents.ts:23) / [`api.consents.recordMultipleConsents`](convex/consents.ts:64).
+
+When you materially change Terms/Privacy/Cookies:
+- Update the policy version in [`CURRENT_POLICY_VERSION`](convex/consents.ts:6)
+- Consider requiring users to re-accept on next login/onboarding
+
+### Data retention (recommended operational behavior)
+
+The legal pages describe retention as best-practice ranges. Operationally, keep to these defaults:
+- **Account/profile data**: retained while account active; delete/anonymize within ~30 days after deletion request.
+- **Messages/invitations**: retain while account active; remove within ~30–90 days after deletion.
+- **Consent records**: keep as long as needed to demonstrate compliance (audit trail).
+- **Logs/error events**: keep short (typically 30–90 days), unless needed for incident investigation.
+
+If you change retention behavior, update the legal pages and this section.
+
 ## License
 
 Private project.

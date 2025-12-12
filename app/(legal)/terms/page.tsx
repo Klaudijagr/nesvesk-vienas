@@ -22,67 +22,75 @@ type TermsContent = Record<string, TermsContentItem>;
 const termsContent: TermsContent = {
   lt: {
     title: "Paslaugų teikimo sąlygos",
-    lastUpdated: "Paskutinį kartą atnaujinta: 2024 m. gruodžio mėn.",
+    lastUpdated: "Paskutinį kartą atnaujinta: 2025 m. gruodžio mėn.",
     intro:
       "Prašome atidžiai perskaityti šias naudojimo sąlygas. Registruodamiesi paskyrą arba naudodamiesi paslaugomis, jūs sutinkate laikytis šių naudojimo sąlygų ir visų įtrauktų sąlygų. Jei nesutinkate su visomis šiomis sąlygomis, nenaudokite paslaugų.",
     sections: [
       {
-        title: "1. Tinkamumas ir registracija",
+        title: "1. Kas mes esame",
+        content: [
+          "Paslaugas teikia Nešvęsk Vienas (verslo pavadinimas) © (toliau – „mes“, „mūsų“).",
+          "Jurisdikcija ir taikoma teisė: Lietuva.",
+          "Privatumas: Mūsų asmens duomenų tvarkymas aprašytas Privatumo politikoje. Naudodamiesi Paslaugomis, jūs sutinkate su Privatumo politika.",
+        ],
+      },
+      {
+        title: "2. Tinkamumas ir registracija",
         content: [
           "Norėdami naudotis Paslaugomis, turite būti bent 18 metų amžiaus.",
           "Registruodamiesi sutinkate: (a) pateikti tikslią, teisingą ir išsamią informaciją; (b) palaikyti ir nedelsiant atnaujinti savo paskyros informaciją; (c) saugoti savo paskyrą ir slaptažodį; (d) nedelsiant pranešti mums apie bet kokius saugumo pažeidimus; (e) prisiimti atsakomybę už visą veiklą, vykdomą per jūsų paskyrą.",
         ],
       },
       {
-        title: "2. Sąveika su kitais nariais",
+        title: "3. Sąveika su kitais nariais",
         content: [
           "Jūs esate vienintelis atsakingas už savo sąveiką su kitais nariais. NEŠVĘSK VIENAS NĖRA JOKIŲ KOMUNIKACIJŲ, SANDORIŲ, SĄVEIKŲ, GINČŲ AR BET KOKIŲ SANTYKIŲ TARP JŪSŲ IR BET KURIO KITO NARIO ŠALIS.",
           "Atminkite, kad Nešvęsk Vienas paslaugos yra tik platforma, leidžianti bendrauti ir sąveikauti su kitais žmonėmis. Negalime būti atsakingi už jūsų sąveiką su kitais nariais, todėl naudodamiesi mūsų Paslaugomis naudokite sveiką protą ir galvokite apie saugumą.",
         ],
       },
       {
-        title: "3. Tapatybės tikrinimas",
+        title: "4. Tapatybės tikrinimas",
         content: [
           "Mes negalime ir nepatvirtiname kiekvieno nario tapatybės. Nors teikiame įrankius, skirtus padėti tikrinti tapatybę, jūs esate vienintelis atsakingas už kitų narių, su kuriais galite sąveikauti, tapatybės ir tinkamumo nustatymą.",
           "Mes netikriname ir nepatvirtiname jokio nario reputacijos, elgesio, moralės, kriminalinės praeities ar bet kokios informacijos, kurią nariai gali pateikti Paslaugoms. Raginame imtis atsargumo priemonių bendraujant su kitais nariais.",
         ],
       },
       {
-        title: "4. Nario elgesys ir turinys",
+        title: "5. Nario elgesys ir turinys",
         content: [
           "Jūs esate vienintelis atsakingas už bet kokį turinį, kurį pateikiate mūsų Paslaugoms. Sutinkate neskelbti turinio, kuris: (a) yra neteisėtas, šmeižikiškas, grasinantis; (b) pažeidžia privatumą; (c) yra seksualiai atviras ar obsceniškas; (d) skatina smurtą; (e) yra apgaulingas ar klaidinantis.",
           "Naudodamiesi Paslaugomis sutinkate elgtis atsakingai ir nepažeisti jokių taikytinų įstatymų.",
         ],
       },
       {
-        title: "5. Atsakomybės atsisakymas",
+        title: "6. Atsakomybės atsisakymas",
         content:
           "Kadangi mūsų Paslaugos yra tik platforma, jei turite ginčą su vienu ar daugiau narių, maksimaliu taikytinų įstatymų leidžiamu mastu atleidžiate mus (ir mūsų pareigūnus, direktorius, darbuotojus ir atstovus) nuo bet kokių reikalavimų, pretenzijų ir žalos (faktinės ir pasekminės), žinomos ir nežinomos, kylančios iš tokių ginčų ar su jais susijusios.",
       },
       {
-        title: "6. Garantijų atsisakymas",
+        title: "7. Garantijų atsisakymas",
         content: [
           "JEI NAUDOJATĖS MŪSŲ PASLAUGOMIS, TAI DAROTE IŠIMTINAI SAVO RIZIKA. MŪSŲ PASLAUGOS TEIKIAMOS TOKIOS, KOKIOS YRA IR KOKIOS PRIEINAMOS.",
           "MES NEGARANTUOJAME, KAD: (A) MŪSŲ PASLAUGOS ATITIKS JŪSŲ REIKALAVIMUS; (B) PASLAUGOS BUS NEPERTRAUKIAMOS, SAVALAIKĖS, SAUGIOS AR BE KLAIDŲ; (C) BET KOKIA INFORMACIJA, GAUTA PER MŪSŲ PASLAUGAS, BUS TIKSLI AR PATIKIMA.",
         ],
       },
       {
-        title: "7. Atsakomybės apribojimai",
+        title: "8. Atsakomybės apribojimai",
         content:
           "JOKIU ATVEJU NEŠVĘSK VIENAS AR MŪSŲ DIREKTORIAI, NARIAI, DARBUOTOJAI AR ATSTOVAI NEBUS ATSAKINGI UŽ JOKIĄ SPECIALIĄ, NETIESIOGINĘ AR PASEKMINĘ ŽALĄ, ĮSKAITANT, BET NEAPSIRIBOJANT, NAUDOJIMO PRARADIMĄ, PELNO PRARADIMĄ AR DUOMENŲ PRARADIMĄ.",
       },
       {
-        title: "8. Paskyros nutraukimas",
+        title: "9. Paskyros nutraukimas",
         content:
           "Jei pažeidžiate šias Sąlygas ar bet kokias kitas mūsų nustatytas politikas ar bendruomenės standartus, galime savo nuožiūra bet kuriuo metu: (a) nutraukti jūsų prieigą prie mūsų Paslaugų; (b) deaktyvuoti ar ištrinti jūsų paskyrą ir visą susijusią informaciją; (c) užblokuoti jūsų prieigą prie bet kurių Paslaugų.",
       },
       {
-        title: "9. Pranešimas apie netinkamą elgesį",
+        title: "10. Pranešimas apie netinkamą elgesį",
         content:
           "Jei sąveikaujate su bet kuriuo mūsų Paslaugų naudotoju, kuris, jūsų manymu, elgiasi ar elgėsi netinkamai, įskaitant įžeidžiantį, smurtinį ar seksualiai netinkamą elgesį, primygtinai raginame nedelsiant pranešti tokiam asmeniui atitinkamoms institucijoms ir mums susisiekiant el. paštu: info@nesveskvienas.lt",
       },
       {
-        title: "10. Susisiekite su mumis",
+        title: "11. Susisiekite su mumis",
         content:
           "Jei turite klausimų dėl šių Sąlygų, susisiekite su mumis el. paštu: info@nesveskvienas.lt",
       },
@@ -90,10 +98,18 @@ const termsContent: TermsContent = {
   },
   en: {
     title: "Terms of Service",
-    lastUpdated: "Last updated: December 2024",
+    lastUpdated: "Last updated: December 2025",
     intro:
       "Please read these terms of use carefully. By registering for an account or by accessing or using the services, you agree to be bound by these terms of use and all terms incorporated by reference. If you do not agree to all of these terms, do not access or use the services.",
     sections: [
+      {
+        title: "Who We Are",
+        content: [
+          'The Services are operated by Nešvęsk Vienas (business name) © ("we", "us").',
+          "Governing law and jurisdiction: Lithuania.",
+          "Privacy: Our processing of personal data is described in the Privacy Policy. By using the Services, you agree to the Privacy Policy.",
+        ],
+      },
       {
         title: "1. Eligibility and Registration",
         content: [
@@ -158,10 +174,18 @@ const termsContent: TermsContent = {
   },
   ru: {
     title: "Условия использования",
-    lastUpdated: "Последнее обновление: декабрь 2024 г.",
+    lastUpdated: "Последнее обновление: декабрь 2025 г.",
     intro:
       "Пожалуйста, внимательно прочитайте настоящие условия использования. Регистрируя учетную запись или используя услуги, вы соглашаетесь соблюдать настоящие условия и все включенные условия. Если вы не согласны со всеми этими условиями, не используйте услуги.",
     sections: [
+      {
+        title: "Кто мы",
+        content: [
+          'Сервис управляется Nešvęsk Vienas (название бизнеса) © ("мы").',
+          "Применимое право и юрисдикция: Литва.",
+          "Конфиденциальность: обработка персональных данных описана в Политике конфиденциальности. Используя Сервис, вы соглашаетесь с Политикой конфиденциальности.",
+        ],
+      },
       {
         title: "1. Право на использование и регистрация",
         content: [
@@ -226,10 +250,18 @@ const termsContent: TermsContent = {
   },
   ua: {
     title: "Умови використання",
-    lastUpdated: "Останнє оновлення: грудень 2024 р.",
+    lastUpdated: "Останнє оновлення: грудень 2025 р.",
     intro:
       "Будь ласка, уважно прочитайте ці умови використання. Реєструючи обліковий запис або використовуючи послуги, ви погоджуєтеся дотримуватися цих умов та всіх включених умов. Якщо ви не погоджуєтеся з усіма цими умовами, не використовуйте послуги.",
     sections: [
+      {
+        title: "Хто ми",
+        content: [
+          'Сервіс керується Nešvęsk Vienas (назва бізнесу) © ("ми").',
+          "Застосовне право та юрисдикція: Литва.",
+          "Конфіденційність: обробка персональних даних описана в Політиці конфіденційності. Використовуючи Сервіс, ви погоджуєтеся з Політикою конфіденційності.",
+        ],
+      },
       {
         title: "1. Право на використання та реєстрація",
         content: [

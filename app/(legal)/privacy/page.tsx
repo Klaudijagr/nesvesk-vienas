@@ -22,12 +22,20 @@ type PrivacyContent = Record<string, PrivacyContentItem>;
 const privacyContent: PrivacyContent = {
   lt: {
     title: "Privatumo politika",
-    lastUpdated: "Paskutinį kartą atnaujinta: 2024 m. gruodžio mėn.",
+    lastUpdated: "Paskutinį kartą atnaujinta: 2025 m. gruodžio mėn.",
     intro:
       "Ši privatumo politika aprašo, kaip Nešvęsk Vienas renka, naudoja ir saugo jūsų asmeninę informaciją. Naudodamiesi mūsų paslaugomis, jūs sutinkate su šia politika.",
     sections: [
       {
-        title: "1. Kokią informaciją renkame",
+        title: "1. Duomenų valdytojas",
+        content: [
+          "Duomenų valdytojas (angl. data controller) yra subjektas, kuris nustato, kodėl ir kaip tvarkomi asmens duomenys.",
+          "Šios platformos duomenų valdytojas: Nešvęsk Vienas (verslo pavadinimas) ©.",
+          "Jurisdikcija: Lietuva.",
+        ],
+      },
+      {
+        title: "2. Kokią informaciją renkame",
         content: [
           "Paskyros informacija: Kai registruojatės, renkame jūsų vardą, el. pašto adresą, miestą ir profilio nuotrauką. Galite taip pat pateikti papildomą informaciją, tokią kaip amžius, kalbos ir biografija.",
           "Profilio informacija: Informacija, kurią pateikiate savo viešame profilyje, įskaitant aprašymą, nuotraukas, pasiekiamas datas ir nustatymus.",
@@ -37,7 +45,7 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "2. Kaip naudojame jūsų informaciją",
+        title: "3. Kaip naudojame jūsų informaciją",
         content: [
           "Paslaugų teikimas: Teikiame ir palaikome mūsų platformą, leidžiame jums kurti profilį ir bendrauti su kitais nariais.",
           "Komunikacija: Siunčiame jums svarbius pranešimus apie paslaugą, įskaitant paskyros patvirtinimus, saugumo įspėjimus ir atnaujinimus.",
@@ -46,7 +54,7 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "3. Informacijos dalijimasis",
+        title: "4. Informacijos dalijimasis",
         content: [
           "Vieša profilio informacija: Jūsų profilio informacija (vardas, miestas, biografija, nuotraukos, pasiekiamos datos) yra matoma kitiems platformos nariams.",
           "Privati informacija: Tam tikra informacija (pavardė, telefono numeris, adresas) atskleidžiama tik nariams, su kuriais esate susijungę (priėmę kvietimą).",
@@ -55,7 +63,37 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "4. Duomenų saugumas",
+        title: "5. Paslaugų teikėjai (duomenų tvarkytojai)",
+        content: [
+          "Mes naudojame patikimus paslaugų teikėjus (angl. processors), kad galėtume teikti paslaugas. Jie tvarko duomenis tik pagal mūsų nurodymus.",
+          "Vercel (talpinimas): aptarnauja svetainės turinį, gali matyti techninius žurnalus (pvz., IP adresas, užklausos metaduomenys) saugumo ir patikimumo tikslais.",
+          "Convex (duomenų bazė ir serverio funkcijos): saugo profilius, pranešimus, kvietimus ir kitus programos duomenis.",
+          "Clerk (autentifikacija): tvarko prisijungimą ir paskyrų identifikatorius (pvz., el. pašto adresas, autentifikavimo metaduomenys).",
+          "Maileroo (el. paštas): siunčia transakcinius el. laiškus (pvz., sisteminius pranešimus).",
+          "Sentry (klaidų stebėsena): gauna techninę diagnostiką apie klaidas (pvz., įrenginio/naršyklės tipas, klaidos informacija). Mes nesiunčiame pilno PII pagal nutylėjimą.",
+          "Vercel Analytics ir Speed Insights (analitika): įjungiama tik gavus jūsų sutikimą dėl analitinių slapukų.",
+        ],
+      },
+      {
+        title: "6. Teisinis pagrindas (GDPR)",
+        content: [
+          "Sutarties vykdymas: tvarkome paskyros ir profilio duomenis, kad galėtume teikti paslaugas (registracija, profilio rodymas, žinučių siuntimas).",
+          "Teisėtas interesas: tvarkome tam tikrus techninius duomenis ir saugumo žurnalus, kad apsaugotume platformą nuo piktnaudžiavimo ir sukčiavimo.",
+          "Sutikimas: analitiniai slapukai/analitika ir neprivalomi rinkodaros el. laiškai (jei pasirenkate). Sutikimą galite atšaukti bet kada.",
+          "Teisinė prievolė: kai kuriuos duomenis galime saugoti/atskleisti, jei to reikalauja įstatymai.",
+        ],
+      },
+      {
+        title: "7. Duomenų saugojimas (retention)",
+        content: [
+          "Paskyros ir profilio duomenys: saugomi tol, kol paskyra aktyvi. Po paskyros ištrynimo paprastai ištrinami arba anonimizuojami per 30 dienų, nebent reikia ilgiau dėl teisinių/saugumo priežasčių.",
+          "Žinutės ir kvietimai: saugomi tol, kol paskyra aktyvi. Po paskyros ištrynimo gali būti pašalinami per 30–90 dienų.",
+          "Sutikimų įrašai (Terms/Privacy/marketing/analytics): saugomi kaip audito įrašas, kad galėtume įrodyti sutikimą ir laikytis atitikties.",
+          "Serverio žurnalai ir saugumo diagnostika: paprastai saugomi 30–90 dienų (pagal paslaugų teikėjų nustatymus), nebent reikia ilgiau incidento tyrimui.",
+        ],
+      },
+      {
+        title: "8. Duomenų saugumas",
         content: [
           "Mes imamės pagrįstų techninių ir organizacinių priemonių apsaugoti jūsų asmeninę informaciją nuo neteisėtos prieigos, pakeitimo, atskleidimo ar sunaikinimo.",
           "Naudojame pramonės standartų šifravimą duomenų perdavimui ir saugojimui.",
@@ -63,7 +101,7 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "5. Jūsų teisės",
+        title: "9. Jūsų teisės",
         content: [
           "Prieiga: Turite teisę prieiti prie savo asmeninių duomenų ir gauti jų kopiją.",
           "Taisymas: Galite prašyti ištaisyti netikslius ar neišsamius duomenis.",
@@ -73,34 +111,29 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "6. Slapukai ir sekimo technologijos",
+        title: "10. Slapukai ir sekimo technologijos",
         content: [
           "Naudojame slapukus ir panašias technologijas, kad: palaikytume jūsų sesiją ir nustatymus, suprastume, kaip naudojate mūsų paslaugas, pagerintume jūsų patirtį.",
           "Galite valdyti slapukų nustatymus savo naršyklėje. Tačiau kai kurių slapukų išjungimas gali paveikti mūsų paslaugų funkcionalumą.",
         ],
       },
       {
-        title: "7. Duomenų saugojimas",
-        content:
-          "Saugome jūsų asmeninę informaciją tol, kol jūsų paskyra yra aktyvi arba kiek reikia paslaugoms teikti. Galite bet kada prašyti ištrinti savo paskyrą, ir mes ištrinsime jūsų duomenis per pagrįstą laikotarpį, nebent privalome juos saugoti pagal teisinių įsipareigojimų.",
-      },
-      {
-        title: "8. Vaikų privatumas",
+        title: "11. Vaikų privatumas",
         content:
           "Mūsų paslaugos nėra skirtos asmenims jaunesniems nei 18 metų. Mes sąmoningai nerenkame asmeninės informacijos iš vaikų. Jei sužinome, kad surinkome informaciją iš vaiko, nedelsdami imsimės veiksmų ją ištrinti.",
       },
       {
-        title: "9. Tarptautinis duomenų perdavimas",
+        title: "12. Tarptautinis duomenų perdavimas",
         content:
-          "Jūsų informacija gali būti perduodama ir apdorojama šalyse, kurios nėra jūsų gyvenamoji šalis. Šios šalys gali turėti skirtingus duomenų apsaugos įstatymus. Mes imamės priemonių užtikrinti, kad jūsų informacija būtų tinkamai apsaugota.",
+          "Jūsų informacija gali būti perduodama ir apdorojama šalyse, kurios nėra jūsų gyvenamoji šalis (pvz., kai naudojame tarptautinius paslaugų teikėjus). Šios šalys gali turėti skirtingus duomenų apsaugos įstatymus. Mes imamės priemonių užtikrinti, kad jūsų informacija būtų tinkamai apsaugota.",
       },
       {
-        title: "10. Šios politikos pakeitimai",
+        title: "13. Šios politikos pakeitimai",
         content:
           "Galime retkarčiais atnaujinti šią privatumo politiką. Informuosime jus apie bet kokius reikšmingus pakeitimus paskelbdami naują politiką mūsų platformoje ir atnaujindami datą viršuje.",
       },
       {
-        title: "11. Susisiekite su mumis",
+        title: "14. Susisiekite su mumis",
         content:
           "Jei turite klausimų apie šią privatumo politiką ar norite pasinaudoti savo teisėmis, susisiekite su mumis el. paštu: info@nesveskvienas.lt",
       },
@@ -108,12 +141,20 @@ const privacyContent: PrivacyContent = {
   },
   en: {
     title: "Privacy Policy",
-    lastUpdated: "Last updated: December 2024",
+    lastUpdated: "Last updated: December 2025",
     intro:
       "This privacy policy describes how Nešvęsk Vienas collects, uses, and protects your personal information. By using our services, you agree to this policy.",
     sections: [
       {
-        title: "1. Information We Collect",
+        title: "1. Data Controller",
+        content: [
+          "The data controller is the person or entity that decides why and how personal data is processed.",
+          "Data controller for this platform: Nešvęsk Vienas (business name) ©.",
+          "Jurisdiction: Lithuania.",
+        ],
+      },
+      {
+        title: "2. Information We Collect",
         content: [
           "Account Information: When you register, we collect your name, email address, city, and profile photo. You may also provide additional information such as age, languages, and bio.",
           "Profile Information: Information you provide in your public profile, including description, photos, available dates, and preferences.",
@@ -123,7 +164,7 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "2. How We Use Your Information",
+        title: "3. How We Use Your Information",
         content: [
           "Service Delivery: Provide and maintain our platform, allow you to create a profile and interact with other members.",
           "Communication: Send you important service notifications, including account confirmations, security alerts, and updates.",
@@ -132,7 +173,7 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "3. Information Sharing",
+        title: "4. Information Sharing",
         content: [
           "Public Profile Information: Your profile information (name, city, bio, photos, available dates) is visible to other platform members.",
           "Private Information: Certain information (last name, phone number, address) is only revealed to members you are connected with (accepted invitation).",
@@ -141,7 +182,37 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "4. Data Security",
+        title: "5. Service Providers (Processors)",
+        content: [
+          "We use trusted service providers (processors) to operate the platform. They process data only on our instructions.",
+          "Vercel (hosting): serves the website and may process technical logs (e.g., IP address and request metadata) for security and reliability.",
+          "Convex (database and server functions): stores profiles, messages, invitations, and other app data.",
+          "Clerk (authentication): handles sign-in and account identity (e.g., email address, authentication metadata).",
+          "Maileroo (email delivery): sends transactional emails (service notifications).",
+          "Sentry (error monitoring): receives technical diagnostics about crashes/errors (e.g., device/browser type, error details). We do not send full PII by default.",
+          "Vercel Analytics and Speed Insights (analytics): enabled only after you opt in to analytics cookies.",
+        ],
+      },
+      {
+        title: "6. Legal Bases (GDPR)",
+        content: [
+          "Contract: to provide the services you request (account creation, profile display, messaging, invitations).",
+          "Legitimate interests: to secure the platform, prevent abuse/fraud, and maintain reliability (limited technical logs and security monitoring).",
+          "Consent: for analytics cookies/analytics and optional marketing emails (if you opt in). You can withdraw consent at any time.",
+          "Legal obligation: when we must retain or disclose information to comply with law.",
+        ],
+      },
+      {
+        title: "7. Data Retention",
+        content: [
+          "Account and profile data: retained while your account is active. After account deletion, data is typically deleted or anonymized within 30 days unless we need to keep it longer for legal or security reasons.",
+          "Messages and invitations: retained while your account is active and typically removed within 30–90 days after deletion.",
+          "Consent records (Terms/Privacy/marketing/analytics): retained as an audit record to demonstrate compliance.",
+          "Server logs and security diagnostics: typically retained for 30–90 days (depending on provider settings) unless needed longer for incident investigation.",
+        ],
+      },
+      {
+        title: "8. Data Security",
         content: [
           "We take reasonable technical and organizational measures to protect your personal information from unauthorized access, alteration, disclosure, or destruction.",
           "We use industry-standard encryption for data transmission and storage.",
@@ -149,7 +220,7 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "5. Your Rights",
+        title: "9. Your Rights",
         content: [
           "Access: You have the right to access your personal data and obtain a copy.",
           "Correction: You can request correction of inaccurate or incomplete data.",
@@ -159,34 +230,29 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "6. Cookies and Tracking Technologies",
+        title: "10. Cookies and Tracking Technologies",
         content: [
           "We use cookies and similar technologies to: maintain your session and preferences, understand how you use our services, improve your experience.",
           "You can manage cookie settings in your browser. However, disabling certain cookies may affect the functionality of our services.",
         ],
       },
       {
-        title: "7. Data Retention",
-        content:
-          "We retain your personal information for as long as your account is active or as needed to provide services. You can request deletion of your account at any time, and we will delete your data within a reasonable period, unless we are required to retain it for legal obligations.",
-      },
-      {
-        title: "8. Children's Privacy",
+        title: "11. Children's Privacy",
         content:
           "Our services are not intended for individuals under 18 years of age. We do not knowingly collect personal information from children. If we learn that we have collected information from a child, we will take immediate steps to delete it.",
       },
       {
-        title: "9. International Data Transfer",
+        title: "12. International Data Transfer",
         content:
-          "Your information may be transferred to and processed in countries other than your country of residence. These countries may have different data protection laws. We take measures to ensure your information is adequately protected.",
+          "Your information may be transferred to and processed in countries other than your country of residence (for example, when we use international service providers). These countries may have different data protection laws. We take measures to ensure your information is adequately protected.",
       },
       {
-        title: "10. Changes to This Policy",
+        title: "13. Changes to This Policy",
         content:
           "We may update this privacy policy from time to time. We will notify you of any significant changes by posting the new policy on our platform and updating the date at the top.",
       },
       {
-        title: "11. Contact Us",
+        title: "14. Contact Us",
         content:
           "If you have questions about this privacy policy or want to exercise your rights, please contact us at: info@nesveskvienas.lt",
       },
@@ -194,12 +260,20 @@ const privacyContent: PrivacyContent = {
   },
   ru: {
     title: "Политика конфиденциальности",
-    lastUpdated: "Последнее обновление: декабрь 2024 г.",
+    lastUpdated: "Последнее обновление: декабрь 2025 г.",
     intro:
       "Эта политика конфиденциальности описывает, как Не празднуй один собирает, использует и защищает вашу личную информацию. Используя наши услуги, вы соглашаетесь с этой политикой.",
     sections: [
       {
-        title: "1. Какую информацию мы собираем",
+        title: "1. Оператор данных",
+        content: [
+          "Оператор данных (data controller) — это лицо или организация, которые определяют цели и способы обработки персональных данных.",
+          "Оператор данных для этой платформы: Nešvęsk Vienas (название бизнеса) ©.",
+          "Юрисдикция: Литва.",
+        ],
+      },
+      {
+        title: "2. Какую информацию мы собираем",
         content: [
           "Информация об учетной записи: При регистрации мы собираем ваше имя, адрес электронной почты, город и фото профиля. Вы также можете предоставить дополнительную информацию, такую как возраст, языки и биографию.",
           "Информация профиля: Информация, которую вы предоставляете в своем публичном профиле, включая описание, фотографии, доступные даты и предпочтения.",
@@ -209,7 +283,7 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "2. Как мы используем вашу информацию",
+        title: "3. Как мы используем вашу информацию",
         content: [
           "Предоставление услуг: Предоставляем и поддерживаем нашу платформу, позволяем вам создать профиль и взаимодействовать с другими участниками.",
           "Коммуникация: Отправляем вам важные уведомления о сервисе, включая подтверждения учетной записи, предупреждения о безопасности и обновления.",
@@ -218,7 +292,7 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "3. Обмен информацией",
+        title: "4. Обмен информацией",
         content: [
           "Публичная информация профиля: Информация вашего профиля (имя, город, биография, фотографии, доступные даты) видна другим участникам платформы.",
           "Личная информация: Определенная информация (фамилия, номер телефона, адрес) раскрывается только участникам, с которыми вы связаны (принятое приглашение).",
@@ -227,7 +301,37 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "4. Безопасность данных",
+        title: "5. Поставщики услуг (обработчики)",
+        content: [
+          "Мы используем надежных поставщиков услуг (processors), чтобы предоставлять и защищать сервис. Они обрабатывают данные только по нашим инструкциям.",
+          "Vercel (хостинг): предоставляет сайт и может обрабатывать технические логи (например, IP-адрес и метаданные запросов) для безопасности и надежности.",
+          "Convex (база данных и серверные функции): хранит профили, сообщения, приглашения и другие данные приложения.",
+          "Clerk (аутентификация): обеспечивает вход и управление учетными данными (например, email и метаданные аутентификации).",
+          "Maileroo (email): отправляет транзакционные письма (уведомления сервиса).",
+          "Sentry (мониторинг ошибок): получает техническую диагностику ошибок/сбоев. Мы не отправляем полные персональные данные по умолчанию.",
+          "Vercel Analytics и Speed Insights (аналитика): включается только после согласия на аналитические cookie.",
+        ],
+      },
+      {
+        title: "6. Правовые основания (GDPR)",
+        content: [
+          "Договор: чтобы предоставлять запрошенные вами услуги (учетная запись, профиль, сообщения, приглашения).",
+          "Законные интересы: безопасность платформы, предотвращение злоупотреблений/мошенничества, надежность (ограниченные технические логи).",
+          "Согласие: аналитические cookie/аналитика и необязательные маркетинговые письма (если вы выбрали). Вы можете отозвать согласие в любое время.",
+          "Юридическая обязанность: когда мы должны хранить или раскрывать данные по закону.",
+        ],
+      },
+      {
+        title: "7. Хранение данных",
+        content: [
+          "Данные учетной записи и профиля: хранятся, пока учетная запись активна. После удаления учетной записи данные обычно удаляются или обезличиваются в течение 30 дней, если не требуется более длительное хранение по юридическим или безопасностным причинам.",
+          "Сообщения и приглашения: хранятся, пока учетная запись активна, и обычно удаляются в течение 30–90 дней после удаления.",
+          "Записи о согласии (Terms/Privacy/marketing/analytics): хранятся как аудит-след для подтверждения соблюдения требований.",
+          "Серверные логи и диагностика безопасности: обычно хранятся 30–90 дней (в зависимости от настроек провайдеров), если не требуется дольше для расследования инцидентов.",
+        ],
+      },
+      {
+        title: "8. Безопасность данных",
         content: [
           "Мы принимаем разумные технические и организационные меры для защиты вашей личной информации от несанкционированного доступа, изменения, раскрытия или уничтожения.",
           "Мы используем шифрование отраслевого стандарта для передачи и хранения данных.",
@@ -235,7 +339,7 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "5. Ваши права",
+        title: "9. Ваши права",
         content: [
           "Доступ: Вы имеете право получить доступ к своим личным данным и получить их копию.",
           "Исправление: Вы можете запросить исправление неточных или неполных данных.",
@@ -245,34 +349,29 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "6. Файлы cookie и технологии отслеживания",
+        title: "10. Файлы cookie и технологии отслеживания",
         content: [
           "Мы используем файлы cookie и аналогичные технологии для: поддержания вашей сессии и настроек, понимания того, как вы используете наши услуги, улучшения вашего опыта.",
           "Вы можете управлять настройками файлов cookie в своем браузере. Однако отключение определенных файлов cookie может повлиять на функциональность наших услуг.",
         ],
       },
       {
-        title: "7. Хранение данных",
-        content:
-          "Мы храним вашу личную информацию до тех пор, пока ваша учетная запись активна или пока это необходимо для предоставления услуг. Вы можете в любое время запросить удаление своей учетной записи, и мы удалим ваши данные в разумные сроки, если мы не обязаны хранить их по юридическим обязательствам.",
-      },
-      {
-        title: "8. Конфиденциальность детей",
+        title: "11. Конфиденциальность детей",
         content:
           "Наши услуги не предназначены для лиц младше 18 лет. Мы сознательно не собираем личную информацию от детей. Если мы узнаем, что собрали информацию от ребенка, мы немедленно примем меры для ее удаления.",
       },
       {
-        title: "9. Международная передача данных",
+        title: "12. Международная передача данных",
         content:
-          "Ваша информация может быть передана и обработана в странах, отличных от страны вашего проживания. В этих странах могут действовать другие законы о защите данных. Мы принимаем меры для обеспечения надлежащей защиты вашей информации.",
+          "Ваша информация может быть передана и обработана в странах, отличных от страны вашего проживания (например, при использовании международных поставщиков услуг). В этих странах могут действовать другие законы о защите данных. Мы принимаем меры для обеспечения надлежащей защиты вашей информации.",
       },
       {
-        title: "10. Изменения в этой политике",
+        title: "13. Изменения в этой политике",
         content:
           "Мы можем время от времени обновлять эту политику конфиденциальности. Мы уведомим вас о любых существенных изменениях, опубликовав новую политику на нашей платформе и обновив дату вверху.",
       },
       {
-        title: "11. Свяжитесь с нами",
+        title: "14. Свяжитесь с нами",
         content:
           "Если у вас есть вопросы об этой политике конфиденциальности или вы хотите воспользоваться своими правами, свяжитесь с нами по адресу: info@nesveskvienas.lt",
       },
@@ -280,12 +379,20 @@ const privacyContent: PrivacyContent = {
   },
   ua: {
     title: "Політика конфіденційності",
-    lastUpdated: "Останнє оновлення: грудень 2024 р.",
+    lastUpdated: "Останнє оновлення: грудень 2025 р.",
     intro:
       "Ця політика конфіденційності описує, як Не святкуй наодинці збирає, використовує та захищає вашу особисту інформацію. Використовуючи наші послуги, ви погоджуєтеся з цією політикою.",
     sections: [
       {
-        title: "1. Яку інформацію ми збираємо",
+        title: "1. Контролер даних",
+        content: [
+          "Контролер даних (data controller) — це особа або організація, які визначають цілі та способи обробки персональних даних.",
+          "Контролер даних для цієї платформи: Nešvęsk Vienas (назва бізнесу) ©.",
+          "Юрисдикція: Литва.",
+        ],
+      },
+      {
+        title: "2. Яку інформацію ми збираємо",
         content: [
           "Інформація про обліковий запис: При реєстрації ми збираємо ваше ім'я, адресу електронної пошти, місто та фото профілю. Ви також можете надати додаткову інформацію, таку як вік, мови та біографію.",
           "Інформація профілю: Інформація, яку ви надаєте у своєму публічному профілі, включаючи опис, фотографії, доступні дати та вподобання.",
@@ -295,7 +402,7 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "2. Як ми використовуємо вашу інформацію",
+        title: "3. Як ми використовуємо вашу інформацію",
         content: [
           "Надання послуг: Надаємо та підтримуємо нашу платформу, дозволяємо вам створити профіль та взаємодіяти з іншими учасниками.",
           "Комунікація: Надсилаємо вам важливі повідомлення про сервіс, включаючи підтвердження облікового запису, попередження про безпеку та оновлення.",
@@ -304,7 +411,7 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "3. Обмін інформацією",
+        title: "4. Обмін інформацією",
         content: [
           "Публічна інформація профілю: Інформація вашого профілю (ім'я, місто, біографія, фотографії, доступні дати) видима іншим учасникам платформи.",
           "Особиста інформація: Певна інформація (прізвище, номер телефону, адреса) розкривається лише учасникам, з якими ви з'єднані (прийняте запрошення).",
@@ -313,7 +420,37 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "4. Безпека даних",
+        title: "5. Постачальники послуг (обробники)",
+        content: [
+          "Ми використовуємо надійних постачальників послуг (processors), щоб надавати сервіс. Вони обробляють дані лише за нашими інструкціями.",
+          "Vercel (хостинг): обслуговує сайт і може обробляти технічні логи (наприклад, IP-адресу та метадані запитів) для безпеки та надійності.",
+          "Convex (база даних і серверні функції): зберігає профілі, повідомлення, запрошення та інші дані.",
+          "Clerk (автентифікація): забезпечує вхід і керування обліковими даними (наприклад, email і метадані автентифікації).",
+          "Maileroo (email): надсилає транзакційні листи (сервісні повідомлення).",
+          "Sentry (моніторинг помилок): отримує технічну діагностику помилок/збоїв. Ми не надсилаємо повні персональні дані за замовчуванням.",
+          "Vercel Analytics та Speed Insights (аналітика): вмикається лише після вашої згоди на аналітичні cookie.",
+        ],
+      },
+      {
+        title: "6. Правові підстави (GDPR)",
+        content: [
+          "Договір: щоб надавати запитані вами послуги (обліковий запис, профіль, повідомлення, запрошення).",
+          "Законні інтереси: безпека платформи, запобігання зловживанням/шахрайству та підтримка надійності (обмежені технічні логи).",
+          "Згода: аналітичні cookie/аналітика та необов’язкові маркетингові листи (якщо ви обрали). Ви можете відкликати згоду в будь-який час.",
+          "Юридичний обов’язок: коли ми повинні зберігати або розкривати дані відповідно до закону.",
+        ],
+      },
+      {
+        title: "7. Зберігання даних",
+        content: [
+          "Дані облікового запису та профілю: зберігаються, поки обліковий запис активний. Після видалення облікового запису дані зазвичай видаляються або знеособлюються протягом 30 днів, якщо не потрібне довше зберігання з юридичних або безпекових причин.",
+          "Повідомлення та запрошення: зберігаються, поки обліковий запис активний, і зазвичай видаляються протягом 30–90 днів після видалення.",
+          "Записи згоди (Terms/Privacy/marketing/analytics): зберігаються як аудит-запис для підтвердження дотримання вимог.",
+          "Серверні логи та діагностика безпеки: зазвичай зберігаються 30–90 днів (залежно від налаштувань провайдерів), якщо не потрібно довше для розслідування інцидентів.",
+        ],
+      },
+      {
+        title: "8. Безпека даних",
         content: [
           "Ми вживаємо розумних технічних та організаційних заходів для захисту вашої особистої інформації від несанкціонованого доступу, зміни, розкриття або знищення.",
           "Ми використовуємо шифрування галузевого стандарту для передачі та зберігання даних.",
@@ -321,7 +458,7 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "5. Ваші права",
+        title: "9. Ваші права",
         content: [
           "Доступ: Ви маєте право отримати доступ до своїх особистих даних та отримати їх копію.",
           "Виправлення: Ви можете запросити виправлення неточних або неповних даних.",
@@ -331,34 +468,29 @@ const privacyContent: PrivacyContent = {
         ],
       },
       {
-        title: "6. Файли cookie та технології відстеження",
+        title: "10. Файли cookie та технології відстеження",
         content: [
           "Ми використовуємо файли cookie та подібні технології для: підтримки вашої сесії та налаштувань, розуміння того, як ви використовуєте наші послуги, покращення вашого досвіду.",
           "Ви можете керувати налаштуваннями файлів cookie у своєму браузері. Однак вимкнення певних файлів cookie може вплинути на функціональність наших послуг.",
         ],
       },
       {
-        title: "7. Зберігання даних",
-        content:
-          "Ми зберігаємо вашу особисту інформацію доти, поки ваш обліковий запис активний або поки це необхідно для надання послуг. Ви можете в будь-який час запросити видалення свого облікового запису, і ми видалимо ваші дані в розумні терміни, якщо ми не зобов'язані зберігати їх за юридичними зобов'язаннями.",
-      },
-      {
-        title: "8. Конфіденційність дітей",
+        title: "11. Конфіденційність дітей",
         content:
           "Наші послуги не призначені для осіб молодше 18 років. Ми свідомо не збираємо особисту інформацію від дітей. Якщо ми дізнаємося, що зібрали інформацію від дитини, ми негайно вживемо заходів для її видалення.",
       },
       {
-        title: "9. Міжнародна передача даних",
+        title: "12. Міжнародна передача даних",
         content:
-          "Ваша інформація може бути передана та оброблена в країнах, відмінних від країни вашого проживання. У цих країнах можуть діяти інші закони про захист даних. Ми вживаємо заходів для забезпечення належного захисту вашої інформації.",
+          "Ваша інформація може бути передана та оброблена в країнах, відмінних від країни вашого проживання (наприклад, при використанні міжнародних постачальників послуг). У цих країнах можуть діяти інші закони про захист даних. Ми вживаємо заходів для забезпечення належного захисту вашої інформації.",
       },
       {
-        title: "10. Зміни до цієї політики",
+        title: "13. Зміни до цієї політики",
         content:
           "Ми можемо час від часу оновлювати цю політику конфіденційності. Ми повідомимо вас про будь-які істотні зміни, опублікувавши нову політику на нашій платформі та оновивши дату вгорі.",
       },
       {
-        title: "11. Зв'яжіться з нами",
+        title: "14. Зв'яжіться з нами",
         content:
           "Якщо у вас є запитання щодо цієї політики конфіденційності або ви хочете скористатися своїми правами, зв'яжіться з нами за адресою: info@nesveskvienas.lt",
       },

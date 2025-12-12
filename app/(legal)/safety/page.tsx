@@ -4,11 +4,8 @@ import {
   AlertTriangle,
   ArrowLeft,
   Eye,
-  Flag,
-  Heart,
   MapPin,
   MessageCircle,
-  Phone,
   Shield,
   ShieldCheck,
   Users,
@@ -39,57 +36,46 @@ type SafetyContent = Record<string, SafetyContentItem>;
 const safetyContent: SafetyContent = {
   lt: {
     title: "Saugos gairės",
-    subtitle: "Jūsų saugumas yra svarbus. Priimkite tai rimtai. Mes taip pat.",
+    subtitle:
+      "Jūsų saugumas yra prioritetas. Prašome šias gaires vertinti rimtai.",
     intro:
-      "Susitikdami su naujais žmonėmis, visada būkite atsargūs. Šios gairės padės jums saugiai naudotis platforma. Atminkite, kad Nešvęsk Vienas yra platforma, skirta sujungti žmones – tačiau jūsų saugumas visada priklauso ir nuo jūsų pačių sprendimų.",
+      "Platforma sudaro tik ryšio galimybę tarp narių – už savo sprendimus ir veiksmus esate atsakingi jūs patys.",
     tips: [
       {
         icon: "eye",
         title: "Atidžiai peržiūrėkite profilius",
         content:
-          "Nesvarbu, ar keliaujate, ar dalyvaujate renginyje, skirkite laiko atidžiai peržiūrėti narių profilius. Perskaitykite, ką nariai sako apie save. Duokite sau laiko kruopščiai perskaityti visą turimą informaciją ir nekompromituokite. Jei jaučiatės nepatogiai, ieškokite toliau.",
+          "Skirkite laiko susipažinti su kitų narių informacija. Įvertinkite, ar aprašymas, nuotraukos ir bendravimas kelia pasitikėjimą.",
       },
       {
         icon: "alert",
         title: "Pasitikėkite savo nuojauta",
         content:
-          "Jei asmuo, situacija ar profilis atrodo nesaugus dėl bet kokios priežasties, eikite toliau. Nesijaudinkite dėl to, kad atrodote nemandagūs. Būkite aiškūs dėl savo ribų ir nedrovėkite jų pareikšti. Jei kas nors jus verčia jaustis nepatogiai, palikite situaciją arba nedalyvaukite. Bendravimas aiškiai su kitais ir rūpinkitės savimi.",
+          "Jeigu asmuo, situacija ar bet kuris elementas jums kelia abejonių ar atrodo nesaugus, nutraukite bendravimą. Jūsų komfortas ir saugumas yra svarbiausi.",
       },
       {
         icon: "mappin",
-        title: "Turėkite atsarginį planą",
+        title: "Žinokite savo galimybes",
         content:
-          "Žinokite savo galimybes. Jei kažkas neveikia su jūsų šeimininku arba jie klaidingai apibūdino save ar savo namus, įsitikinkite, kad turite alternatyvią vietą apsistoti. Nustatykite artimiausią viešbutį ar hostelį arba turėkite atsarginį šeimininką prieš vykdami. Jei įmanoma, išsiaiškinkite šeimininko apylinkes prieš atvykdami.",
+          "Jei kažkas negerai su jūsų šeimininku, ieškokite alternatyvos. Visada turėkite planą, kuris užtikrintų jūsų saugumą ir galimybę pasitraukti iš situacijos.",
       },
       {
         icon: "message",
         title: "Bendraukite per platformą",
         content:
-          "Niekada nesidalinkite savo telefono numeriu ar el. pašto adresu naujam asmeniui, kol nesusitiksite ir nepasijusite patogiai su jais. Naudokite tik svetainę ir mobilias programėles bendravimui. Kelionių patvirtinimas ir visų komunikacijų laikymas Nešvęsk Vienas platformoje padeda mūsų saugumo komandai identifikuoti problemas ir greitai reaguoti.",
+          "Savo kontaktais ir adresu dalinkitės tik tada, kai esate tikri dėl kito asmens tapatybės ir jaučiatės saugiai. Kol nesate užtikrinti, naudokite tik platformos vidinį susirašinėjimą.",
       },
       {
         icon: "users",
         title: "Susitikite viešoje vietoje",
         content:
-          "Pirmą kartą susitikdami, pasirinkite viešą vietą. Praneškite draugui ar šeimos nariui, kur būsite. Jei jaučiatės nepatogiai likti vieni su nariu, apsvarstykite galimybę apsistoti pas šeimas ar poras.",
+          "Pirmą kartą susitikdami rinkitės viešą, žmonių lankomą vietą arba įtraukite daugiau dalyvių. Praneškite draugui ar šeimos nariui, kur ir su kuo susitinkate.",
       },
       {
         icon: "shield",
         title: "Žinokite savo ribas",
         content:
-          "Vakarėliai gali būti smagūs, bet tai perduoda jūsų saugumą ir gerovę kitiems. Būkite sąmoningi dėl savo aplinkos ir saugokite savo daiktus. Nustatykite aiškias ribas ir jų laikykitės.",
-      },
-      {
-        icon: "heart",
-        title: "Būkite informuoti apie kultūrą",
-        content:
-          "Atlikite namų darbus ir įsitikinkite, kad esate informuoti apie kultūrinius ir religinius skirtumus, jautrumus ir bendras saugumo rekomendacijas kiekvienai vietai, į kurią keliaujate. Lyčių vaidmenys ir lūkesčiai gali labai skirtis.",
-      },
-      {
-        icon: "flag",
-        title: "Palikite atsiliepimus",
-        content:
-          "Naudokite atsiliepimų sistemą, kad praneštumėte kitiems nariams apie savo patirtį su žmonėmis, kuriuos sutinkate. Būkite sąžiningi ir aiškūs. Atsiliepimų sistema padeda kurti pasitikėjimą bendruomenėje.",
+          'Aiškiai komunikuokite, kas jums priimtina, o kas ne. Nedvejokite pasakyti „ne" ir pasitraukti iš situacijų, kurios kelia nepatogumą ar nesaugumo jausmą.',
       },
     ],
     reportTitle: "Pranešti apie neigiamą patirtį",
@@ -101,57 +87,46 @@ const safetyContent: SafetyContent = {
   },
   en: {
     title: "Safety Guidelines",
-    subtitle: "Your safety is important. Take it seriously. We do.",
+    subtitle:
+      "Your safety is a priority. Please take these guidelines seriously.",
     intro:
-      "When meeting new people, always exercise caution. These guidelines will help you use the platform safely. Remember, Nešvęsk Vienas is a platform designed to connect people – but your safety always depends on your own decisions as well.",
+      "The platform only facilitates connections between members – you are responsible for your own decisions and actions.",
     tips: [
       {
         icon: "eye",
         title: "Review Profiles Carefully",
         content:
-          "Whether traveling, attending an event, or joining a gathering, take the time to carefully review member profiles. Read what members say about themselves. Give yourself the time to thoroughly read through all the information available and don't compromise. If you're uncomfortable, keep looking.",
+          "Take time to explore members' profiles. Evaluate whether their descriptions, photos, and communication feel trustworthy.",
       },
       {
         icon: "alert",
         title: "Trust Your Instincts",
         content:
-          "If a person, situation or profile seems unsafe for any reason, move on. Don't worry about seeming rude. Be clear about your boundaries and don't be shy about stating them. If someone makes you uncomfortable, leave the situation or don't attend. Communicate clearly with others and take care of yourself.",
+          "If a person or situation raises doubts or feels unsafe for any reason, stop communicating. Your comfort and safety come first.",
       },
       {
         icon: "mappin",
-        title: "Have a Backup Plan",
+        title: "Know Your Options",
         content:
-          "Know your options. If something doesn't work out with your host, or if they misrepresented themselves or their home, make sure you have an alternate place to stay. Identify the nearest hostel or hotel, or have a backup host in place before you go. If possible, research your host's neighborhood prior to arriving.",
+          "If something doesn't go well with your host, look for an alternative. Always have a plan that ensures your safety and ability to leave if needed.",
       },
       {
         icon: "message",
-        title: "Communicate Through Platform",
+        title: "Communicate Through the Platform",
         content:
-          "Never give out your phone number or email address to a new person until you meet and feel comfortable with them. Use only the website and mobile apps to communicate. Confirming trips and keeping all communication on Nešvęsk Vienas helps our safety team identify issues and react quickly.",
+          "Share your contact details or address only when you are confident about the other person's identity and feel safe. Until then, use the platform's internal messaging.",
       },
       {
         icon: "users",
-        title: "Meet in Public Places",
+        title: "Meet in a Public Place",
         content:
-          "For first meetings, choose a public place. Let a friend or family member know where you'll be. If you're uncomfortable staying alone with a member, consider staying with families or with couples.",
+          "For the first meeting, choose a public, well-populated place or involve additional people. Inform a friend or family member about where you are going and with whom.",
       },
       {
         icon: "shield",
-        title: "Know Your Limits",
+        title: "Know Your Boundaries",
         content:
-          "Partying like a rockstar might be fun, but it puts your safety and well-being in the hands of others. Be aware of your surroundings and keep your belongings safe. Set clear boundaries and stick to them.",
-      },
-      {
-        icon: "heart",
-        title: "Be Informed About the Culture",
-        content:
-          "Do your homework, and be sure you're aware of cultural and religious differences, sensitivities, and general safety recommendations for each place that you travel. Gender roles and expectations can differ widely.",
-      },
-      {
-        icon: "flag",
-        title: "Leave References",
-        content:
-          "Use the reference system to let other members know about your experiences with the people you meet. Be honest and clear. The reference system helps build trust in the community.",
+          'Be clear about your limits and communicate them openly. Do not hesitate to say "no" or leave situations that make you feel uncomfortable or unsafe.',
       },
     ],
     reportTitle: "Report Negative Experiences",
@@ -162,58 +137,47 @@ const safetyContent: SafetyContent = {
       "General Emergency: 112 | Police: 02 or 112 | Ambulance: 03 or 112",
   },
   ru: {
-    title: "Правила безопасности",
-    subtitle: "Ваша безопасность важна. Отнеситесь к этому серьезно. Мы тоже.",
+    title: "Рекомендации по безопасности",
+    subtitle:
+      "Ваша безопасность — наш приоритет. Пожалуйста, серьёзно относитесь к этим рекомендациям.",
     intro:
-      "При встрече с новыми людьми всегда соблюдайте осторожность. Эти рекомендации помогут вам безопасно пользоваться платформой. Помните, что Не празднуй один — это платформа для связи людей, но ваша безопасность всегда зависит и от ваших собственных решений.",
+      "Платформа лишь предоставляет возможность связи между участниками — вы самостоятельно отвечаете за свои решения и действия.",
     tips: [
       {
         icon: "eye",
         title: "Внимательно изучайте профили",
         content:
-          "Путешествуете ли вы, посещаете мероприятие или присоединяетесь к встрече, уделите время тщательному изучению профилей участников. Прочитайте, что участники говорят о себе. Дайте себе время внимательно прочитать всю доступную информацию и не идите на компромиссы. Если вам некомфортно, продолжайте поиск.",
+          "Уделите время просмотру профилей участников. Оцените, вызывают ли доверие их описание, фотографии и стиль общения.",
       },
       {
         icon: "alert",
-        title: "Доверяйте своей интуиции",
+        title: "Доверяйте своим ощущениям",
         content:
-          "Если человек, ситуация или профиль кажутся небезопасными по какой-либо причине, идите дальше. Не беспокойтесь о том, что покажетесь грубым. Четко обозначьте свои границы и не стесняйтесь их озвучивать. Если кто-то заставляет вас чувствовать себя некомфортно, покиньте ситуацию или не участвуйте.",
+          "Если человек или ситуация вызывает сомнения или кажется небезопасной, прекращайте общение. Ваш комфорт и безопасность — прежде всего.",
       },
       {
         icon: "mappin",
-        title: "Имейте запасной план",
+        title: "Знайте свои возможности",
         content:
-          "Знайте свои варианты. Если что-то не получается с хозяином или они исказили информацию о себе или своем доме, убедитесь, что у вас есть альтернативное место для проживания. Определите ближайший хостел или отель или имейте запасного хозяина перед поездкой.",
+          "Если что-то идёт не так с вашим хозяином, найдите альтернативу. Всегда имейте план, который обеспечит вашу безопасность и возможность уйти при необходимости.",
       },
       {
         icon: "message",
         title: "Общайтесь через платформу",
         content:
-          "Никогда не давайте свой номер телефона или адрес электронной почты новому человеку, пока не встретитесь и не почувствуете себя комфортно с ним. Используйте только сайт и мобильные приложения для общения.",
+          "Делитесь своими контактами или адресом только тогда, когда уверены в личности другого человека и чувствуете себя в безопасности. До этого пользуйтесь внутренним чатом платформы.",
       },
       {
         icon: "users",
-        title: "Встречайтесь в общественных местах",
+        title: "Встречайтесь в публичном месте",
         content:
-          "Для первых встреч выбирайте общественное место. Сообщите другу или члену семьи, где вы будете. Если вам некомфортно оставаться наедине с участником, рассмотрите возможность проживания у семей или пар.",
+          "Для первой встречи выбирайте публичное, людное место или приглашайте других людей. Сообщите другу или члену семьи, где и с кем вы встречаетесь.",
       },
       {
         icon: "shield",
         title: "Знайте свои границы",
         content:
-          "Развлечения могут быть веселыми, но они передают вашу безопасность и благополучие в руки других. Будьте внимательны к окружающей обстановке и берегите свои вещи. Установите четкие границы и придерживайтесь их.",
-      },
-      {
-        icon: "heart",
-        title: "Будьте информированы о культуре",
-        content:
-          "Сделайте домашнее задание и убедитесь, что вы осведомлены о культурных и религиозных различиях, чувствительности и общих рекомендациях по безопасности для каждого места, куда вы путешествуете.",
-      },
-      {
-        icon: "flag",
-        title: "Оставляйте отзывы",
-        content:
-          "Используйте систему отзывов, чтобы сообщить другим участникам о вашем опыте общения с людьми, которых вы встречаете. Будьте честны и понятны. Система отзывов помогает укреплять доверие в сообществе.",
+          "Чётко обозначайте свои личные границы и не бойтесь о них говорить. Не стесняйтесь сказать «нет» и покинуть ситуацию, если вам некомфортно или небезопасно.",
       },
     ],
     reportTitle: "Сообщить о негативном опыте",
@@ -225,57 +189,46 @@ const safetyContent: SafetyContent = {
   },
   ua: {
     title: "Правила безпеки",
-    subtitle: "Ваша безпека важлива. Ставтеся до цього серйозно. Ми теж.",
+    subtitle:
+      "Ваша безпека є пріоритетом. Будь ласка, серйозно ставтеся до цих рекомендацій.",
     intro:
-      "При зустрічі з новими людьми завжди дотримуйтесь обережності. Ці рекомендації допоможуть вам безпечно користуватися платформою. Пам'ятайте, що Не святкуй наодинці — це платформа для з'єднання людей, але ваша безпека завжди залежить і від ваших власних рішень.",
+      "Платформа лише створює можливість для контакту між учасниками — ви самі несете відповідальність за свої рішення та дії.",
     tips: [
       {
         icon: "eye",
-        title: "Уважно вивчайте профілі",
+        title: "Уважно переглядайте профілі",
         content:
-          "Подорожуєте ви, відвідуєте захід чи приєднуєтеся до зустрічі, приділіть час ретельному вивченню профілів учасників. Прочитайте, що учасники говорять про себе. Дайте собі час уважно прочитати всю доступну інформацію і не йдіть на компроміси. Якщо вам некомфортно, продовжуйте пошук.",
+          "Приділіть час вивченню профілів інших користувачів. Оцініть, чи викликають довіру їхній опис, фото та стиль спілкування.",
       },
       {
         icon: "alert",
         title: "Довіряйте своїй інтуїції",
         content:
-          "Якщо людина, ситуація або профіль здаються небезпечними з будь-якої причини, йдіть далі. Не турбуйтеся про те, що здаватиметеся грубим. Чітко позначте свої межі і не соромтеся їх озвучувати. Якщо хтось змушує вас почуватися некомфортно, залиште ситуацію або не беріть участі.",
+          "Якщо людина або ситуація викликає сумніви чи здається небезпечною, припиніть спілкування. Ваш комфорт і безпека — найважливіші.",
       },
       {
         icon: "mappin",
-        title: "Майте запасний план",
+        title: "Знайте свої можливості",
         content:
-          "Знайте свої варіанти. Якщо щось не виходить з господарем або вони спотворили інформацію про себе чи свій дім, переконайтеся, що у вас є альтернативне місце для проживання. Визначте найближчий хостел або готель або майте запасного господаря перед поїздкою.",
+          "Якщо щось іде не так із вашим господарем, шукайте альтернативу. Завжди майте план, який забезпечить вашу безпеку та можливість залишити ситуацію за потреби.",
       },
       {
         icon: "message",
         title: "Спілкуйтеся через платформу",
         content:
-          "Ніколи не давайте свій номер телефону або адресу електронної пошти новій людині, поки не зустрінетеся і не відчуєте себе комфортно з нею. Використовуйте тільки сайт і мобільні додатки для спілкування.",
+          "Діліться своїми контактами або адресою лише тоді, коли ви впевнені в особистості іншої людини та почуваєтеся в безпеці. До цього користуйтеся внутрішнім чатом платформи.",
       },
       {
         icon: "users",
         title: "Зустрічайтеся в громадських місцях",
         content:
-          "Для перших зустрічей обирайте громадське місце. Повідомте другу або члену сім'ї, де ви будете. Якщо вам некомфортно залишатися наодинці з учасником, розгляньте можливість проживання у сімей або пар.",
+          "Під час першої зустрічі вибирайте публічне, людне місце або запрошуйте інших людей приєднатися. Повідомте друга чи члена сім'ї, де та з ким ви зустрічаєтесь.",
       },
       {
         icon: "shield",
         title: "Знайте свої межі",
         content:
-          "Розваги можуть бути веселими, але вони передають вашу безпеку та благополуччя в руки інших. Будьте уважні до оточення і бережіть свої речі. Встановіть чіткі межі і дотримуйтесь їх.",
-      },
-      {
-        icon: "heart",
-        title: "Будьте інформовані про культуру",
-        content:
-          "Зробіть домашнє завдання і переконайтеся, що ви обізнані про культурні та релігійні відмінності, чутливість та загальні рекомендації з безпеки для кожного місця, куди ви подорожуєте.",
-      },
-      {
-        icon: "flag",
-        title: "Залишайте відгуки",
-        content:
-          "Використовуйте систему відгуків, щоб повідомити іншим учасникам про ваш досвід спілкування з людьми, яких ви зустрічаєте. Будьте чесні та зрозумілі. Система відгуків допомагає зміцнювати довіру в спільноті.",
+          "Чітко визначайте свої обмеження та відкрито про них говоріть. Не вагайтеся сказати «ні» та покинути ситуацію, якщо вам некомфортно або небезпечно.",
       },
     ],
     reportTitle: "Повідомити про негативний досвід",
@@ -294,9 +247,6 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   message: MessageCircle,
   users: Users,
   shield: ShieldCheck,
-  phone: Phone,
-  heart: Heart,
-  flag: Flag,
 };
 
 export default function SafetyPage() {
