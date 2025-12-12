@@ -144,7 +144,8 @@ export default defineSchema({
 
     // Stable Clerk user id (the part after the "|"), used for webhook sync + fast lookups.
     // NOTE: Webhooks provide only the user id, not the full tokenIdentifier.
-    clerkUserId: v.string(),
+    // Optional for backwards compat with users created before this field existed.
+    clerkUserId: v.optional(v.string()),
     email: v.optional(v.string()),
     // Lowercased email for safe matching/merging across auth instance changes.
     emailLower: v.optional(v.string()),
