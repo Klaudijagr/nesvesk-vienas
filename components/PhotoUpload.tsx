@@ -3,7 +3,10 @@
 import { useMutation } from "convex/react";
 import { Camera, Loader2, X } from "lucide-react";
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import { uploadCompressedImage } from "@/lib/image-compression";
 import { Button } from "./ui/button";
 
 type PhotoUploadProps = {
@@ -29,10 +32,7 @@ export function PhotoUpload({
     }
 
     if (!file.type.startsWith("image/")) {
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Please select an image file");
       return;
     }
 
@@ -43,31 +43,32 @@ export function PhotoUpload({
     };
     reader.readAsDataURL(file);
 
-    try {
-      setUploading(true);
+    setUploading(true);
 
-      const uploadUrl = await generateUploadUrl();
-
-      const response = await fetch(uploadUrl, {
-        method: "POST",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
-
-      if (!response.ok) {
-        throw new Error("Upload failed");
-      }
-
-      const { storageId } = await response.json();
-
-      const photoUrl = await saveProfilePhoto({ storageId });
-      onPhotoUploaded(photoUrl);
-      // Keep preview until Convex URL is ready
-    } catch {
+    const uploadResult = await uploadCompressedImage(file, generateUploadUrl);
+    if (!uploadResult.success) {
+      toast.error(uploadResult.error);
       setPreviewUrl(null);
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    try {
+      const photoUrl = await saveProfilePhoto({
+        storageId: uploadResult.storageId as Id<"_storage">,
+      });
+      onPhotoUploaded(photoUrl);
+      toast.success("Photo uploaded");
+    } catch (err) {
+      setPreviewUrl(null);
+      const message =
+        err instanceof Error ? err.message : "Failed to save photo";
+      toast.error(message);
     } finally {
       setUploading(false);
-      // Reset input so same file can be selected again
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }

@@ -59,6 +59,7 @@ NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
 # Clerk
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
 CLERK_SECRET_KEY=sk_test_...
+CLERK_ISSUER_DOMAIN=https://your-clerk-issuer-domain
 
 # Maileroo (for emails)
 MAILEROO_API_KEY=...
@@ -69,6 +70,7 @@ Also set these in your **Convex Dashboard** (Settings → Environment Variables)
 ```env
   CLERK_WEBHOOK_SECRET=whsec_...   # From Clerk webhook endpoint
   CLERK_SECRET_KEY=sk_test_...     # Same as above
+  CLERK_ISSUER_DOMAIN=https://your-clerk-issuer-domain
   MAILEROO_API_KEY=...             # Transactional email provider
 
 # Optional admin allowlist for dev/admin Convex functions
@@ -83,6 +85,27 @@ To enable bi-directional sync between Clerk and Convex:
 2. Set **Endpoint URL**: `https://YOUR-DEPLOYMENT.convex.site/clerk-users-webhook`
 3. Select events: `user.created`, `user.updated`, `user.deleted`
 4. Copy the **Signing Secret** and set it as `CLERK_WEBHOOK_SECRET` in Convex
+
+### Migrating / relinking users after changing Clerk issuer or instance
+
+If you previously had users created under a different Clerk issuer (for example, switching from a dev instance to a production instance, or moving to a custom Clerk domain), existing Convex user records may no longer match the Clerk `sub` (user id) that users receive on sign-in.
+
+This repo includes an admin-only Convex action to **relink Convex users to Clerk by email**, preserving the existing Convex user `_id` (so profiles/messages remain intact):
+
+- Convex action: `migrations.relinkUsersByEmailToClerk`
+- Env requirements (Convex): `CLERK_SECRET_KEY`, `CLERK_ISSUER_DOMAIN`, `ADMIN_CLERK_USER_IDS`
+
+Run it from the Convex dashboard “Functions” panel (as an admin) with a small page size first:
+
+```json
+{
+  "paginationOpts": { "numItems": 25, "cursor": null },
+  "createMissing": false,
+  "dryRun": true
+}
+```
+
+Then re-run with `"dryRun": false`. If your Clerk instance does not already contain those users, you can set `"createMissing": true` to create missing users in Clerk using their email address.
 
 ## Project Structure
 

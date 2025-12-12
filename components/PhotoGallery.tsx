@@ -3,7 +3,10 @@
 import { useMutation, useQuery } from "convex/react";
 import { Camera, Loader2, Star, X } from "lucide-react";
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import { uploadCompressedImage } from "@/lib/image-compression";
 
 const MAX_PHOTOS = 5;
 
@@ -52,6 +55,14 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
     }
   };
 
+  const clearSlotPreview = (slot: number) => {
+    setPreviewUrls((prev) => {
+      const next = new Map(prev);
+      next.delete(slot);
+      return next;
+    });
+  };
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || activeSlot === null) {
@@ -59,59 +70,49 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
     }
 
     if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      return;
-    }
+
+    const currentSlot = activeSlot;
 
     // Show preview immediately
     const reader = new FileReader();
     reader.onload = (event) => {
       setPreviewUrls((prev) => {
         const next = new Map(prev);
-        next.set(activeSlot, event.target?.result as string);
+        next.set(currentSlot, event.target?.result as string);
         return next;
       });
     };
     reader.readAsDataURL(file);
 
-    try {
-      setUploadingIndex(activeSlot);
+    setUploadingIndex(currentSlot);
 
-      const uploadUrl = await generateUploadUrl();
-
-      const response = await fetch(uploadUrl, {
-        method: "POST",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
-
-      if (!response.ok) {
-        throw new Error("Upload failed");
+    const uploadResult = await uploadCompressedImage(file, generateUploadUrl);
+    if (!uploadResult.success) {
+      toast.error(uploadResult.error);
+      clearSlotPreview(currentSlot);
+      setUploadingIndex(null);
+      setActiveSlot(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
       }
+      return;
+    }
 
-      const { storageId } = await response.json();
-
-      // First photo becomes main automatically
+    try {
       await addProfilePhoto({
-        storageId,
+        storageId: uploadResult.storageId as Id<"_storage">,
         setAsMain: photos.length === 0,
       });
-
-      // Clear preview once uploaded
-      setPreviewUrls((prev) => {
-        const next = new Map(prev);
-        next.delete(activeSlot);
-        return next;
-      });
-    } catch {
-      // Clear preview on error
-      setPreviewUrls((prev) => {
-        const next = new Map(prev);
-        next.delete(activeSlot);
-        return next;
-      });
+      clearSlotPreview(currentSlot);
+      toast.success("Photo uploaded");
+    } catch (err) {
+      clearSlotPreview(currentSlot);
+      const message =
+        err instanceof Error ? err.message : "Failed to save photo";
+      toast.error(message);
     } finally {
       setUploadingIndex(null);
       setActiveSlot(null);
@@ -124,8 +125,11 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
   const handleRemovePhoto = async (photoUrl: string) => {
     try {
       await removeProfilePhoto({ photoUrl });
-    } catch {
-      // Handle error silently
+      toast.success("Photo removed");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to remove photo";
+      toast.error(message);
     }
   };
 
@@ -135,8 +139,11 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
     }
     try {
       await setMainPhoto({ photoUrl });
-    } catch {
-      // Handle error silently
+      toast.success("Main photo updated");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to set main photo";
+      toast.error(message);
     }
   };
 

@@ -146,11 +146,14 @@ export default defineSchema({
     // NOTE: Webhooks provide only the user id, not the full tokenIdentifier.
     clerkUserId: v.string(),
     email: v.optional(v.string()),
+    // Lowercased email for safe matching/merging across auth instance changes.
+    emailLower: v.optional(v.string()),
     name: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
   })
     .index("by_clerkId", ["clerkId"])
-    .index("by_clerkUserId", ["clerkUserId"]),
+    .index("by_clerkUserId", ["clerkUserId"])
+    .index("by_emailLower", ["emailLower"]),
 
   // User profiles (extends user)
   profiles: defineTable({

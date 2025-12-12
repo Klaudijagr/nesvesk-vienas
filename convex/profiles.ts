@@ -3,7 +3,7 @@ import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 import { assertAdmin } from "./lib/admin";
-import { getCurrentUserId } from "./lib/auth";
+import { getCurrentUserId, getOrCreateUser } from "./lib/auth";
 
 type Language = "Lithuanian" | "English" | "Ukrainian" | "Russian";
 type HolidayDate = "24 Dec" | "25 Dec" | "26 Dec" | "31 Dec";
@@ -378,37 +378,14 @@ export const upsertProfile = mutation({
     marketingEmails: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    // Get or create user from Clerk identity
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getOrCreateUser(ctx);
+    if (!userId) {
       throw new Error("Not authenticated");
-    }
-
-    // Look up or create user
-    let user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.tokenIdentifier))
-      .unique();
-
-    if (!user) {
-      const clerkUserId = identity.tokenIdentifier.split("|").at(-1);
-      const userId = await ctx.db.insert("users", {
-        clerkId: identity.tokenIdentifier,
-        clerkUserId: clerkUserId ?? identity.tokenIdentifier,
-        email: identity.email,
-        name: identity.name,
-        imageUrl: identity.pictureUrl,
-      });
-      user = await ctx.db.get(userId);
-    }
-
-    if (!user) {
-      throw new Error("Failed to create user");
     }
 
     const existing = await ctx.db
       .query("profiles")
-      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
       .first();
 
     if (existing) {
@@ -426,7 +403,7 @@ export const upsertProfile = mutation({
     // Create new profile
     const profileData = {
       ...args,
-      userId: user._id,
+      userId,
       photos: args.photos ?? [],
       verified: false,
       isVisible: args.isVisible ?? true,

@@ -1,3 +1,4 @@
+import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import {
@@ -65,6 +66,7 @@ export const upsertFromClerk = internalMutation({
       .unique();
 
     const email = data.email_addresses?.[0]?.email_address;
+    const emailLower = email?.trim().toLowerCase() || undefined;
     const name = [data.first_name, data.last_name].filter(Boolean).join(" ");
 
     if (existingUser) {
@@ -72,6 +74,7 @@ export const upsertFromClerk = internalMutation({
         // Keep existingUser.clerkId if it's already the full tokenIdentifier.
         // (We cannot derive it from webhook payload.)
         email,
+        emailLower,
         name: name || existingUser.name,
         imageUrl: data.image_url,
       });
@@ -81,6 +84,7 @@ export const upsertFromClerk = internalMutation({
         clerkId: clerkUserId,
         clerkUserId,
         email,
+        emailLower,
         name: name || undefined,
         imageUrl: data.image_url,
       });
@@ -208,6 +212,30 @@ export const getUserByClerkUserId = internalQuery({
       .query("users")
       .withIndex("by_clerkUserId", (q) => q.eq("clerkUserId", clerkUserId))
       .unique();
+  },
+});
+
+export const listUsersForMigration = internalQuery({
+  args: { paginationOpts: paginationOptsValidator },
+  async handler(ctx, { paginationOpts }) {
+    return await ctx.db.query("users").order("desc").paginate(paginationOpts);
+  },
+});
+
+export const patchUserClerkLink = internalMutation({
+  args: {
+    userId: v.id("users"),
+    clerkUserId: v.string(),
+    clerkId: v.string(),
+    email: v.optional(v.string()),
+  },
+  async handler(ctx, { userId, clerkUserId, clerkId, email }) {
+    await ctx.db.patch(userId, {
+      clerkUserId,
+      clerkId,
+      email,
+      emailLower: email?.trim().toLowerCase(),
+    });
   },
 });
 

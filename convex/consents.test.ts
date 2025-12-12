@@ -1,6 +1,7 @@
 import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
 import { api } from "./_generated/api";
+import type { Doc } from "./_generated/dataModel";
 import schema from "./schema";
 
 describe("consents", () => {
@@ -32,9 +33,15 @@ describe("consents", () => {
     const consents = await asUser.query(api.consents.getMyConsents, {});
 
     expect(consents).toHaveLength(2);
-    expect(consents.map((c) => c.purpose)).toContain("terms_of_service");
-    expect(consents.map((c) => c.purpose)).toContain("privacy_policy");
-    expect(consents.every((c) => c.status === "active")).toBe(true);
+    expect(consents.map((c: Doc<"userConsents">) => c.purpose)).toContain(
+      "terms_of_service"
+    );
+    expect(consents.map((c: Doc<"userConsents">) => c.purpose)).toContain(
+      "privacy_policy"
+    );
+    expect(
+      consents.every((c: Doc<"userConsents">) => c.status === "active")
+    ).toBe(true);
   });
 
   test("recordMultipleConsents with marketing consent", async () => {
@@ -64,7 +71,9 @@ describe("consents", () => {
     const consents = await asUser.query(api.consents.getMyConsents, {});
 
     expect(consents).toHaveLength(3);
-    expect(consents.map((c) => c.purpose)).toContain("marketing_emails");
+    expect(consents.map((c: Doc<"userConsents">) => c.purpose)).toContain(
+      "marketing_emails"
+    );
   });
 
   test("withdrawConsent changes status to withdrawn", async () => {
@@ -96,7 +105,7 @@ describe("consents", () => {
     // Check it's withdrawn
     const consents = await asUser.query(api.consents.getMyConsents, {});
     const marketingConsent = consents.find(
-      (c) => c.purpose === "marketing_emails"
+      (c: Doc<"userConsents">) => c.purpose === "marketing_emails"
     );
 
     expect(marketingConsent?.status).toBe("withdrawn");
