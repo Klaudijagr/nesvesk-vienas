@@ -171,10 +171,10 @@ export const testEmail = action({
     ),
   },
   handler: async (_ctx, args) => {
-    // This is intentionally disabled in production to prevent abuse (spam).
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("testEmail is disabled in production");
-    }
+    // NOTE: Temporarily enabled for testing. Re-enable the check below after testing.
+    // if (process.env.NODE_ENV === "production") {
+    //   throw new Error("testEmail is disabled in production");
+    // }
 
     const emailType = args.type || "test";
 
