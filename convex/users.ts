@@ -233,8 +233,10 @@ export const patchUserClerkLink = internalMutation({
     await ctx.db.patch(userId, {
       clerkUserId,
       clerkId,
-      email,
-      emailLower: email?.trim().toLowerCase(),
+      ...(email !== undefined && {
+        email,
+        emailLower: email.trim().toLowerCase(),
+      }),
     });
   },
 });
