@@ -395,7 +395,7 @@ const PreferenceCardWithDates = memo(function PreferenceCardInner({
                 <motion.div
                   animate={{ opacity: 1, y: 0 }}
                   initial={{ opacity: 0, y: 10 }}
-                  key={date}
+                  key={`${option.id}-${date}`}
                   transition={{ delay: 0.03 * index, duration: 0.15 }}
                 >
                   <DateButton
