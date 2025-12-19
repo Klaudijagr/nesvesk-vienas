@@ -510,6 +510,31 @@ function Step2BasicInfo({
   >;
   userImageUrl?: string;
 }) {
+  const [touched, setTouched] = useState<{ firstName: boolean; age: boolean }>({
+    firstName: false,
+    age: false,
+  });
+
+  const ageValue =
+    typeof formData.age === "number"
+      ? formData.age
+      : Number.parseInt(formData.age as string, 10);
+
+  const firstNameError = touched.firstName && formData.firstName.length === 0;
+  const ageEmpty = formData.age === "" || formData.age === undefined;
+  const ageError =
+    touched.age && (ageEmpty || Number.isNaN(ageValue) || ageValue < 18);
+  const getAgeErrorMessage = () => {
+    if (ageEmpty) {
+      return "Age is required";
+    }
+    if (ageValue < 18) {
+      return "You must be 18 or older";
+    }
+    return "";
+  };
+  const ageErrorMessage = getAgeErrorMessage();
+
   return (
     <div className="space-y-4">
       <PhotoGallery fallbackPhotoUrl={userImageUrl} />
@@ -517,13 +542,18 @@ function Step2BasicInfo({
         <div className="space-y-1">
           <Label htmlFor="firstName">First Name *</Label>
           <Input
+            className={firstNameError ? "border-red-500" : ""}
             id="firstName"
+            onBlur={() => setTouched((prev) => ({ ...prev, firstName: true }))}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, firstName: e.target.value }))
             }
             placeholder="Your first name"
             value={formData.firstName}
           />
+          {firstNameError && (
+            <p className="text-red-500 text-xs">First name is required</p>
+          )}
         </div>
         <div className="space-y-1">
           <Label htmlFor="lastName">Last Name</Label>
@@ -539,11 +569,13 @@ function Step2BasicInfo({
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <Label htmlFor="age">Age</Label>
+          <Label htmlFor="age">Age *</Label>
           <Input
+            className={ageError ? "border-red-500" : ""}
             id="age"
             max={120}
             min={18}
+            onBlur={() => setTouched((prev) => ({ ...prev, age: true }))}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, age: e.target.value }))
             }
@@ -551,6 +583,9 @@ function Step2BasicInfo({
             type="number"
             value={formData.age}
           />
+          {ageError && (
+            <p className="text-red-500 text-xs">{ageErrorMessage}</p>
+          )}
         </div>
         <div className="space-y-1">
           <Label htmlFor="city">City</Label>
@@ -1243,30 +1278,48 @@ export default function OnboardingPage() {
       <CardContent className="space-y-6">
         {renderStepContent()}
 
-        <div className="flex justify-between pt-4">
-          {step > 0 ? (
-            <Button onClick={handleBack} type="button" variant="outline">
-              <ChevronLeft className="mr-1 h-4 w-4" />
-              Back
-            </Button>
-          ) : (
-            <div />
-          )}
+        <div className="flex flex-col gap-2 pt-4">
+          <div className="flex justify-between">
+            {step > 0 ? (
+              <Button onClick={handleBack} type="button" variant="outline">
+                <ChevronLeft className="mr-1 h-4 w-4" />
+                Back
+              </Button>
+            ) : (
+              <div />
+            )}
 
-          {step < 6 ? (
-            <Button
-              disabled={!isCurrentStepValid()}
-              onClick={handleNext}
-              type="button"
-            >
-              {step === 0 ? "I Agree & Continue" : "Next"}
-              <ChevronRight className="ml-1 h-4 w-4" />
-            </Button>
-          ) : (
-            <Button disabled={isSaving} onClick={handleComplete} type="button">
-              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Complete Setup
-            </Button>
+            {step < 6 ? (
+              <Button
+                disabled={!isCurrentStepValid()}
+                onClick={handleNext}
+                type="button"
+              >
+                {step === 0 ? "I Agree & Continue" : "Next"}
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                disabled={isSaving}
+                onClick={handleComplete}
+                type="button"
+              >
+                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Complete Setup
+              </Button>
+            )}
+          </div>
+          {!isCurrentStepValid() && step < 6 && (
+            <p className="text-center text-amber-600 text-sm">
+              {step === 0 &&
+                "Please accept the Terms of Service and Privacy Policy to continue"}
+              {step === 1 &&
+                "Please select at least one date for hosting or visiting"}
+              {step === 2 &&
+                "Please enter your first name and age (must be 18+)"}
+              {step === 3 && "Please write at least 10 characters in your bio"}
+              {step === 4 && "Please select at least one language"}
+            </p>
           )}
         </div>
       </CardContent>

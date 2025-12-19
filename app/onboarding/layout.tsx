@@ -29,9 +29,11 @@ export default function OnboardingLayout({
         </div>
       </header>
 
-      {/* Full screen content area */}
-      <main className="flex flex-1 items-center justify-center p-4">
-        {children}
+      {/* Scrollable content area */}
+      <main className="flex-1 overflow-auto p-4">
+        <div className="mx-auto flex min-h-full items-center justify-center">
+          {children}
+        </div>
       </main>
 
       {/* Minimal footer */}
