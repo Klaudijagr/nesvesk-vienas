@@ -313,7 +313,7 @@ export default function SettingsPage() {
                     {t.signOutFromAccount}
                   </p>
                 </div>
-                <SignOutButton>
+                <SignOutButton redirectUrl="/">
                   <Button variant="outline">
                     <LogOut className="mr-2 h-4 w-4" />
                     {t.signOutLabel}
