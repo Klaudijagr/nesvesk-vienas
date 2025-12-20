@@ -44,6 +44,30 @@ function isFacebookInAppPostMessageInvalidAccessError(
   return isKnownInAppBrowserUA();
 }
 
+function isFacebookInAppWebKitMessageHandlerError(
+  event: Sentry.Event
+): boolean {
+  const exc = event.exception?.values?.[0];
+  const type = exc?.type;
+  const value = exc?.value ?? "";
+
+  if (type !== "TypeError") {
+    return false;
+  }
+
+  // Sentry issue reports show this exact message for the FB iOS in-app browser crash
+  // when trying to access window.webkit.messageHandlers that don't exist.
+  if (
+    !value.includes("undefined is not an object") ||
+    !value.includes("window.webkit.messageHandlers")
+  ) {
+    return false;
+  }
+
+  // Ensure we only drop this in environments where we actually see the bug.
+  return isKnownInAppBrowserUA();
+}
+
 function hasAnalyticsConsent(): boolean {
   if (typeof window === "undefined") {
     return false;
@@ -88,6 +112,10 @@ Sentry.init({
 
   beforeSend(event) {
     if (isFacebookInAppPostMessageInvalidAccessError(event)) {
+      return null;
+    }
+
+    if (isFacebookInAppWebKitMessageHandlerError(event)) {
       return null;
     }
 
