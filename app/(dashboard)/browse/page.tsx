@@ -135,6 +135,12 @@ function FilterBar({
   onClear,
   filterCounts,
   t,
+  citySelectOpen,
+  dateSelectOpen,
+  languageSelectOpen,
+  onCitySelectOpenChange,
+  onDateSelectOpenChange,
+  onLanguageSelectOpenChange,
 }: {
   selectedCity: string;
   selectedDate: string;
@@ -150,6 +156,12 @@ function FilterBar({
     totalProfiles: number;
   };
   t: ReturnType<typeof useLocale>["t"];
+  citySelectOpen: boolean;
+  dateSelectOpen: boolean;
+  languageSelectOpen: boolean;
+  onCitySelectOpenChange: (open: boolean) => void;
+  onDateSelectOpenChange: (open: boolean) => void;
+  onLanguageSelectOpenChange: (open: boolean) => void;
 }) {
   const hasFilters = selectedCity || selectedDate || selectedLanguage;
 
@@ -175,7 +187,9 @@ function FilterBar({
   return (
     <div className="flex w-full flex-1 flex-col items-center gap-2 md:flex-row lg:w-auto">
       <Select
+        onOpenChange={onCitySelectOpenChange}
         onValueChange={(v) => onCityChange(v === "__all__" ? "" : v)}
+        open={citySelectOpen}
         value={selectedCity || "__all__"}
       >
         <SelectTrigger className="h-12 w-full flex-1 rounded-lg border-gray-200 bg-white shadow-sm hover:border-gray-300">
@@ -212,7 +226,9 @@ function FilterBar({
       </Select>
 
       <Select
+        onOpenChange={onDateSelectOpenChange}
         onValueChange={(v) => onDateChange(v === "__all__" ? "" : v)}
+        open={dateSelectOpen}
         value={selectedDate || "__all__"}
       >
         <SelectTrigger className="h-12 w-full flex-1 rounded-lg border-gray-200 bg-white shadow-sm hover:border-gray-300">
@@ -242,7 +258,9 @@ function FilterBar({
       </Select>
 
       <Select
+        onOpenChange={onLanguageSelectOpenChange}
         onValueChange={(v) => onLanguageChange(v === "__all__" ? "" : v)}
+        open={languageSelectOpen}
         value={selectedLanguage || "__all__"}
       >
         <SelectTrigger className="h-12 w-full flex-1 rounded-lg border-gray-200 bg-white shadow-sm hover:border-gray-300">
@@ -501,6 +519,11 @@ export default function BrowsePage() {
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("recommended");
 
+  // Select dropdown open states to prevent portal cleanup issues
+  const [citySelectOpen, setCitySelectOpen] = useState(false);
+  const [dateSelectOpen, setDateSelectOpen] = useState(false);
+  const [languageSelectOpen, setLanguageSelectOpen] = useState(false);
+
   // Query profiles from Convex
   const profiles = useQuery(api.profiles.listProfiles, {
     city: selectedCity || undefined,
@@ -627,6 +650,13 @@ export default function BrowsePage() {
     setSelectedLanguage("");
   };
 
+  // Close all select dropdowns when modal opens/closes to prevent portal cleanup issues
+  useEffect(() => {
+    setCitySelectOpen(false);
+    setDateSelectOpen(false);
+    setLanguageSelectOpen(false);
+  }, [selectedProfile]);
+
   // Track if we've loaded at least once to avoid showing skeleton on tab switch
   const hasLoadedOnce = useRef(false);
   const previousProfiles = useRef<Profile[]>([]);
@@ -734,11 +764,17 @@ export default function BrowsePage() {
             </div>
 
             <FilterBar
+              citySelectOpen={citySelectOpen}
+              dateSelectOpen={dateSelectOpen}
               filterCounts={filterCounts ?? undefined}
+              languageSelectOpen={languageSelectOpen}
               onCityChange={setSelectedCity}
+              onCitySelectOpenChange={setCitySelectOpen}
               onClear={clearFilters}
               onDateChange={setSelectedDate}
+              onDateSelectOpenChange={setDateSelectOpen}
               onLanguageChange={setSelectedLanguage}
+              onLanguageSelectOpenChange={setLanguageSelectOpen}
               selectedCity={selectedCity}
               selectedDate={selectedDate}
               selectedLanguage={selectedLanguage}
