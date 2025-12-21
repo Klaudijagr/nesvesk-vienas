@@ -4,7 +4,6 @@ import { useSignIn, useSignUp } from "@clerk/nextjs";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +20,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 type Mode = "sign-in" | "sign-up";
 
@@ -43,7 +43,9 @@ export function LoginForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLoaded) return;
+    if (!isLoaded) {
+      return;
+    }
 
     setError("");
     setIsLoading(true);
@@ -84,7 +86,7 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="w-full max-w-md shadow-xl border-gray-100">
+      <Card className="w-full max-w-md border-gray-100 shadow-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl text-green-800">
             {mode === "sign-in" ? "Sign in" : "Create account"}
@@ -103,11 +105,11 @@ export function LoginForm({
                   <FieldLabel htmlFor="firstName">First Name</FieldLabel>
                   <Input
                     id="firstName"
-                    type="text"
-                    placeholder="Your name"
-                    value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Your name"
                     required
+                    type="text"
+                    value={firstName}
                   />
                 </Field>
               )}
@@ -116,11 +118,11 @@ export function LoginForm({
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
                   id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
                   required
+                  type="email"
+                  value={email}
                 />
               </Field>
 
@@ -128,11 +130,11 @@ export function LoginForm({
                 <FieldLabel htmlFor="password">Password</FieldLabel>
                 <Input
                   id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
                   required
+                  type="password"
+                  value={password}
                 />
               </Field>
 
@@ -140,9 +142,9 @@ export function LoginForm({
 
               <Field>
                 <Button
-                  type="submit"
-                  className="w-full bg-green-700 hover:bg-green-800 text-white shadow-md"
+                  className="w-full bg-green-700 text-white shadow-md hover:bg-green-800"
                   disabled={isLoading || !isLoaded}
+                  type="submit"
                 >
                   {isLoading && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -155,9 +157,9 @@ export function LoginForm({
                     <>
                       Don&apos;t have an account?{" "}
                       <button
-                        type="button"
+                        className="text-green-700 underline-offset-4 hover:text-green-800 hover:underline"
                         onClick={() => setMode("sign-up")}
-                        className="text-green-700 hover:text-green-800 underline-offset-4 hover:underline"
+                        type="button"
                       >
                         Sign up
                       </button>
@@ -166,9 +168,9 @@ export function LoginForm({
                     <>
                       Already have an account?{" "}
                       <button
-                        type="button"
+                        className="text-green-700 underline-offset-4 hover:text-green-800 hover:underline"
                         onClick={() => setMode("sign-in")}
-                        className="text-green-700 hover:text-green-800 underline-offset-4 hover:underline"
+                        type="button"
                       >
                         Sign in
                       </button>

@@ -38,6 +38,7 @@ export default function SettingsPage() {
   const { user } = useUser();
   const router = useRouter();
   const profile = useQuery(api.profiles.getMyProfile);
+  const currentUser = useQuery(api.users.current);
   const deleteUser = useAction(api.users.deleteUser);
   const updateNotificationPreferences = useMutation(
     api.profiles.updateNotificationPreferences
@@ -65,13 +66,14 @@ export default function SettingsPage() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!profile?.userId) {
+    if (!currentUser?._id) {
+      toast.error("Unable to delete account. Please try again.");
       return;
     }
 
     setIsDeleting(true);
     try {
-      const result = await deleteUser({ userId: profile.userId });
+      const result = await deleteUser({ userId: currentUser._id });
       if (result.success) {
         toast.success("Account deleted successfully");
         router.push("/");

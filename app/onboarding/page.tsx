@@ -910,7 +910,7 @@ export default function OnboardingPage() {
 
   const [step, setStep] = useState<Step>(0);
   const [isSaving, setIsSaving] = useState(false);
-  const [completed, setCompleted] = useState(false);
+  const [completed, _setCompleted] = useState(false);
 
   // Step 0: GDPR Consent
   const [termsAccepted, setTermsAccepted] = useState(false);
