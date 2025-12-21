@@ -860,7 +860,13 @@ function countLanguages(
   return langMap;
 }
 
-// Helper: Count all dates from profiles
+/**
+ * Aggregate occurrence counts for calendar dates across a list of profiles.
+ *
+ * @param profiles - Array of profile-like objects containing date arrays to count
+ * @param roleFilter - Optional role filter ("host" or "guest") that selects which date set to use per profile
+ * @returns A map where keys are date strings and values are the number of profiles that include that date
+ */
 function countDates(
   profiles: {
     availableDates: string[];
@@ -878,7 +884,14 @@ function countDates(
   return dateMap;
 }
 
-// Helper: Filter profiles by visibility and role
+/**
+ * Filter a list of profiles to those that should appear in browse results for a requester and optional role.
+ *
+ * @param allProfiles - The profiles to filter.
+ * @param currentUserId - The requesting user's id, or `null` for anonymous requests.
+ * @param roleFilter - Optional role to require; profiles with this role or `"both"` will match.
+ * @returns The subset of `allProfiles` that match the role filter, are marked visible, and (unless they belong to the requester) are complete for browsing.
+ */
 function filterVisibleProfiles(
   allProfiles: Doc<"profiles">[],
   currentUserId: Id<"users"> | null,
