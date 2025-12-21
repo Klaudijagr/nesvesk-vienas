@@ -22,6 +22,12 @@ function isKnownInAppBrowserUA(): boolean {
   }
 }
 
+/**
+ * Detects whether a Sentry event represents the Facebook iOS in-app browser crash caused by an `InvalidAccessError`.
+ *
+ * @param event - The Sentry event to inspect
+ * @returns `true` if the event is an `InvalidAccessError` whose message matches the known Facebook in-app browser crash text and the client user agent is a known in-app browser, `false` otherwise.
+ */
 function isFacebookInAppPostMessageInvalidAccessError(
   event: Sentry.Event
 ): boolean {
@@ -44,6 +50,12 @@ function isFacebookInAppPostMessageInvalidAccessError(
   return isKnownInAppBrowserUA();
 }
 
+/**
+ * Detects whether a Sentry event represents the Facebook iOS in-app browser crash caused by accessing `window.webkit.messageHandlers`.
+ *
+ * @param event - The Sentry event to inspect.
+ * @returns `true` if the event is a `TypeError` whose message includes "undefined is not an object" and "window.webkit.messageHandlers" and the user agent matches a known in-app browser; `false` otherwise.
+ */
 function isFacebookInAppWebKitMessageHandlerError(
   event: Sentry.Event
 ): boolean {
@@ -70,6 +82,11 @@ function isFacebookInAppWebKitMessageHandlerError(
   return isKnownInAppBrowserUA();
 }
 
+/**
+ * Determines whether the user has granted analytics consent by reading the "cookie_consent" entry in localStorage.
+ *
+ * @returns `true` if the parsed consent object has `analytics` set to `true`, `false` otherwise.
+ */
 function hasAnalyticsConsent(): boolean {
   if (typeof window === "undefined") {
     return false;

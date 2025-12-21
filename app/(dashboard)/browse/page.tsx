@@ -124,7 +124,21 @@ function ResultsHeader({
   );
 }
 
-// Filter bar component
+/**
+ * Renders the filter bar with city, date, and language select controls and an optional "Clear" button.
+ *
+ * The selects display counts when provided and map a special `"__all__"` option to an empty string via change handlers.
+ *
+ * @param filterCounts - Optional counts for cities, languages, dates, and totalProfiles used to show option counts and disable empty options.
+ * @param t - Localization function used for all visible labels and placeholders.
+ * @param citySelectOpen - Controlled open state for the city select.
+ * @param dateSelectOpen - Controlled open state for the date select.
+ * @param languageSelectOpen - Controlled open state for the language select.
+ * @param onCitySelectOpenChange - Callback invoked when the city select open state should change.
+ * @param onDateSelectOpenChange - Callback invoked when the date select open state should change.
+ * @param onLanguageSelectOpenChange - Callback invoked when the language select open state should change.
+ * @returns A JSX element containing three Select controls (city, date, language) and a Clear button when any filter is active.
+ */
 function FilterBar({
   selectedCity,
   selectedDate,
@@ -506,6 +520,20 @@ function EmptyState({
   );
 }
 
+/**
+ * Renders the Browse page containing filters, results (grid or list), and a profile detail modal.
+ *
+ * Renders a tabbed mode toggle (find hosts / find guests), a FilterBar with controlled open states,
+ * a ResultsHeader with sorting and view-mode controls, a results area that shows a loading skeleton,
+ * empty state, grid of listing cards or list items, and a slide-in profile modal with invitation/respond actions.
+ *
+ * The component manages UI state for active tab, view mode, selected filters, controlled select dropdown
+ * visibility, selected profile, and invitation sending state. It issues Convex queries/mutations to
+ * fetch profiles, filter counts, pending invitations, and connection status, and it shows toast feedback
+ * for invite/respond workflows.
+ *
+ * @returns The rendered Browse page React element
+ */
 export default function BrowsePage() {
   const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<"host" | "guest">("host");
