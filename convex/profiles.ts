@@ -177,7 +177,7 @@ export const listProfiles = query({
       ? ctx.db
           .query("profiles")
           .withIndex("by_city", (q) =>
-            q.eq("city", args.city as typeof args.city & string)
+            q.eq("city", args.city as Doc<"profiles">["city"])
           )
       : ctx.db.query("profiles");
 
