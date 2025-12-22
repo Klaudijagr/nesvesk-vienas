@@ -1,8 +1,8 @@
 "use client";
 
-import posthog from "posthog-js";
 import { useMutation } from "convex/react";
 import { Camera, Loader2, X } from "lucide-react";
+import posthog from "posthog-js";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";

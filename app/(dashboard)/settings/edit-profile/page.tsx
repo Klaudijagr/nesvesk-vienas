@@ -1,6 +1,5 @@
 "use client";
 
-import posthog from "posthog-js";
 import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -14,6 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import { memo, useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PhotoGallery } from "@/components/PhotoGallery";

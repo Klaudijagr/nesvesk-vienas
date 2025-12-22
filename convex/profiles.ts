@@ -26,40 +26,6 @@ function isProfileCompleteForBrowse(
 // Top-level regex for username validation
 const USERNAME_REGEX = /^[a-z0-9-]+$/;
 
-// Helper: Get connection status between two users
-async function getConnectionStatusBetween(
-  ctx: QueryCtx,
-  currentUserId: Id<"users">,
-  otherUserId: Id<"users">
-): Promise<ConnectionStatus> {
-  if (currentUserId === otherUserId) {
-    return "self";
-  }
-
-  const sentInv = await ctx.db
-    .query("invitations")
-    .withIndex("by_from", (q) => q.eq("fromUserId", currentUserId))
-    .filter((q) => q.eq(q.field("toUserId"), otherUserId))
-    .first();
-
-  const receivedInv = await ctx.db
-    .query("invitations")
-    .withIndex("by_to", (q) => q.eq("toUserId", currentUserId))
-    .filter((q) => q.eq(q.field("fromUserId"), otherUserId))
-    .first();
-
-  if (sentInv?.status === "accepted" || receivedInv?.status === "accepted") {
-    return "matched";
-  }
-  if (sentInv?.status === "pending") {
-    return "pending_sent";
-  }
-  if (receivedInv?.status === "pending") {
-    return "pending_received";
-  }
-  return "none";
-}
-
 // Get current user's profile
 export const getMyProfile = query({
   args: {},
@@ -223,7 +189,7 @@ export const listProfiles = query({
 
     // Batch fetch all invitations for current user ONCE (2 queries total instead of 2 per profile)
     // This reduces 100 queries to 2 queries for 50 profiles
-    let invitationStatusMap = new Map<Id<"users">, ConnectionStatus>();
+    const invitationStatusMap = new Map<Id<"users">, ConnectionStatus>();
     if (currentUserId) {
       const [allSent, allReceived] = await Promise.all([
         ctx.db

@@ -80,7 +80,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,jsonc,css}": [
-      "ultracite fix"
+      "biome format --write"
     ],
     "*.{ts,tsx}": [
       "bash -c 'tsc --noEmit'"
