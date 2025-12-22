@@ -68,7 +68,7 @@ Holiday hosting/guest matching platform for Lithuania.
 ### High Priority
 
 - [ ] **Username selection in onboarding/settings** - Users can't pick their own username yet
-- [ ] **Profile card unification** - Create single `UserIdentityCard` with variants for grid/list/sidebar/profile
+- [ ] **Profile card unification** - Consolidate `unified-profile-card.tsx` and `listing-card.tsx` into single component with variants. Currently have duplicated `SlimProfile` types.
 - [ ] **Map view for browse** - Show hosts on map with privacy circles
 
 ### Medium Priority
