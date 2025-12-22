@@ -3,11 +3,9 @@
 import { useMutation } from "convex/react";
 import { Camera, Loader2, X } from "lucide-react";
 import posthog from "posthog-js";
-import { useRef, useState } from "react";
-import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { uploadCompressedImage } from "@/lib/image-compression";
+import { usePhotoUpload } from "@/hooks/use-photo-upload";
 import { Button } from "./ui/button";
 
 type PhotoUploadProps = {
@@ -19,73 +17,27 @@ export function PhotoUpload({
   currentPhotoUrl,
   onPhotoUploaded,
 }: PhotoUploadProps) {
-  const [uploading, setUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const saveProfilePhoto = useMutation(api.files.saveProfilePhoto);
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      return;
-    }
-
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
-      return;
-    }
-
-    // Show preview immediately
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setPreviewUrl(event.target?.result as string);
-    };
-    reader.readAsDataURL(file);
-
-    setUploading(true);
-
-    const uploadResult = await uploadCompressedImage(file, generateUploadUrl);
-    if (!uploadResult.success) {
-      toast.error(uploadResult.error);
-      setPreviewUrl(null);
-      setUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-      return;
-    }
-
-    try {
-      const photoUrl = await saveProfilePhoto({
-        storageId: uploadResult.storageId as Id<"_storage">,
-      });
+  const {
+    isUploading,
+    previewUrl,
+    fileInputRef,
+    handleFileChange,
+    triggerFileSelect,
+    clearPreview,
+  } = usePhotoUpload({
+    onSuccess: async (storageId: Id<"_storage">) => {
+      const photoUrl = await saveProfilePhoto({ storageId });
       onPhotoUploaded(photoUrl);
-      posthog.capture("profile-photo-uploaded", {
-        storageId: uploadResult.storageId,
-      });
-      toast.success("Photo uploaded");
-    } catch (err) {
-      setPreviewUrl(null);
-      const message =
-        err instanceof Error ? err.message : "Failed to save photo";
-      toast.error(message);
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
-  };
+      posthog.capture("profile-photo-uploaded", { storageId });
+    },
+  });
 
   const handleRemovePhoto = () => {
     posthog.capture("profile-photo-removed");
-    setPreviewUrl(null);
+    clearPreview();
     onPhotoUploaded("");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
   };
 
   const displayUrl = previewUrl || currentPhotoUrl;
@@ -94,7 +46,6 @@ export function PhotoUpload({
     <div className="flex items-center gap-3">
       {displayUrl ? (
         <div className="relative">
-          {/* Use native img for data URLs (preview) */}
           <img
             alt="Profile"
             className="h-24 w-24 rounded-xl object-cover"
@@ -102,7 +53,7 @@ export function PhotoUpload({
             src={displayUrl}
             width={96}
           />
-          {!uploading && (
+          {!isUploading && (
             <button
               className="-top-1 -right-1 absolute rounded-full bg-red-600 p-1 text-white hover:bg-red-700"
               onClick={handleRemovePhoto}
@@ -111,7 +62,7 @@ export function PhotoUpload({
               <X className="h-3 w-3" />
             </button>
           )}
-          {uploading && (
+          {isUploading && (
             <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/50">
               <Loader2 className="h-5 w-5 animate-spin text-white" />
             </div>
@@ -120,7 +71,7 @@ export function PhotoUpload({
       ) : (
         <button
           className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-gray-300 border-dashed bg-gray-50 transition-colors hover:border-gray-400 hover:bg-gray-100"
-          onClick={() => fileInputRef.current?.click()}
+          onClick={triggerFileSelect}
           type="button"
         >
           <Camera className="h-6 w-6 text-gray-400" />
@@ -131,14 +82,14 @@ export function PhotoUpload({
       <input
         accept="image/*"
         className="hidden"
-        onChange={handleFileSelect}
+        onChange={handleFileChange}
         ref={fileInputRef}
         type="file"
       />
 
-      {displayUrl && !uploading && (
+      {displayUrl && !isUploading && (
         <Button
-          onClick={() => fileInputRef.current?.click()}
+          onClick={triggerFileSelect}
           size="sm"
           type="button"
           variant="outline"
