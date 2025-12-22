@@ -8,13 +8,13 @@
     "dev:convex": "convex dev",
     "build": "next build",
     "start": "next start",
-    "lint": "biome check app components contexts convex hooks lib",
-    "lint:fix": "biome check --write --unsafe app components contexts convex hooks lib",
+    "lint": "ultracite check",
+    "lint:fix": "ultracite fix",
     "lint:md": "markdownlint-cli2 '*.md' 'docs/*.md' 'convex/*.md' '.claude/*.md'",
     "lint:md:fix": "markdownlint-cli2 --fix '*.md' 'docs/*.md' 'convex/*.md' '.claude/*.md'",
     "typecheck": "tsc --noEmit",
-    "check": "biome check app components contexts convex hooks lib && tsc --noEmit",
-    "fix": "biome check --write --unsafe app components contexts convex hooks lib",
+    "check": "ultracite check && tsc --noEmit",
+    "fix": "ultracite fix",
     "test": "vitest",
     "test:once": "vitest run",
     "email": "email dev --dir emails",
@@ -80,7 +80,10 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,jsonc,css}": [
-      "biome format --write"
+      "ultracite fix"
+    ],
+    "*.{ts,tsx}": [
+      "bash -c 'tsc --noEmit'"
     ]
   }
 }
