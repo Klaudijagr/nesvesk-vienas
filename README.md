@@ -135,6 +135,8 @@ convex/                # Convex backend
   http.ts              # HTTP endpoints (webhooks)
 contexts/              # React contexts
 hooks/                 # Custom hooks
+  use-photo-upload.ts  # Shared photo upload logic
+  use-onboarding-form.ts # Onboarding form state
 lib/                   # Utilities
 ```
 
@@ -146,9 +148,10 @@ bun dev:next     # Start only Next.js
 bun dev:convex   # Start only Convex
 bun build        # Production build
 bun start        # Start production server
-bun lint         # Run Biome linter
+bun run lint     # Ultracite + TypeScript check
+bun run check    # Same as lint
 bun lint:fix     # Fix lint issues
-bun typecheck    # Run TypeScript check
+bun typecheck    # TypeScript only
 ```
 
 ## Code Quality

@@ -2,7 +2,7 @@
 
 Holiday hosting/guest matching platform for Lithuania.
 
-**Last updated**: December 11, 2025
+**Last updated**: December 21, 2025
 
 ---
 
@@ -18,6 +18,7 @@ Holiday hosting/guest matching platform for Lithuania.
 - [x] Face verification (EdgeFace-XXS + YuNet)
 - [x] i18n (LT, EN, UA, RU)
 - [x] Username routing (`/people/[username]`)
+- [x] In-app browser gate for Instagram/social auth
 
 ### Security & Compliance (Production Hardening)
 
@@ -29,6 +30,7 @@ Holiday hosting/guest matching platform for Lithuania.
 - [x] Clerk ↔ Convex user sync (webhooks + bi-directional delete)
 - [x] IDOR fix: `deleteUser` only allows self-deletion
 - [x] Email test action disabled in production
+- [x] Account deletion for users without profiles
 
 ### Moderation & Safety
 
@@ -51,6 +53,13 @@ Holiday hosting/guest matching platform for Lithuania.
 - [x] Sentry error tracking
 - [x] Vercel Analytics (consent-gated)
 - [x] Vercel Speed Insights (consent-gated)
+- [x] PostHog analytics
+
+### Performance Optimizations (Dec 2025)
+
+- [x] N+1 query fix in `listProfiles` - batch invitation queries (100 queries → 2)
+- [x] Denormalized unread counts on conversations for O(1) reads
+- [x] Slim profile returns from `listProfiles` (excludes large arrays)
 
 ---
 
@@ -81,8 +90,32 @@ Holiday hosting/guest matching platform for Lithuania.
 
 ## Tech Debt
 
-- [ ] Reduce component complexity (BrowsePage, MessagesPage still have warnings)
+### Completed
+
+- [x] Fix TypeScript `lastMessage` null vs undefined type mismatch
+- [x] Fix city type assertion in profiles.ts
+- [x] Remove unused `getConnectionStatusBetween` function (dead code after N+1 fix)
+- [x] Remove unused `QueryCtx` import
+- [x] Extract shared `usePhotoUpload` hook (reduces PhotoUpload/PhotoGallery complexity)
+
+### Remaining (Complexity Warnings)
+
+Current lint complexity limit is 15. These are flagged but work fine:
+
+| File | Score | Notes |
+|------|-------|-------|
+| `OnboardingPage` | 24/15 | 7-step wizard with 15+ fields. Hook created but not integrated yet |
+| `usePhotoUpload` | 21/15 | Centralized upload logic - complexity trade-off for reusability |
+| `profiles.ts` handler | 17/15 | Complex server query - legitimately complex |
+| `profiles.ts` filter | 17/15 | Many filter conditions - idiomatic |
+| `login-form` | 16/15 | Clean code, barely over |
+
+**Decision**: Consider raising biome complexity limit to 20 (would pass login-form & profiles.ts, still flag OnboardingPage and usePhotoUpload for future refactoring).
+
+### Future Considerations
+
 - [ ] Consider Cloudflare R2 for images if scaling past bandwidth limits
+- [ ] Integrate `useOnboardingForm` hook (requires updating Step0-Step6 components)
 
 ---
 
@@ -107,7 +140,8 @@ Holiday hosting/guest matching platform for Lithuania.
 
 ```bash
 bun dev          # Start dev server
-bun run check    # Lint + type check
+bun run check    # Lint + type check (ultracite + tsc)
+bun run lint     # Same as check
 bun test         # Run tests
 ```
 
@@ -117,3 +151,5 @@ bun test         # Run tests
 - `lib/i18n.ts` - All translations
 - `contexts/cookie-consent-context.tsx` - Consent state
 - `convex/lib/admin.ts` - Admin guard for protected functions
+- `hooks/use-photo-upload.ts` - Shared photo upload logic
+- `hooks/use-onboarding-form.ts` - Onboarding form state (not yet integrated)
