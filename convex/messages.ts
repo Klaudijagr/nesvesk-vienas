@@ -2,8 +2,7 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
-import { mutation, query } from "./_generated/server";
-import { assertAdmin } from "./lib/admin";
+import { internalMutation, mutation, query } from "./_generated/server";
 import { getCurrentUserId } from "./lib/auth";
 
 // Helper to check if messaging is blocked between users
@@ -712,13 +711,12 @@ export const getConversation = query({
   },
 });
 
-// Admin-only: Backfill unread counts for existing conversations
+// Internal: Backfill unread counts for existing conversations
 // Run once after deploying the schema change to populate counts for old conversations
-export const backfillUnreadCounts = mutation({
+// Use internalMutation so it can be run from Convex dashboard without auth
+export const backfillUnreadCounts = internalMutation({
   args: {},
   handler: async (ctx) => {
-    await assertAdmin(ctx);
-
     const conversations = await ctx.db.query("conversations").collect();
     let updated = 0;
 
