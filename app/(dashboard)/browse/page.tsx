@@ -1,6 +1,5 @@
 "use client";
 
-import posthog from "posthog-js";
 import { useMutation, useQuery } from "convex/react";
 import {
   Calendar,
@@ -14,6 +13,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import posthog from "posthog-js";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ListingCard } from "@/components/listing-card";
@@ -30,6 +30,12 @@ import { useLocale } from "@/contexts/locale-context";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { CITIES, HOLIDAY_DATES, LANGUAGES } from "@/lib/types";
+
+// PostHog event names - centralized for consistency and typo prevention
+const POSTHOG_EVENTS = {
+  INVITATION_SENT: "invitation_sent",
+  BROWSE_TAB_SWITCHED: "browse_tab_switched",
+} as const;
 
 type Profile = NonNullable<
   ReturnType<typeof useQuery<typeof api.profiles.listProfiles>>
@@ -124,7 +130,21 @@ function ResultsHeader({
   );
 }
 
-// Filter bar component
+/**
+ * Renders the filter bar with city, date, and language select controls and an optional "Clear" button.
+ *
+ * The selects display counts when provided and map a special `"__all__"` option to an empty string via change handlers.
+ *
+ * @param filterCounts - Optional counts for cities, languages, dates, and totalProfiles used to show option counts and disable empty options.
+ * @param t - Localization function used for all visible labels and placeholders.
+ * @param citySelectOpen - Controlled open state for the city select.
+ * @param dateSelectOpen - Controlled open state for the date select.
+ * @param languageSelectOpen - Controlled open state for the language select.
+ * @param onCitySelectOpenChange - Callback invoked when the city select open state should change.
+ * @param onDateSelectOpenChange - Callback invoked when the date select open state should change.
+ * @param onLanguageSelectOpenChange - Callback invoked when the language select open state should change.
+ * @returns A JSX element containing three Select controls (city, date, language) and a Clear button when any filter is active.
+ */
 function FilterBar({
   selectedCity,
   selectedDate,
@@ -135,6 +155,12 @@ function FilterBar({
   onClear,
   filterCounts,
   t,
+  citySelectOpen,
+  dateSelectOpen,
+  languageSelectOpen,
+  onCitySelectOpenChange,
+  onDateSelectOpenChange,
+  onLanguageSelectOpenChange,
 }: {
   selectedCity: string;
   selectedDate: string;
@@ -150,6 +176,12 @@ function FilterBar({
     totalProfiles: number;
   };
   t: ReturnType<typeof useLocale>["t"];
+  citySelectOpen: boolean;
+  dateSelectOpen: boolean;
+  languageSelectOpen: boolean;
+  onCitySelectOpenChange: (open: boolean) => void;
+  onDateSelectOpenChange: (open: boolean) => void;
+  onLanguageSelectOpenChange: (open: boolean) => void;
 }) {
   const hasFilters = selectedCity || selectedDate || selectedLanguage;
 
@@ -175,7 +207,9 @@ function FilterBar({
   return (
     <div className="flex w-full flex-1 flex-col items-center gap-2 md:flex-row lg:w-auto">
       <Select
+        onOpenChange={onCitySelectOpenChange}
         onValueChange={(v) => onCityChange(v === "__all__" ? "" : v)}
+        open={citySelectOpen}
         value={selectedCity || "__all__"}
       >
         <SelectTrigger className="h-12 w-full flex-1 rounded-lg border-gray-200 bg-white shadow-sm hover:border-gray-300">
@@ -212,7 +246,9 @@ function FilterBar({
       </Select>
 
       <Select
+        onOpenChange={onDateSelectOpenChange}
         onValueChange={(v) => onDateChange(v === "__all__" ? "" : v)}
+        open={dateSelectOpen}
         value={selectedDate || "__all__"}
       >
         <SelectTrigger className="h-12 w-full flex-1 rounded-lg border-gray-200 bg-white shadow-sm hover:border-gray-300">
@@ -242,7 +278,9 @@ function FilterBar({
       </Select>
 
       <Select
+        onOpenChange={onLanguageSelectOpenChange}
         onValueChange={(v) => onLanguageChange(v === "__all__" ? "" : v)}
+        open={languageSelectOpen}
         value={selectedLanguage || "__all__"}
       >
         <SelectTrigger className="h-12 w-full flex-1 rounded-lg border-gray-200 bg-white shadow-sm hover:border-gray-300">
@@ -488,6 +526,20 @@ function EmptyState({
   );
 }
 
+/**
+ * Renders the Browse page containing filters, results (grid or list), and a profile detail modal.
+ *
+ * Renders a tabbed mode toggle (find hosts / find guests), a FilterBar with controlled open states,
+ * a ResultsHeader with sorting and view-mode controls, a results area that shows a loading skeleton,
+ * empty state, grid of listing cards or list items, and a slide-in profile modal with invitation/respond actions.
+ *
+ * The component manages UI state for active tab, view mode, selected filters, controlled select dropdown
+ * visibility, selected profile, and invitation sending state. It issues Convex queries/mutations to
+ * fetch profiles, filter counts, pending invitations, and connection status, and it shows toast feedback
+ * for invite/respond workflows.
+ *
+ * @returns The rendered Browse page React element
+ */
 export default function BrowsePage() {
   const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<"host" | "guest">("host");
@@ -500,6 +552,11 @@ export default function BrowsePage() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("recommended");
+
+  // Select dropdown open states to prevent portal cleanup issues
+  const [citySelectOpen, setCitySelectOpen] = useState(false);
+  const [dateSelectOpen, setDateSelectOpen] = useState(false);
+  const [languageSelectOpen, setLanguageSelectOpen] = useState(false);
 
   // Query profiles from Convex
   const profiles = useQuery(api.profiles.listProfiles, {
@@ -534,7 +591,7 @@ export default function BrowsePage() {
         toUserId: userId,
         date: "24 Dec", // TODO: Let user pick date
       });
-      posthog.capture("invitation_sent", {
+      posthog.capture(POSTHOG_EVENTS.INVITATION_SENT, {
         to_user_id: userId,
         from_view: "list",
       });
@@ -565,7 +622,7 @@ export default function BrowsePage() {
         toUserId: selectedProfile.userId as Id<"users">,
         date: firstValidDate as "24 Dec" | "25 Dec" | "26 Dec" | "31 Dec",
       });
-      posthog.capture("invitation_sent", {
+      posthog.capture(POSTHOG_EVENTS.INVITATION_SENT, {
         to_user_id: selectedProfile.userId,
         from_view: "profile_modal",
       });
@@ -626,6 +683,14 @@ export default function BrowsePage() {
     setSelectedDate("");
     setSelectedLanguage("");
   };
+
+  // Close all select dropdowns when modal opens/closes to prevent portal cleanup issues
+  // biome-ignore lint/correctness/useExhaustiveDependencies: selectedProfile is intentionally used as trigger
+  useEffect(() => {
+    setCitySelectOpen(false);
+    setDateSelectOpen(false);
+    setLanguageSelectOpen(false);
+  }, [selectedProfile]);
 
   // Track if we've loaded at least once to avoid showing skeleton on tab switch
   const hasLoadedOnce = useRef(false);
@@ -707,7 +772,7 @@ export default function BrowsePage() {
                 }`}
                 onClick={() => {
                   setActiveTab("host");
-                  posthog.capture("browse_tab_switched", {
+                  posthog.capture(POSTHOG_EVENTS.BROWSE_TAB_SWITCHED, {
                     active_tab: "host",
                   });
                 }}
@@ -723,7 +788,7 @@ export default function BrowsePage() {
                 }`}
                 onClick={() => {
                   setActiveTab("guest");
-                  posthog.capture("browse_tab_switched", {
+                  posthog.capture(POSTHOG_EVENTS.BROWSE_TAB_SWITCHED, {
                     active_tab: "guest",
                   });
                 }}
@@ -734,11 +799,17 @@ export default function BrowsePage() {
             </div>
 
             <FilterBar
+              citySelectOpen={citySelectOpen}
+              dateSelectOpen={dateSelectOpen}
               filterCounts={filterCounts ?? undefined}
+              languageSelectOpen={languageSelectOpen}
               onCityChange={setSelectedCity}
+              onCitySelectOpenChange={setCitySelectOpen}
               onClear={clearFilters}
               onDateChange={setSelectedDate}
+              onDateSelectOpenChange={setDateSelectOpen}
               onLanguageChange={setSelectedLanguage}
+              onLanguageSelectOpenChange={setLanguageSelectOpen}
               selectedCity={selectedCity}
               selectedDate={selectedDate}
               selectedLanguage={selectedLanguage}

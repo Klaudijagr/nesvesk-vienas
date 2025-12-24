@@ -236,6 +236,11 @@ export default defineSchema({
     // Event date (for confirmed events)
     eventDate: v.optional(holidayDate),
 
+    // Denormalized unread counts for O(1) reads (updated on send/markAsRead)
+    // Optional for backwards compat - undefined treated as 0
+    unreadCountForGuest: v.optional(v.number()),
+    unreadCountForHost: v.optional(v.number()),
+
     // Archive support (per-user archiving stored separately, this is for conversation-level)
     isArchivedByGuest: v.optional(v.boolean()),
     isArchivedByHost: v.optional(v.boolean()),

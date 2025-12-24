@@ -4,11 +4,11 @@ import { useQuery } from "convex/react";
 import { Gift, Home, MessageCircle, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import posthog from "posthog-js";
 import { useLocale } from "@/contexts/locale-context";
 import { api } from "@/convex/_generated/api";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
-import posthog from "posthog-js";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -62,13 +62,13 @@ export function AppSidebar() {
           <Link href={item.url} key={item.title}>
             <Button
               className="h-11 w-full justify-start gap-3"
-              variant={isActive(item.url) ? "secondary" : "ghost"}
               onClick={() =>
                 posthog.capture("sidebar_nav_item_clicked", {
                   url: item.url,
                   title: item.title,
                 })
               }
+              variant={isActive(item.url) ? "secondary" : "ghost"}
             >
               <item.icon className="h-5 w-5" />
               <span className="flex-1 text-left">{item.title}</span>

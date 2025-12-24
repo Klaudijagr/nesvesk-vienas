@@ -45,21 +45,46 @@ export function InAppBrowserGate({
   mode: Mode;
   children: React.ReactNode;
 }) {
-  const [isInApp, setIsInApp] = useState(false);
-  const [currentUrl, setCurrentUrl] = useState<string>("");
+  const [gateState, setGateState] = useState<{
+    isInApp: boolean;
+    currentUrl: string;
+  } | null>(null);
 
   useEffect(() => {
     const ua = navigator.userAgent || navigator.vendor || "";
     const params = new URLSearchParams(window.location.search);
     const forceGate = params.get("forceGate") === "true";
-    setIsInApp(forceGate || detectInAppBrowser(ua));
-    setCurrentUrl(window.location.href);
+    setGateState({
+      isInApp: forceGate || detectInAppBrowser(ua),
+      currentUrl: window.location.href,
+    });
   }, []);
 
   const copyLabel = useMemo(
     () => (mode === "sign-in" ? "Copy sign-in link" : "Copy sign-up link"),
     [mode]
   );
+
+  // Important: we intentionally avoid rendering `children` until after the
+  // first client effect runs. Some in-app browsers (notably Facebook on iOS)
+  // can crash during auth widget initialization (e.g. `postMessage`) and we
+  // want to gate those browsers before mounting Clerk.
+  if (gateState === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Checking your browser…</CardTitle>
+            <CardDescription>
+              Preparing a safe sign-in experience.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  const { isInApp, currentUrl } = gateState;
 
   if (!isInApp) {
     return children;

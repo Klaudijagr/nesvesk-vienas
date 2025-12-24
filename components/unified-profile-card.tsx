@@ -14,7 +14,36 @@ import {
   X,
 } from "lucide-react";
 import Image from "next/image";
-import type { Doc } from "@/convex/_generated/dataModel";
+import type { Id } from "@/convex/_generated/dataModel";
+
+// Slim profile type matching what listProfiles returns (excludes large arrays like photos, amenities, houseRules)
+type SlimProfile = {
+  _id: Id<"profiles">;
+  userId: Id<"users">;
+  username?: string;
+  firstName: string;
+  age: number;
+  city: string;
+  bio: string;
+  photoUrl?: string;
+  role: "host" | "guest" | "both";
+  hostingStatus?: "can-host" | "may-host" | "cant-host";
+  guestStatus?: "looking" | "maybe-guest" | "not-looking";
+  languages: string[];
+  availableDates: string[];
+  hostingDates?: string[];
+  guestDates?: string[];
+  verified: boolean;
+  vibes?: string[];
+  dietaryInfo?: string[];
+  concept?: "Party" | "Dinner" | "Hangout";
+  capacity?: number;
+  lastActive?: number;
+  smokingAllowed: boolean;
+  drinkingAllowed: boolean;
+  petsAllowed: boolean;
+  hasPets: boolean;
+};
 
 // Helper to format last active time
 function formatLastActive(lastActive: number | undefined): string | null {
@@ -37,7 +66,7 @@ function formatLastActive(lastActive: number | undefined): string | null {
 }
 
 // Profile Header component
-function ProfileHeader({ profile }: { profile: Doc<"profiles"> }) {
+function ProfileHeader({ profile }: { profile: SlimProfile }) {
   const lastActive = formatLastActive(profile.lastActive);
   const isOnline = lastActive === "Online now";
 
@@ -178,7 +207,7 @@ function StatusBadge({
 }
 
 // About section component
-function AboutSection({ profile }: { profile: Doc<"profiles"> }) {
+function AboutSection({ profile }: { profile: SlimProfile }) {
   return (
     <div className="space-y-4 px-5 py-4">
       {/* Languages & Vibes - side by side */}
@@ -200,14 +229,14 @@ function AboutSection({ profile }: { profile: Doc<"profiles"> }) {
           </div>
         </div>
 
-        {profile.vibes.length > 0 && (
+        {(profile.vibes?.length ?? 0) > 0 && (
           <div className="flex-1">
             <p className="mb-2 flex items-center gap-1.5 font-medium text-gray-400 text-xs uppercase tracking-wider">
               <Sparkles size={12} />
               Vibes
             </p>
             <div className="flex flex-wrap gap-1.5">
-              {profile.vibes.map((vibe) => (
+              {(profile.vibes ?? []).map((vibe) => (
                 <span
                   className="rounded-full border border-purple-200 bg-purple-50 px-2.5 py-1 font-medium text-purple-700 text-xs"
                   key={vibe}
@@ -220,14 +249,14 @@ function AboutSection({ profile }: { profile: Doc<"profiles"> }) {
         )}
       </div>
 
-      {profile.dietaryInfo.length > 0 && (
+      {(profile.dietaryInfo?.length ?? 0) > 0 && (
         <div>
           <p className="mb-2 flex items-center gap-1.5 font-medium text-gray-400 text-xs uppercase tracking-wider">
             <UtensilsCrossed size={12} />
             Dietary
           </p>
           <div className="flex flex-wrap gap-1.5">
-            {profile.dietaryInfo.map((diet) => (
+            {(profile.dietaryInfo ?? []).map((diet) => (
               <span
                 className="rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 font-medium text-orange-700 text-xs"
                 key={diet}
@@ -298,7 +327,7 @@ export function UnifiedProfileCard({
   className = "",
   actionButton,
 }: {
-  profile: Doc<"profiles">;
+  profile: SlimProfile;
   className?: string;
   actionButton?: React.ReactNode;
 }) {

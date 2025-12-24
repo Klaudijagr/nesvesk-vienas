@@ -1454,7 +1454,12 @@ function buildSidebarItems(
   }
   // Add conversations
   for (const conv of conversations) {
-    items.push({ type: "conversation", ...conv });
+    items.push({
+      type: "conversation",
+      ...conv,
+      // Convert null to undefined to match SidebarItem type
+      lastMessage: conv.lastMessage ?? undefined,
+    });
   }
   // Sort all items by most recent activity
   return items.sort((a, b) => getSortDate(b) - getSortDate(a));

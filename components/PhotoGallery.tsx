@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "convex/react";
 import { Camera, Loader2, Star, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -40,7 +40,6 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
     if (photos[i]) {
       return { type: "photo" as const, url: photos[i] };
     }
-    // First slot shows fallback if no photos
     if (i === 0 && photos.length === 0 && fallbackPhotoUrl) {
       return { type: "fallback" as const, url: fallbackPhotoUrl };
     }
@@ -55,13 +54,13 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
     }
   };
 
-  const clearSlotPreview = (slot: number) => {
+  const clearSlotPreview = useCallback((slot: number) => {
     setPreviewUrls((prev) => {
       const next = new Map(prev);
       next.delete(slot);
       return next;
     });
-  };
+  }, []);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -89,19 +88,17 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
 
     setUploadingIndex(currentSlot);
 
-    const uploadResult = await uploadCompressedImage(file, generateUploadUrl);
-    if (!uploadResult.success) {
-      toast.error(uploadResult.error);
-      clearSlotPreview(currentSlot);
-      setUploadingIndex(null);
-      setActiveSlot(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-      return;
-    }
-
     try {
+      const uploadResult = await uploadCompressedImage(
+        file,
+        generateUploadUrl
+      );
+      if (!uploadResult.success) {
+        toast.error(uploadResult.error);
+        clearSlotPreview(currentSlot);
+        return;
+      }
+
       await addProfilePhoto({
         storageId: uploadResult.storageId as Id<"_storage">,
         setAsMain: photos.length === 0,
@@ -182,24 +179,20 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
                   width={128}
                 />
 
-                {/* Main photo badge */}
                 {slot.type === "photo" && slot.url === mainPhoto && (
                   <div className="absolute top-1 left-1 rounded bg-amber-500 px-1.5 py-0.5 font-medium text-white text-xs shadow-sm">
                     Main
                   </div>
                 )}
 
-                {/* Uploading overlay */}
                 {uploadingIndex === index && (
                   <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50">
                     <Loader2 className="h-5 w-5 animate-spin text-white" />
                   </div>
                 )}
 
-                {/* Hover overlay with actions */}
                 {slot.type === "photo" && uploadingIndex !== index && (
                   <div className="absolute inset-0 flex items-center justify-center gap-1 rounded-lg bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100">
-                    {/* Set as main button */}
                     {slot.url !== mainPhoto && slot.url && (
                       <button
                         className="rounded-full bg-white/90 p-1.5 text-amber-600 shadow-sm transition-colors hover:bg-white"
@@ -210,7 +203,6 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
                         <Star className="h-4 w-4" />
                       </button>
                     )}
-                    {/* Delete button */}
                     {slot.url && (
                       <button
                         className="rounded-full bg-white/90 p-1.5 text-red-600 shadow-sm transition-colors hover:bg-white"
@@ -224,7 +216,6 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
                   </div>
                 )}
 
-                {/* Fallback photo overlay - allow clicking to replace */}
                 {slot.type === "fallback" && (
                   <button
                     className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-lg bg-black/0 opacity-0 transition-all hover:bg-black/40 hover:opacity-100"

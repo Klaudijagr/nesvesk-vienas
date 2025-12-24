@@ -1,8 +1,8 @@
 "use client";
 
+import posthog from "posthog-js";
 import { useCallback, useRef, useState } from "react";
 import { useFaceVerification } from "@/hooks/use-face-verification";
-import posthog from "posthog-js";
 
 type FaceVerificationProps = {
   onVerificationComplete?: (verified: boolean, confidence: number) => void;

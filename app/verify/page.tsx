@@ -13,12 +13,12 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import posthog from "posthog-js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
 import { useFaceVerification } from "@/hooks/use-face-verification";
-import posthog from "posthog-js";
 
 type VerificationState = "idle" | "verifying" | "success" | "failed";
 

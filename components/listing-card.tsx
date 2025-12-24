@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import type { Doc } from "@/convex/_generated/dataModel";
+import type { Id } from "@/convex/_generated/dataModel";
 
 type ConnectionStatus =
   | "none"
@@ -20,7 +20,28 @@ type ConnectionStatus =
   | "matched"
   | "self";
 
-interface ProfileWithStatus extends Doc<"profiles"> {
+// Slim profile type matching what listProfiles returns (excludes large arrays like photos, amenities, houseRules)
+interface ProfileWithStatus {
+  _id: Id<"profiles">;
+  userId: Id<"users">;
+  username?: string;
+  firstName: string;
+  age: number;
+  city: string;
+  bio: string;
+  photoUrl?: string;
+  role: "host" | "guest" | "both";
+  hostingStatus?: "can-host" | "may-host" | "cant-host";
+  guestStatus?: "looking" | "maybe-guest" | "not-looking";
+  languages: string[];
+  availableDates: string[];
+  hostingDates?: string[];
+  guestDates?: string[];
+  verified: boolean;
+  vibes?: string[];
+  smokingAllowed: boolean;
+  drinkingAllowed: boolean;
+  petsAllowed: boolean;
   connectionStatus?: ConnectionStatus;
 }
 

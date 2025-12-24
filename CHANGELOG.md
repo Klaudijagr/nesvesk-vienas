@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2025-12-21
+
+### Performance
+
+- **N+1 query fix** in `listProfiles` - batch invitation queries reduce 100 DB queries to 2
+- **Denormalized unread counts** on conversations table for O(1) reads instead of counting messages
+- **Slim profile returns** - `listProfiles` now excludes large arrays (photos, amenities, houseRules)
+
+### Fixed
+
+- Account deletion now works for users without profiles
+- In-app browser gate for Instagram/Facebook/TikTok auth (prevents WebView crashes)
+- TypeScript `lastMessage` null vs undefined type mismatch
+- City type assertion in profiles.ts
+- Onboarding validation errors with scroll-to-field
+
+### Refactored
+
+- Extracted `usePhotoUpload` hook - shared upload logic between PhotoUpload and PhotoGallery
+- Created `useOnboardingForm` hook (prepared for future integration)
+- Removed dead code: `getConnectionStatusBetween` function, unused `QueryCtx` import
+
+### Developer Experience
+
+- Lint scripts now use Ultracite (`bun run lint` = `ultracite check && tsc --noEmit`)
+- Added TypeScript check to lint-staged (catches type errors on commit)
+- PostHog event names extracted to constants
+
+### Technical
+
+- `backfillUnreadCounts` now uses `internalMutation` for dashboard execution
+- Slim profile types in `listing-card.tsx` and `unified-profile-card.tsx`
+
+---
+
 ## [1.0.0] - 2025-12-11
 
 🎉 **First Production Release**
@@ -151,4 +186,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | 0.1.0   | 2024-12-03 | Initial release - auth, profiles, browse, invitations |
 | 0.2.0   | 2024-12-07 | Face verification, E2E testing, docs organization     |
 | 0.3.0   | 2024-12-08 | Next.js App Router, Clerk auth, bi-directional sync   |
-| 1.0.0   | 2025-12-11 | 🎉 First production release                           |
+| 1.0.0   | 2025-12-11 | First production release                              |
+| 1.1.0   | 2025-12-21 | Performance fixes, refactoring, DX improvements       |

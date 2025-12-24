@@ -319,11 +319,8 @@ export const deleteUser = action({
         return { success: false, error: `Clerk API error: ${response.status}` };
       }
 
-      // If user not in Clerk (404), still clean up Convex
-      if (response.status === 404) {
-        await ctx.runMutation(internal.users.deleteFromClerk, { clerkUserId });
-      }
-      // Otherwise, Clerk webhook will handle Convex cleanup
+      // Always clean up Convex after Clerk deletion (works with or without webhooks)
+      await ctx.runMutation(internal.users.deleteFromClerk, { clerkUserId });
 
       return { success: true };
     } catch (error) {
