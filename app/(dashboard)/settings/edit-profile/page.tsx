@@ -291,54 +291,51 @@ const PreferenceCardWithDates = memo(function PreferenceCardInner({
         </p>
       </button>
 
-      <AnimatePresence initial={false}>
-        {showDates && (
+      {showDates && (
+        <motion.div
+          animate={{ opacity: 1 }}
+          className={`border-t ${c.border} px-3 pb-3`}
+          initial={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
           <motion.div
-            animate={{ height: "auto", opacity: 1 }}
-            className={`border-t ${c.border} px-3 pb-3`}
-            exit={{ height: 0, opacity: 0 }}
-            initial={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            animate={{ y: 0, opacity: 1 }}
+            initial={{ y: -10, opacity: 0 }}
+            transition={{ delay: 0.1, duration: 0.2 }}
           >
-            <motion.div
-              animate={{ y: 0, opacity: 1 }}
-              initial={{ y: -10, opacity: 0 }}
-              transition={{ delay: 0.1, duration: 0.2 }}
-            >
-              <p className={`mb-2 pt-2 font-medium text-xs ${c.title}`}>
-                Select dates:
-              </p>
-              <div className="flex flex-wrap gap-1">
-                {HOLIDAY_DATES.map((date, index) => (
-                  <motion.div
-                    animate={{ opacity: 1, y: 0 }}
-                    initial={{ opacity: 0, y: 10 }}
-                    key={date}
-                    transition={{ delay: 0.03 * index, duration: 0.15 }}
-                  >
-                    <DateButton
-                      colorType={option.colorType}
-                      date={date}
-                      isSelected={selectedDates.includes(date)}
-                      onToggle={onToggleDate}
-                    />
-                  </motion.div>
-                ))}
-              </div>
-              {selectedDates.length > 0 && (
-                <motion.p
-                  animate={{ opacity: 1 }}
-                  className={`mt-2 text-xs ${c.desc}`}
-                  initial={{ opacity: 0 }}
+            <p className={`mb-2 pt-2 font-medium text-xs ${c.title}`}>
+              Select dates:
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {HOLIDAY_DATES.map((date, index) => (
+                <motion.div
+                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  key={date}
+                  transition={{ delay: 0.03 * index, duration: 0.15 }}
                 >
-                  {selectedDates.length} date
-                  {selectedDates.length !== 1 ? "s" : ""} selected
-                </motion.p>
-              )}
-            </motion.div>
+                  <DateButton
+                    colorType={option.colorType}
+                    date={date}
+                    isSelected={selectedDates.includes(date)}
+                    onToggle={onToggleDate}
+                  />
+                </motion.div>
+              ))}
+            </div>
+            {selectedDates.length > 0 && (
+              <motion.p
+                animate={{ opacity: 1 }}
+                className={`mt-2 text-xs ${c.desc}`}
+                initial={{ opacity: 0 }}
+              >
+                {selectedDates.length} date
+                {selectedDates.length !== 1 ? "s" : ""} selected
+              </motion.p>
+            )}
           </motion.div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      )}
     </div>
   );
 });
