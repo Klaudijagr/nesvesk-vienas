@@ -20,6 +20,46 @@
   --color-barn-red-light: #b83a3a;
   --color-soft-black: #2c2c2c;
   --color-dark-green: #4a5d45;
+
+  /*
+   * Product palette. Each token carries the exact shade the UI already used,
+   * so pages keep their look while referencing tokens instead of raw shades.
+   * Tints are written with an opacity modifier, for example bg-success/10.
+   */
+  --color-brand: oklch(57.7% 0.245 27.325);
+  --color-brand-strong: oklch(50.5% 0.213 27.518);
+  --color-brand-foreground: #fff;
+  --color-destructive-strong: oklch(50.5% 0.213 27.518);
+  --color-gold: oklch(82.8% 0.189 84.429);
+  --color-gold-soft: oklch(96.2% 0.059 95.617);
+  --color-gold-strong: oklch(66.6% 0.179 58.318);
+  --color-gold-deep: oklch(47.3% 0.137 46.201);
+  --color-gold-foreground: oklch(20.8% 0.042 265.755);
+  --color-success: oklch(62.7% 0.194 149.214);
+  --color-success-strong: oklch(52.7% 0.154 150.069);
+  --color-info: oklch(54.6% 0.245 262.881);
+  --color-info-strong: oklch(48.8% 0.243 264.376);
+  --color-plum: oklch(49.6% 0.265 301.924);
+  --color-ember: oklch(55.3% 0.195 38.402);
+  --color-berry: oklch(71.2% 0.194 13.428);
+  --color-holly: oklch(76.5% 0.177 163.223);
+
+  /* Night: the dark landing page and its mobile menu. */
+  --color-night: oklch(20.8% 0.042 265.755);
+  --color-night-deep: oklch(12.9% 0.042 264.695);
+  --color-night-raised: oklch(27.9% 0.041 260.031);
+  --color-night-border: oklch(37.2% 0.044 257.287);
+  --color-night-muted: oklch(70.4% 0.04 256.788);
+  --color-night-foreground: oklch(98.4% 0.003 247.858);
+
+  /* Small print, heavy blurs and text shadows used by badges and the hero. */
+  --text-3xs: 0.5625rem;
+  --text-2xs: 0.625rem;
+  --blur-4xl: 80px;
+  --blur-5xl: 100px;
+  --blur-6xl: 120px;
+  --drop-shadow-text: 0 2px 8px rgb(0 0 0 / 0.5);
+  --drop-shadow-glow: 0 0 20px rgb(251 191 36 / 0.3);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
