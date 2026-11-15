@@ -143,7 +143,7 @@
 }
 
 .font-pinyon {
-  font-family: "Pinyon Script", cursive;
+  font-family: var(--font-pinyon), cursive;
 }
 
 /* Heritage Holiday Stripe Backgrounds */
@@ -213,7 +213,7 @@
 
 /* Vintage Pill Button */
 .btn-vintage-pill {
-  @apply px-8 py-3 rounded-full border-2 border-barn-red text-barn-red uppercase tracking-wider text-sm transition-colors;
+  @apply border-barn-red text-barn-red rounded-full border-2 px-8 py-3 text-sm tracking-wider uppercase transition-colors;
   font-family: var(--font-courier), ui-monospace, monospace;
 }
 

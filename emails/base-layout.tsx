@@ -199,38 +199,63 @@ export const emailTranslations = {
   },
 };
 
-export function getTranslations(locale: Locale) {
-  return emailTranslations[locale] || emailTranslations.en;
-}
+// The locale can come from stored data, so unknown values fall back to English.
+export const getTranslations = (locale: Locale) =>
+  Object.hasOwn(emailTranslations, locale)
+    ? emailTranslations[locale]
+    : emailTranslations.en;
 
 // Site colors (matching the dark theme)
 export const colors = {
-  background: "#0F172A", // slate-900
-  cardBg: "#1E293B", // slate-800
-  border: "#334155", // slate-700
-  text: "#CBD5E1", // slate-300
-  textMuted: "#94A3B8", // slate-400
-  textLight: "#F8FAFC", // slate-50
-  amber: "#F59E0B", // amber-500
-  amberLight: "#FCD34D", // amber-300
-  green: "#22C55E", // green-500
-  greenLight: "#86EFAC", // green-300
+  // slate-900
+  background: "#0F172A",
+  // slate-800
+  cardBg: "#1E293B",
+  // slate-700
+  border: "#334155",
+  // slate-300
+  text: "#CBD5E1",
+  // slate-400
+  textMuted: "#94A3B8",
+  // slate-50
+  textLight: "#F8FAFC",
+  // amber-500
+  amber: "#F59E0B",
+  // amber-300
+  amberLight: "#FCD34D",
+  // green-500
+  green: "#22C55E",
+  // green-300
+  greenLight: "#86EFAC",
 };
 
-type BaseLayoutProps = {
+interface BaseLayoutProps {
   preview: string;
   children: React.ReactNode;
   locale?: Locale;
-};
+  /** Copyright year; defaults to the year the email is rendered. */
+  year?: number;
+}
 
-const baseUrl = process.env.SITE_URL || "https://nesveskvienas.lt";
+// Emails are rendered once per send, so the send time is read here when the
+// caller does not pass a year.
+const getCurrentYear = (): number => new Date().getFullYear();
+
+// An unset or empty SITE_URL falls back to the production site.
+const siteUrl = process.env.SITE_URL;
+export const baseUrl =
+  siteUrl === undefined || siteUrl === ""
+    ? "https://nesveskvienas.lt"
+    : siteUrl;
 
 export const BaseLayout = ({
   preview,
   children,
   locale = "lt",
+  year,
 }: BaseLayoutProps) => {
   const t = getTranslations(locale);
+  const copyrightYear = year ?? getCurrentYear();
 
   return (
     <Html>
@@ -263,7 +288,7 @@ export const BaseLayout = ({
               </Link>
             </Text>
             <Text style={copyright}>
-              © {new Date().getFullYear()} Nešvęsk vienas. {t.copyright}
+              © {copyrightYear} Nešvęsk vienas. {t.copyright}
             </Text>
           </Section>
         </Container>

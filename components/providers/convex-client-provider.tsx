@@ -4,14 +4,20 @@ import { ClerkProvider, useAuth } from "@clerk/nextjs";
 import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
-export function ConvexClientProvider({ children }: { children: ReactNode }) {
+const subscribeToNothing = () => () => {
+  // The mounted flag never changes after hydration, so there is nothing to unsubscribe.
+};
+const getMountedOnClient = () => true;
+const getMountedOnServer = () => false;
+
+export const ConvexClientProvider = ({ children }: { children: ReactNode }) => {
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
   const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  const [convex, setConvex] = useState<ConvexReactClient | null>(null);
-  const missingConvexEnv = !convexUrl;
-  const missingClerkEnv = !clerkPublishableKey;
+  const missingConvexEnv = convexUrl === undefined || convexUrl === "";
+  const missingClerkEnv =
+    clerkPublishableKey === undefined || clerkPublishableKey === "";
 
   // Fail fast during build/prerender if the Convex URL isn't present so we
   // don't render the app tree without a Convex provider.
@@ -34,7 +40,6 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
     process.env.NODE_ENV === "production" &&
     clerkPublishableKey?.startsWith("pk_test_")
   ) {
-    // eslint-disable-next-line no-console
     console.error(
       "Clerk is configured with a test publishable key in production (NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY starts with pk_test_). Use your live key (pk_live_) for production."
     );
@@ -47,18 +52,16 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
     [convexUrl]
   );
 
-  useEffect(() => {
-    // Avoid instantiating the Convex client during SSR/prerender where
-    // process.env may be undefined.
-    if (missingConvexEnv || !convexClient) {
-      return;
-    }
-
-    setConvex(convexClient);
-  }, [convexClient, missingConvexEnv]);
+  // False during SSR/prerender and hydration, true once mounted in the browser.
+  const isMounted = useSyncExternalStore(
+    subscribeToNothing,
+    getMountedOnClient,
+    getMountedOnServer
+  );
+  const convex = isMounted ? convexClient : null;
 
   if (!convex) {
-    // While the client instantiates on the client, render nothing to avoid
+    // Until the app is mounted in the browser, render nothing to avoid
     // rendering children outside a Convex provider.
     return null;
   }
@@ -75,4 +78,4 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
       </ConvexProviderWithClerk>
     </ClerkProvider>
   );
-}
+};

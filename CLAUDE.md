@@ -1,4 +1,3 @@
-
 Default to using Bun instead of Node.js.
 
 - Use `bun <file>` instead of `node <file>` or `ts-node <file>`
@@ -34,6 +33,7 @@ Example test:
 ```ts
 import { convexTest } from "convex-test";
 import { expect, test } from "vitest";
+
 import { api } from "./_generated/api";
 import schema from "./schema";
 
@@ -128,3 +128,5 @@ bun --hot ./index.ts
 ```
 
 For more information, read the Bun API docs in `node_modules/bun-types/docs/**.md`.
+
+@AGENTS.md

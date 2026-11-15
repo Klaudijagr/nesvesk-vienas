@@ -1,11 +1,13 @@
 import { v } from "convex/values";
+
 import type { Doc, Id } from "./_generated/dataModel";
+import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 import { assertAdmin } from "./lib/admin";
 import { getCurrentUserId, getOrCreateUser } from "./lib/auth";
+import { isNonEmptyString, mapSequential } from "./lib/helpers";
+import schema from "./schema";
 
-type Language = "Lithuanian" | "English" | "Ukrainian" | "Russian";
-type HolidayDate = "24 Dec" | "25 Dec" | "26 Dec" | "31 Dec";
 type ConnectionStatus =
   | "none"
   | "pending_sent"
@@ -13,17 +15,47 @@ type ConnectionStatus =
   | "matched"
   | "self";
 
-function isProfileCompleteForBrowse(
+const isProfileCompleteForBrowse = (
   profile: Partial<Doc<"profiles">>
-): boolean {
+): boolean => {
   const firstNameOk = (profile.firstName ?? "").trim().length > 0;
   const bioOk = (profile.bio ?? "").trim().length > 0;
   const languagesOk = (profile.languages?.length ?? 0) > 0;
   return firstNameOk && bioOk && languagesOk;
-}
+};
 
 // Top-level regex for username validation
-const USERNAME_REGEX = /^[a-z0-9-]+$/;
+const USERNAME_REGEX = /^[a-z0-9-]+$/u;
+const NON_USERNAME_CHARACTERS_REGEX = /[^a-z0-9]/gu;
+
+type City = Doc<"profiles">["city"];
+
+// City names accepted by the schema, read from the schema itself.
+const CITY_NAMES: ReadonlySet<string> = new Set(
+  schema.tables.profiles.validator.fields.city.members.map(
+    (member) => member.value
+  )
+);
+
+const isCity = (value: string): value is City => CITY_NAMES.has(value);
+
+// Load the profiles to browse - use the city index when a city filter is provided
+const collectProfilesForCity = async (
+  ctx: QueryCtx,
+  cityFilter: string | undefined
+): Promise<Doc<"profiles">[]> => {
+  if (!isNonEmptyString(cityFilter)) {
+    return await ctx.db.query("profiles").collect();
+  }
+  // A city outside the schema list cannot match any stored profile.
+  if (!isCity(cityFilter)) {
+    return [];
+  }
+  return await ctx.db
+    .query("profiles")
+    .withIndex("by_city", (q) => q.eq("city", cityFilter))
+    .collect();
+};
 
 // Get current user's profile
 export const getMyProfile = query({
@@ -112,11 +144,13 @@ export const listProfiles = query({
     role: v.optional(v.string()),
     language: v.optional(v.string()),
     date: v.optional(v.string()),
-    limit: v.optional(v.number()), // Pagination limit (default 20)
+    // Pagination limit (default 20)
+    limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const currentUserId = await getCurrentUserId(ctx);
-    const limit = args.limit ?? 50; // Default limit to reduce bandwidth
+    // Default limit to reduce bandwidth
+    const limit = args.limit ?? 50;
 
     // Get blocked user IDs (both directions) if logged in - do this first
     let blockedUserIds = new Set<Id<"users">>();
@@ -137,17 +171,8 @@ export const listProfiles = query({
       ]);
     }
 
-    // Build query - use index when city filter is provided
-    const profileQuery = args.city
-      ? ctx.db
-          .query("profiles")
-          .withIndex("by_city", (q) =>
-            q.eq("city", args.city as Doc<"profiles">["city"])
-          )
-      : ctx.db.query("profiles");
-
     // Collect with server-side filtering
-    const allProfiles = await profileQuery.collect();
+    const allProfiles = await collectProfilesForCity(ctx, args.city);
 
     // Filter profiles - combine all conditions for efficiency
     const filteredProfiles = allProfiles.filter((p) => {
@@ -166,17 +191,26 @@ export const listProfiles = query({
       }
 
       // Apply role filter
-      if (args.role && p.role !== args.role && p.role !== "both") {
+      if (
+        isNonEmptyString(args.role) &&
+        p.role !== args.role &&
+        p.role !== "both"
+      ) {
         return false;
       }
 
       // Apply language filter
-      if (args.language && !p.languages.includes(args.language as Language)) {
+      const languages: readonly string[] = p.languages;
+      if (
+        isNonEmptyString(args.language) &&
+        !languages.includes(args.language)
+      ) {
         return false;
       }
 
       // Apply date filter
-      if (args.date && !p.availableDates.includes(args.date as HolidayDate)) {
+      const availableDates: readonly string[] = p.availableDates;
+      if (isNonEmptyString(args.date) && !availableDates.includes(args.date)) {
         return false;
       }
 
@@ -239,7 +273,8 @@ export const listProfiles = query({
         age: p.age,
         city: p.city,
         bio: p.bio,
-        photoUrl: p.photoUrl, // Only main photo, not the full photos array
+        // Only main photo, not the full photos array
+        photoUrl: p.photoUrl,
         role: p.role,
         hostingStatus: p.hostingStatus,
         guestStatus: p.guestStatus,
@@ -322,7 +357,8 @@ export const upsertProfile = mutation({
     ),
     firstName: v.string(),
     lastName: v.optional(v.string()),
-    age: v.number(), // Required, must be 18+
+    // Required, must be 18+
+    age: v.number(),
     city: v.union(
       v.literal("Vilnius"),
       v.literal("Kaunas"),
@@ -506,7 +542,7 @@ export const updateLastActive = mutation({
 // ===== USERNAME ROUTING =====
 
 // Reserved usernames that can't be used
-const RESERVED_USERNAMES = [
+const RESERVED_USERNAMES = new Set([
   "admin",
   "api",
   "people",
@@ -526,10 +562,10 @@ const RESERVED_USERNAMES = [
   "support",
   "null",
   "undefined",
-];
+]);
 
 // Validate username format: 3-30 chars, lowercase alphanumeric + hyphens, no leading/trailing hyphens
-function isValidUsernameFormat(username: string): boolean {
+const isValidUsernameFormat = (username: string): boolean => {
   const normalized = username.toLowerCase().trim();
   if (normalized.length < 3 || normalized.length > 30) {
     return false;
@@ -544,14 +580,18 @@ function isValidUsernameFormat(username: string): boolean {
     return false;
   }
   return true;
-}
+};
 
 // Generate a username from firstName and lastName
-function generateUsername(firstName: string, lastName?: string): string {
-  const first = firstName.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const last = lastName ? lastName.toLowerCase().replace(/[^a-z0-9]/g, "") : "";
-  return last ? `${first}-${last}` : first;
-}
+const generateUsername = (firstName: string, lastName?: string): string => {
+  const first = firstName
+    .toLowerCase()
+    .replaceAll(NON_USERNAME_CHARACTERS_REGEX, "");
+  const last = isNonEmptyString(lastName)
+    ? lastName.toLowerCase().replaceAll(NON_USERNAME_CHARACTERS_REGEX, "")
+    : "";
+  return last === "" ? first : `${first}-${last}`;
+};
 
 // Get profile by username (public route)
 export const getProfileByUsername = query({
@@ -628,7 +668,7 @@ export const checkUsernameAvailability = query({
     }
 
     // Check reserved
-    if (RESERVED_USERNAMES.includes(normalized)) {
+    if (RESERVED_USERNAMES.has(normalized)) {
       return { available: false, reason: "reserved" };
     }
 
@@ -665,7 +705,7 @@ export const setUsername = mutation({
     }
 
     // Check reserved
-    if (RESERVED_USERNAMES.includes(normalized)) {
+    if (RESERVED_USERNAMES.has(normalized)) {
       throw new Error("This username is reserved.");
     }
 
@@ -772,6 +812,24 @@ export const updateNotificationPreferences = mutation({
   },
 });
 
+// Find a free username: the base itself, then base-1, base-2, ...
+const findAvailableUsername = async (
+  ctx: MutationCtx,
+  baseUsername: string,
+  suffix = 0
+): Promise<string> => {
+  const username = suffix === 0 ? baseUsername : `${baseUsername}-${suffix}`;
+  const existing = await ctx.db
+    .query("profiles")
+    .withIndex("by_username", (q) => q.eq("username", username))
+    .first();
+
+  if (!existing && !RESERVED_USERNAMES.has(username)) {
+    return username;
+  }
+  return await findAvailableUsername(ctx, baseUsername, suffix + 1);
+};
+
 // Auto-generate usernames for existing profiles without one
 export const generateMissingUsernames = mutation({
   args: {},
@@ -779,82 +837,63 @@ export const generateMissingUsernames = mutation({
     await assertAdmin(ctx);
 
     const profiles = await ctx.db.query("profiles").collect();
-    let updated = 0;
+    const profilesWithoutUsername = profiles.filter(
+      (profile) => !isNonEmptyString(profile.username)
+    );
 
-    for (const profile of profiles) {
-      if (profile.username) {
-        continue; // Already has username
-      }
-
-      let baseUsername = generateUsername(profile.firstName, profile.lastName);
+    // Sequential on purpose: each username must be stored before the next
+    // profile looks for a free one, or two profiles could get the same name.
+    await mapSequential(profilesWithoutUsername, async (profile) => {
+      const generated = generateUsername(profile.firstName, profile.lastName);
 
       // If too short, pad it
-      if (baseUsername.length < 3) {
-        baseUsername = `user-${baseUsername}`;
-      }
+      const baseUsername =
+        generated.length < 3 ? `user-${generated}` : generated;
 
-      // Find unique username
-      let username = baseUsername;
-      let suffix = 1;
-
-      while (true) {
-        const existing = await ctx.db
-          .query("profiles")
-          .withIndex("by_username", (q) => q.eq("username", username))
-          .first();
-
-        if (!(existing || RESERVED_USERNAMES.includes(username))) {
-          break;
-        }
-
-        username = `${baseUsername}-${suffix}`;
-        suffix++;
-      }
-
+      const username = await findAvailableUsername(ctx, baseUsername);
       await ctx.db.patch(profile._id, { username });
-      updated++;
-    }
+    });
 
-    return { updated };
+    return { updated: profilesWithoutUsername.length };
   },
 });
 
 // Helper: Count occurrences and return sorted array
-function countToSortedArray(map: Map<string, number>, sort = true) {
-  const arr = Array.from(map.entries()).map(([name, count]) => ({
+const countToSortedArray = (map: Map<string, number>, sort = true) => {
+  const arr = [...map.entries()].map(([name, count]) => ({
     name,
     count,
   }));
-  return sort ? arr.sort((a, b) => b.count - a.count) : arr;
-}
+  return sort ? arr.toSorted((a, b) => b.count - a.count) : arr;
+};
 
 // Helper: Get dates for a profile based on role filter
-function getProfileDates(
+const getProfileDates = (
   profile: {
     availableDates: string[];
     hostingDates?: string[];
     guestDates?: string[];
   },
   roleFilter?: string
-) {
+) => {
   if (roleFilter === "host") {
-    return profile.hostingDates || profile.availableDates;
+    return profile.hostingDates ?? profile.availableDates;
   }
   if (roleFilter === "guest") {
-    return profile.guestDates || profile.availableDates;
+    return profile.guestDates ?? profile.availableDates;
   }
   return profile.availableDates;
-}
+};
 
 // Helper: Count occurrences of a single value
-function incrementCount(map: Map<string, number>, key: string) {
-  map.set(key, (map.get(key) || 0) + 1);
-}
+const incrementCount = (map: Map<string, number>, key: string) => {
+  map.set(key, (map.get(key) ?? 0) + 1);
+};
 
 // Helper: Count all languages from profiles
-function countLanguages(
+const countLanguages = (
   profiles: { languages: string[] }[]
-): Map<string, number> {
+): Map<string, number> => {
   const langMap = new Map<string, number>();
   for (const p of profiles) {
     for (const lang of p.languages) {
@@ -862,7 +901,7 @@ function countLanguages(
     }
   }
   return langMap;
-}
+};
 
 /**
  * Aggregate occurrence counts for calendar dates across a list of profiles.
@@ -871,14 +910,14 @@ function countLanguages(
  * @param roleFilter - Optional role filter ("host" or "guest") that selects which date set to use per profile
  * @returns A map where keys are date strings and values are the number of profiles that include that date
  */
-function countDates(
+const countDates = (
   profiles: {
     availableDates: string[];
     hostingDates?: string[];
     guestDates?: string[];
   }[],
   roleFilter?: string
-): Map<string, number> {
+): Map<string, number> => {
   const dateMap = new Map<string, number>();
   for (const p of profiles) {
     for (const date of getProfileDates(p, roleFilter)) {
@@ -886,7 +925,7 @@ function countDates(
     }
   }
   return dateMap;
-}
+};
 
 /**
  * Filter a list of profiles to those that should appear in browse results for a requester and optional role.
@@ -896,35 +935,36 @@ function countDates(
  * @param roleFilter - Optional role to require; profiles with this role or `"both"` will match.
  * @returns The subset of `allProfiles` that match the role filter, are marked visible, and (unless they belong to the requester) are complete for browsing.
  */
-function filterVisibleProfiles(
+const filterVisibleProfiles = (
   allProfiles: Doc<"profiles">[],
   currentUserId: Id<"users"> | null,
   roleFilter?: string
-): Doc<"profiles">[] {
+): Doc<"profiles">[] =>
   // Optimized: Skip user existence check - trust referential integrity
   // Orphaned profiles are rare and will be cleaned up eventually
-  return allProfiles.filter((p) => {
+  allProfiles.filter((p) => {
     const isOwner = p.userId === currentUserId;
     const isVisible = p.isVisible !== false;
     const matchesRole =
-      !roleFilter || p.role === roleFilter || p.role === "both";
+      !isNonEmptyString(roleFilter) ||
+      p.role === roleFilter ||
+      p.role === "both";
     // For browse filter counts, only count profiles that would actually show up.
     // (But keep owner visibility logic intact for safety/backwards-compat.)
     const isCountable = isProfileCompleteForBrowse(p) && isVisible;
     return matchesRole && (isOwner || isCountable);
   });
-}
 
 // Helper: Count cities from profiles
-function countCities(profiles: { city?: string }[]): Map<string, number> {
+const countCities = (profiles: { city?: string }[]): Map<string, number> => {
   const cityMap = new Map<string, number>();
   for (const p of profiles) {
-    if (p.city) {
+    if (isNonEmptyString(p.city)) {
       incrementCount(cityMap, p.city);
     }
   }
   return cityMap;
-}
+};
 
 // Get filter counts for browse page (cities, languages, dates with actual profile counts)
 // Returns arrays instead of objects because Convex doesn't allow non-ASCII chars in object keys

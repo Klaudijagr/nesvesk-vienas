@@ -2,6 +2,7 @@
 
 import { useLocale } from "@/contexts/locale-context";
 import type { Locale } from "@/lib/i18n";
+
 import { Button } from "./ui/button";
 
 const languages: { code: Locale; label: string }[] = [
@@ -11,16 +12,18 @@ const languages: { code: Locale; label: string }[] = [
   { code: "ru", label: "RU" },
 ];
 
-export function LanguageSelector() {
+export const LanguageSelector = () => {
   const { locale, setLocale } = useLocale();
 
   return (
-    <div className="flex gap-1 rounded-lg border border-border bg-background p-1">
+    <div className="border-border bg-background flex gap-1 rounded-lg border p-1">
       {languages.map((lang) => (
         <Button
-          className="min-w-[2.5rem] font-medium text-xs"
+          className="min-w-[2.5rem] text-xs font-medium"
           key={lang.code}
-          onClick={() => setLocale(lang.code)}
+          onClick={() => {
+            setLocale(lang.code);
+          }}
           size="sm"
           variant={locale === lang.code ? "default" : "ghost"}
         >
@@ -29,4 +32,4 @@ export function LanguageSelector() {
       ))}
     </div>
   );
-}
+};

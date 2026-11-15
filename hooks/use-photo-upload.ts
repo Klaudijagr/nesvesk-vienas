@@ -3,6 +3,7 @@
 import { useMutation } from "convex/react";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
+
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { uploadCompressedImage } from "@/lib/image-compression";
@@ -11,13 +12,13 @@ type UploadResult =
   | { success: true; storageId: Id<"_storage"> }
   | { success: false; error: string };
 
-type UsePhotoUploadOptions = {
+interface UsePhotoUploadOptions {
   onSuccess?: (storageId: Id<"_storage">) => Promise<void> | void;
   onError?: (error: string) => void;
   showToasts?: boolean;
-};
+}
 
-export function usePhotoUpload(options: UsePhotoUploadOptions = {}) {
+export const usePhotoUpload = (options: UsePhotoUploadOptions = {}) => {
   const { onSuccess, onError, showToasts = true } = options;
 
   const [isUploading, setIsUploading] = useState(false);
@@ -53,9 +54,11 @@ export function usePhotoUpload(options: UsePhotoUploadOptions = {}) {
 
       // Show preview immediately
       const reader = new FileReader();
-      reader.onload = (event) => {
-        setPreviewUrl(event.target?.result as string);
-      };
+      reader.addEventListener("load", () => {
+        if (typeof reader.result === "string") {
+          setPreviewUrl(reader.result);
+        }
+      });
       reader.readAsDataURL(file);
 
       setIsUploading(true);
@@ -73,37 +76,37 @@ export function usePhotoUpload(options: UsePhotoUploadOptions = {}) {
         return { success: false, error: uploadResult.error };
       }
 
+      const { storageId } = uploadResult;
+      let result: UploadResult = { success: true, storageId };
       try {
-        const storageId = uploadResult.storageId as Id<"_storage">;
         await onSuccess?.(storageId);
         if (showToasts) {
           toast.success("Photo uploaded");
         }
-        return { success: true, storageId };
-      } catch (err) {
+      } catch (error) {
         setPreviewUrl(null);
         const message =
-          err instanceof Error ? err.message : "Failed to save photo";
+          error instanceof Error ? error.message : "Failed to save photo";
         if (showToasts) {
           toast.error(message);
         }
         onError?.(message);
-        return { success: false, error: message };
-      } finally {
-        setIsUploading(false);
-        resetInput();
+        result = { success: false, error: message };
       }
+      setIsUploading(false);
+      resetInput();
+      return result;
     },
     [generateUploadUrl, onSuccess, onError, showToasts, resetInput]
   );
 
   const handleFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) {
         return null;
       }
-      return upload(file);
+      return await upload(file);
     },
     [upload]
   );
@@ -124,4 +127,4 @@ export function usePhotoUpload(options: UsePhotoUploadOptions = {}) {
     clearPreview,
     setPreviewUrl,
   };
-}
+};

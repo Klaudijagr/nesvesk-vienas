@@ -1,6 +1,12 @@
 import type { MetadataRoute } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nesveskvienas.lt";
+const DEFAULT_SITE_URL = "https://nesveskvienas.lt";
+const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+// An unset or empty variable falls back to the production URL.
+const siteUrl =
+  configuredSiteUrl === undefined || configuredSiteUrl === ""
+    ? DEFAULT_SITE_URL
+    : configuredSiteUrl;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticPages: MetadataRoute.Sitemap = [
@@ -54,18 +60,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.3,
     },
   ];
-
-  // TODO: Add dynamic pages for public user profiles
-  // When you have public profile pages at /people/[username],
-  // you can fetch usernames from Convex and add them here:
-  //
-  // const profiles = await fetchQuery(api.profiles.getPublicUsernames);
-  // const profilePages = profiles.map((username) => ({
-  //   url: `${siteUrl}/people/${username}`,
-  //   lastModified: new Date(),
-  //   changeFrequency: "weekly" as const,
-  //   priority: 0.6,
-  // }));
 
   return [...staticPages];
 }

@@ -1,233 +1,135 @@
-// This file configures the initialization of Sentry on the client.
-// The added config here will be used whenever a users loads a page in their browser.
+// Client-side Sentry and PostHog setup. Runs whenever a page loads in the browser.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
-import * as Sentry from "@sentry/nextjs";
-import posthog from "posthog-js";
+import {
+  captureRouterTransitionStart,
+  init,
+  replayIntegration,
+} from "@sentry/nextjs";
+import type { Event } from "@sentry/nextjs";
+import { posthog } from "posthog-js";
 
-interface CookieConsent {
-  analytics: boolean;
-}
+import {
+  isClerkScriptLoadFailure,
+  isInAppBrowserNoise,
+  isInAppBrowserUserAgent,
+} from "@/lib/sentry-event-filters";
 
-const IN_APP_BROWSER_UA_RE =
-  /FBAN|FBAV|Instagram|Messenger|LinkedIn|TikTok|Snapchat|Pinterest|Twitter|Line|WeChat|MicroMessenger/i;
+const FIRST_HTTP_URL_RE = /https?:\/\/[^\s]+/u;
+const CLERK_ERROR_CODE_RE = /code="(?<code>[^"]+)"/u;
+const TRAILING_PUNCTUATION_RE = /[),.]+$/u;
+const MAX_MESSAGE_LENGTH = 500;
 
-const FIRST_HTTP_URL_RE = /https?:\/\/[^\s]+/;
-const CLERK_ERROR_CODE_RE = /code="([^"]+)"/;
-const TRAILING_PUNCTUATION_RE = /[),.]+$/;
+const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY ?? "";
 
-const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-
-function isKnownInAppBrowserUA(): boolean {
+const currentUserAgent = (): string => {
   try {
-    return IN_APP_BROWSER_UA_RE.test(
-      navigator.userAgent || navigator.vendor || ""
-    );
+    return navigator.userAgent;
   } catch {
-    return false;
+    return "";
   }
-}
+};
 
-/**
- * Detects whether a Sentry event represents the Facebook iOS in-app browser crash caused by an `InvalidAccessError`.
- *
- * @param event - The Sentry event to inspect
- * @returns `true` if the event is an `InvalidAccessError` whose message matches the known Facebook in-app browser crash text and the client user agent is a known in-app browser, `false` otherwise.
- */
-function isFacebookInAppPostMessageInvalidAccessError(
-  event: Sentry.Event
-): boolean {
-  const exc = event.exception?.values?.[0];
-  const type = exc?.type;
-  const value = exc?.value ?? "";
-
-  if (type !== "InvalidAccessError") {
-    return false;
-  }
-
-  // Sentry issue reports show this exact message for the FB iOS in-app browser crash.
-  if (
-    !value.includes("The object does not support the operation or argument")
-  ) {
-    return false;
-  }
-
-  // Ensure we only drop this in environments where we actually see the bug.
-  return isKnownInAppBrowserUA();
-}
-
-/**
- * Detects whether a Sentry event represents the Facebook iOS in-app browser crash caused by accessing `window.webkit.messageHandlers`.
- *
- * @param event - The Sentry event to inspect.
- * @returns `true` if the event is a `TypeError` whose message includes "undefined is not an object" and "window.webkit.messageHandlers" and the user agent matches a known in-app browser; `false` otherwise.
- */
-function isFacebookInAppWebKitMessageHandlerError(
-  event: Sentry.Event
-): boolean {
-  const exc = event.exception?.values?.[0];
-  const type = exc?.type;
-  const value = exc?.value ?? "";
-
-  if (type !== "TypeError") {
-    return false;
-  }
-
-  // Sentry issue reports show this exact message for the FB iOS in-app browser crash
-  // when trying to access window.webkit.messageHandlers that don't exist.
-  if (
-    !(
-      value.includes("undefined is not an object") &&
-      value.includes("window.webkit.messageHandlers")
-    )
-  ) {
-    return false;
-  }
-
-  // Ensure we only drop this in environments where we actually see the bug.
-  return isKnownInAppBrowserUA();
-}
-
-/**
- * Detects whether a Sentry event represents Clerk failing to load its JavaScript bundle.
- * This commonly occurs in in-app browsers that block external scripts, or with ad blockers/privacy extensions.
- *
- * @param event - The Sentry event to inspect.
- * @returns `true` if the event is a Clerk script load failure in an in-app browser; `false` otherwise.
- */
-function isClerkScriptLoadFailure(event: Sentry.Event): boolean {
-  const values = event.exception?.values ?? [];
-
-  for (const exc of values) {
-    const value = exc?.value ?? "";
-    // Check for Clerk's specific error message when script fails to load
-    if (
-      value.toLowerCase().includes("failed to load") &&
-      value.toLowerCase().includes("clerk")
-    ) {
-      // Only filter this in in-app browsers where we expect script loading issues
-      return isKnownInAppBrowserUA();
-    }
-  }
-
-  return false;
-}
-
-function captureClerkScriptLoadFailureToPosthog(event: Sentry.Event): void {
-  if (!posthogKey) {
+const captureClerkScriptLoadFailureToPosthog = (event: Event): void => {
+  if (posthogKey === "") {
     return;
   }
 
   try {
-    const values = event.exception?.values ?? [];
-    const rawMessages: string[] = [];
+    const rawMessages = (event.exception?.values ?? [])
+      .map((exception) => exception.value ?? "")
+      .filter((value) => value !== "");
 
-    for (const exc of values) {
-      const value = exc?.value;
-      if (value) {
-        rawMessages.push(value);
-      }
-    }
-
-    const message = rawMessages.join(" | ").slice(0, 500);
     const scriptUrl = rawMessages
-      .map((value) => value.match(FIRST_HTTP_URL_RE)?.[0] ?? null)
-      .find((value): value is string => Boolean(value))
+      .map((value) => FIRST_HTTP_URL_RE.exec(value)?.[0])
+      .find((value) => value !== undefined)
       ?.replace(TRAILING_PUNCTUATION_RE, "");
     const clerkErrorCode = rawMessages
-      .map((value) => value.match(CLERK_ERROR_CODE_RE)?.[1] ?? null)
-      .find((value): value is string => Boolean(value));
+      .map((value) => CLERK_ERROR_CODE_RE.exec(value)?.groups?.code)
+      .find((value) => value !== undefined);
 
     posthog.capture("clerk_js_failed_to_load_in_app_browser", {
       clerkErrorCode,
-      inAppBrowserUaMatch: isKnownInAppBrowserUA(),
-      message,
+      inAppBrowserUaMatch: isInAppBrowserUserAgent(currentUserAgent()),
+      message: rawMessages.join(" | ").slice(0, MAX_MESSAGE_LENGTH),
+      referrer: typeof document === "undefined" ? undefined : document.referrer,
       scriptUrl,
       sentryEventId: event.event_id,
       sentryRelease: event.release,
       sentryTransaction: event.transaction,
       url: typeof window === "undefined" ? undefined : window.location.href,
-      referrer: typeof document === "undefined" ? undefined : document.referrer,
     });
   } catch {
     // Never let telemetry capture break app error handling.
   }
-}
+};
 
-/**
- * Determines whether the user has granted analytics consent by reading the "cookie_consent" entry in localStorage.
- *
- * @returns `true` if the parsed consent object has `analytics` set to `true`, `false` otherwise.
- */
-function hasAnalyticsConsent(): boolean {
+/** Reads the analytics choice the cookie banner stores in localStorage. */
+const hasAnalyticsConsent = (): boolean => {
   if (typeof window === "undefined") {
     return false;
   }
 
   try {
     const raw = window.localStorage.getItem("cookie_consent");
-    if (!raw) {
+    if (raw === null || raw === "") {
       return false;
     }
-    const parsed = JSON.parse(raw) as Partial<CookieConsent>;
-    return parsed.analytics === true;
+    const parsed: unknown = JSON.parse(raw);
+    return (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      "analytics" in parsed &&
+      parsed.analytics === true
+    );
   } catch {
     return false;
   }
-}
+};
 
 const enableReplay = hasAnalyticsConsent();
 
-Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-
-  // Add optional integrations for additional features
-  integrations: enableReplay ? [Sentry.replayIntegration()] : [],
-
-  // Define how likely traces are sampled. 10% sampling for production.
-  tracesSampleRate: 0.1,
-  // Enable logs to be sent to Sentry
-  enableLogs: false,
-
-  // Define how likely Replay events are sampled.
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
-  replaysSessionSampleRate: enableReplay ? 0.1 : 0,
-
-  // Define how likely Replay events are sampled when an error occurs.
-  replaysOnErrorSampleRate: enableReplay ? 1.0 : 0,
-
-  // Enable sending user PII (Personally Identifiable Information)
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
-  sendDefaultPii: false,
-
+init({
   beforeSend(event) {
-    if (isFacebookInAppPostMessageInvalidAccessError(event)) {
+    const userAgent = currentUserAgent();
+
+    if (isInAppBrowserNoise(event, userAgent)) {
       return null;
     }
 
-    if (isFacebookInAppWebKitMessageHandlerError(event)) {
-      return null;
-    }
-
-    if (isClerkScriptLoadFailure(event)) {
+    if (isClerkScriptLoadFailure(event, userAgent)) {
       captureClerkScriptLoadFailureToPosthog(event);
       return null;
     }
 
     return event;
   },
+
+  // Keep personal data out of Sentry: no user fields, cookies or request/response bodies.
+  dataCollection: {
+    cookies: false,
+    httpBodies: [],
+    userInfo: false,
+  },
+
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+
+  // Session replay only runs for visitors who accepted analytics cookies.
+  integrations: enableReplay ? [replayIntegration()] : [],
+  replaysOnErrorSampleRate: enableReplay ? 1 : 0,
+  replaysSessionSampleRate: enableReplay ? 0.1 : 0,
+
+  tracesSampleRate: 0.1,
 });
 
-// Initialize PostHog for analytics and capture exceptions
-if (posthogKey) {
+if (posthogKey !== "") {
   posthog.init(posthogKey, {
     api_host: "/ingest",
-    ui_host: "https://us.posthog.com",
-    defaults: "2025-05-24",
-    capture_exceptions: true, // This enables capturing exceptions using Error Tracking, set to false if you don't want this
+    capture_exceptions: true,
     debug: process.env.NODE_ENV === "development",
+    defaults: "2025-05-24",
+    ui_host: "https://us.posthog.com",
   });
 }
 
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+export const onRouterTransitionStart = captureRouterTransitionStart;

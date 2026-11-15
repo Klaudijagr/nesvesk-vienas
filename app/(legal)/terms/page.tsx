@@ -2,22 +2,24 @@
 
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+
 import { Navbar } from "@/components/navbar";
 import { useLocale } from "@/contexts/locale-context";
+import type { Locale } from "@/lib/i18n";
 
-type Section = {
+interface Section {
   title: string;
   content: string | string[];
-};
+}
 
-type TermsContentItem = {
+interface TermsContentItem {
   title: string;
   lastUpdated: string;
   intro: string;
   sections: Section[];
-};
+}
 
-type TermsContent = Record<string, TermsContentItem>;
+type TermsContent = Record<Locale, TermsContentItem>;
 
 const termsContent: TermsContent = {
   lt: {
@@ -328,7 +330,7 @@ const termsContent: TermsContent = {
 
 export default function TermsPage() {
   const { t, locale } = useLocale();
-  const c = termsContent[locale] || termsContent.lt;
+  const c = termsContent[locale];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -343,24 +345,24 @@ export default function TermsPage() {
         </Link>
 
         <div className="rounded-lg bg-white p-8 shadow-sm">
-          <h1 className="mb-2 font-bold text-3xl text-gray-900">{c.title}</h1>
-          <p className="mb-6 text-gray-500 text-sm">{c.lastUpdated}</p>
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">{c.title}</h1>
+          <p className="mb-6 text-sm text-gray-500">{c.lastUpdated}</p>
 
           <div className="mb-8 rounded-md bg-amber-50 p-4">
-            <p className="font-medium text-amber-800 text-sm">{c.intro}</p>
+            <p className="text-sm font-medium text-amber-800">{c.intro}</p>
           </div>
 
           <div className="space-y-8">
             {c.sections.map((section) => (
               <div key={section.title}>
-                <h2 className="mb-3 font-semibold text-gray-900 text-xl">
+                <h2 className="mb-3 text-xl font-semibold text-gray-900">
                   {section.title}
                 </h2>
                 {Array.isArray(section.content) ? (
                   <div className="space-y-3">
                     {section.content.map((paragraph, index) => (
                       <p
-                        className="text-gray-600 leading-relaxed"
+                        className="leading-relaxed text-gray-600"
                         key={`${section.title}-${index}`}
                       >
                         {paragraph}
@@ -368,7 +370,7 @@ export default function TermsPage() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="leading-relaxed text-gray-600">
                     {section.content}
                   </p>
                 )}

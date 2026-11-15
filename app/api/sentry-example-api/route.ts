@@ -8,7 +8,7 @@ class SentryExampleAPIError extends Error {
   }
 }
 // A faulty API route to test Sentry's error monitoring
-export function GET() {
+export const GET = () => {
   // Never expose this endpoint in production.
   if (process.env.NODE_ENV === "production") {
     return new NextResponse("Not found", { status: 404 });
@@ -17,4 +17,4 @@ export function GET() {
   throw new SentryExampleAPIError(
     "This error is raised on the backend called by the example page."
   );
-}
+};

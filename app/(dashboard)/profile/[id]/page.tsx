@@ -5,26 +5,42 @@ import { Loader2, Users } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
+
 import { ProfileActionButton } from "@/components/profile-action-button";
 import { ProfileCard } from "@/components/profile-card";
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 
+type InvitationDate = "24 Dec" | "25 Dec" | "26 Dec" | "31 Dec";
+
+// Invitations can only be sent for these dates (see convex/invitations.ts `send`).
+const INVITATION_DATES: ReadonlySet<string> = new Set([
+  "24 Dec",
+  "25 Dec",
+  "26 Dec",
+  "31 Dec",
+]);
+
+const isInvitationDate = (value: string): value is InvitationDate =>
+  INVITATION_DATES.has(value);
+
+const isUserId = (value: string): value is Id<"users"> => value !== "";
+
 export default function ProfilePage() {
-  const params = useParams();
+  const params = useParams<{ id: string }>();
   const router = useRouter();
-  const id = params.id as string;
+  const { id } = params;
   const { isAuthenticated } = useConvexAuth();
 
   const profile = useQuery(
     api.profiles.getProfile,
-    id ? { userId: id as Id<"users"> } : "skip"
+    isUserId(id) ? { userId: id } : "skip"
   );
   const myProfile = useQuery(api.profiles.getMyProfile);
   const connectionStatus = useQuery(
     api.invitations.getConnectionStatus,
-    id ? { otherUserId: id as Id<"users"> } : "skip"
+    isUserId(id) ? { otherUserId: id } : "skip"
   );
 
   const sendInvitation = useMutation(api.invitations.send);
@@ -34,26 +50,19 @@ export default function ProfilePage() {
 
   const isOwnProfile = myProfile?.userId === id;
 
-  const defaultDate = profile?.availableDates?.[0] as
-    | "24 Dec"
-    | "25 Dec"
-    | "26 Dec"
-    | "31 Dec"
-    | undefined;
+  const defaultDate = profile?.availableDates[0];
 
   const handleSendRequest = async () => {
-    if (!(id && defaultDate)) {
+    if (!(isUserId(id) && defaultDate) || !isInvitationDate(defaultDate)) {
       return;
     }
     setIsSending(true);
-    try {
-      await sendInvitation({
-        toUserId: id as Id<"users">,
-        date: defaultDate,
-      });
-    } finally {
+    await sendInvitation({
+      toUserId: id,
+      date: defaultDate,
+    }).finally(() => {
       setIsSending(false);
-    }
+    });
   };
 
   const handleRespond = async (accept: boolean) => {
@@ -61,14 +70,12 @@ export default function ProfilePage() {
       return;
     }
     setIsSending(true);
-    try {
-      await respondToInvitation({
-        invitationId: connectionStatus.invitationId,
-        accept,
-      });
-    } finally {
+    await respondToInvitation({
+      invitationId: connectionStatus.invitationId,
+      accept,
+    }).finally(() => {
       setIsSending(false);
-    }
+    });
   };
 
   if (profile === undefined) {
@@ -82,8 +89,14 @@ export default function ProfilePage() {
   if (profile === null) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-        <h1 className="font-bold text-2xl text-gray-900">Profile not found</h1>
-        <Button onClick={() => router.push("/browse")}>Browse profiles</Button>
+        <h1 className="text-2xl font-bold text-gray-900">Profile not found</h1>
+        <Button
+          onClick={() => {
+            router.push("/browse");
+          }}
+        >
+          Browse profiles
+        </Button>
       </div>
     );
   }
@@ -96,9 +109,15 @@ export default function ProfilePage() {
           <ProfileActionButton
             hasAvailableDates={!!defaultDate}
             isSending={isSending}
-            onAccept={() => handleRespond(true)}
-            onConnect={handleSendRequest}
-            onDecline={() => handleRespond(false)}
+            onAccept={() => {
+              void handleRespond(true);
+            }}
+            onConnect={() => {
+              void handleSendRequest();
+            }}
+            onDecline={() => {
+              void handleRespond(false);
+            }}
             status={connectionStatus?.status}
             userId={id}
           />
@@ -124,7 +143,7 @@ export default function ProfilePage() {
           <p className="font-medium text-blue-700">
             {profile.firstName} wants to connect!
           </p>
-          <p className="mt-1 text-blue-600 text-sm">
+          <p className="mt-1 text-sm text-blue-600">
             For {connectionStatus.date}
           </p>
         </div>

@@ -1,7 +1,6 @@
 # Nešvęsk vienas - Planning Document
 
-**Name**: Nešvęsk vienas ("Don't celebrate alone")
-**URL**: <https://v0-nesvesk-vienas-app.vercel.app>
+**Name**: Nešvęsk vienas ("Don't celebrate alone") **URL**: <https://v0-nesvesk-vienas-app.vercel.app>
 
 ## Open Questions
 
@@ -12,7 +11,7 @@
 ## Answered
 
 | Question | Answer |
-|----------|--------|
+| --- | --- |
 | Reviews after event? | Yes, like Couchsurfing - for future events |
 | What happens after Christmas? | Depends on success - could continue for Easter, etc. |
 | Age restrictions? | 18+ only |
@@ -32,8 +31,8 @@ Invitations/event links should be shareable.
 ### Host Registration Fields
 
 | Field | Visibility | Notes |
-|-------|------------|-------|
-| Name | Public (surname hidden until match) | |
+| --- | --- | --- |
+| Name | Public (surname hidden until match) |  |
 | City + Area | Public | Vilnius, Kaunas, Klaipėda, Šiauliai, Panevėžys |
 | How many guests | Public | Capacity |
 | Dietary info | Public | Vegan, vegetarian, no lactose, no alcohol, etc. |
@@ -41,23 +40,23 @@ Invitations/event links should be shareable.
 | Preferred guest age | Public | Range or preference |
 | Concept | Public | Party / Dinner / Hangout |
 | Available dates | Public | Multi-select: 24, 25, 26, 31 Dec |
-| Photos | Public (optional) | |
-| Address | **Hidden until match** | |
+| Photos | Public (optional) |  |
+| Address | **Hidden until match** |  |
 | Contact (phone, email) | **Hidden until match** | Email used for registration |
 
 ### Guest Registration Fields
 
 | Field | Visibility | Notes |
-|-------|------------|-------|
-| Name | Public (surname hidden until match) | |
-| Age | Public | |
-| City | Public | |
-| Dietary preferences | Public | |
-| Languages | Public | |
+| --- | --- | --- |
+| Name | Public (surname hidden until match) |  |
+| Age | Public |  |
+| City | Public |  |
+| Dietary preferences | Public |  |
+| Languages | Public |  |
 | Available dates | Public | Multi-select: 24, 25, 26, 31 Dec |
-| Photos | Public (optional) | |
-| Full name | **Hidden until match** | |
-| Address | **Hidden until match** | |
+| Photos | Public (optional) |  |
+| Full name | **Hidden until match** |  |
+| Address | **Hidden until match** |  |
 | Contact (phone, email) | **Hidden until match** | Email used for registration |
 
 ### Browse & Filter
@@ -113,14 +112,14 @@ Both hosts and guests can browse and filter by:
 ### Communication Features
 
 | Feature | Priority | Notes |
-|---------|----------|-------|
+| --- | --- | --- |
 | In-app messaging | **MVP** | Users can message after invitation sent (before match) |
 | Voice/video call | Stretch | Not MVP - depends on difficulty |
 
 ### Verification & Trust
 
 | Feature | Required? | Notes |
-|---------|-----------|-------|
+| --- | --- | --- |
 | Email verification | Required | For registration |
 | Photo verification | Optional | Compare uploaded photos to live photo |
 | Reviews/ratings | Post-event | Like Couchsurfing - builds trust for future events |
@@ -161,7 +160,7 @@ Users
 ├── city
 ├── area (for larger cities)
 ├── age (guests) / preferredGuestAge (hosts)
-├── languages[] 
+├── languages[]
 ├── dietaryInfo
 ├── concept (hosts only): "party" | "dinner" | "hangout"
 ├── capacity (hosts only)
@@ -231,7 +230,7 @@ All comparable apps (TimeLeft, 222, Couchsurfing) use the same legal approach:
 **Most similar model (home hosting, mutual matching):**
 
 | App | Model | Key Difference |
-|-----|-------|----------------|
+| --- | --- | --- |
 | **Couchsurfing** | Browse hosts, send request, mutual accept | For travelers, not holidays |
 | **Couchers.org** | Same as CS, free/nonprofit | Direct CS replacement |
 | **BeWelcome** | Same as CS, free/nonprofit | Smaller, open source |
@@ -263,10 +262,10 @@ All comparable apps (TimeLeft, 222, Couchsurfing) use the same legal approach:
 
 ## Future Holidays (If Successful)
 
-| Holiday | Dates | Notes |
-|---------|-------|-------|
-| Christmas | Dec 24-26 | ✅ Launch |
-| New Year's | Dec 31 | ✅ Launch |
-| Easter | March/April | Potential expansion |
-| Midsummer (Joninės) | June 24 | Very Lithuanian! |
-| Other? | TBD | Based on demand |
+| Holiday             | Dates       | Notes               |
+| ------------------- | ----------- | ------------------- |
+| Christmas           | Dec 24-26   | ✅ Launch           |
+| New Year's          | Dec 31      | ✅ Launch           |
+| Easter              | March/April | Potential expansion |
+| Midsummer (Joninės) | June 24     | Very Lithuanian!    |
+| Other?              | TBD         | Based on demand     |

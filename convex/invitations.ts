@@ -1,15 +1,17 @@
 import { v } from "convex/values";
+
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 import { getCurrentUserId, getOrCreateUser } from "./lib/auth";
+import { isNonEmptyString } from "./lib/helpers";
 
 // Helper to check if user wants invitation notifications
-async function shouldSendInvitationEmail(
+const shouldSendInvitationEmail = async (
   ctx: MutationCtx,
   userId: Id<"users">
-): Promise<{ shouldSend: boolean; email: string | null }> {
+): Promise<{ shouldSend: boolean; email: string | null }> => {
   const user = await ctx.db.get(userId);
   const profile = await ctx.db
     .query("profiles")
@@ -21,17 +23,19 @@ async function shouldSendInvitationEmail(
     profile?.emailNotifications !== false &&
     profile?.notifyOnInvitation !== false;
 
+  const email = isNonEmptyString(user?.email) ? user.email : null;
+
   return {
-    shouldSend: wantsNotifications && !!user?.email,
-    email: user?.email || null,
+    shouldSend: wantsNotifications && email !== null,
+    email,
   };
-}
+};
 
 // Helper to check if user wants match notifications
-async function shouldSendMatchEmail(
+const shouldSendMatchEmail = async (
   ctx: MutationCtx,
   userId: Id<"users">
-): Promise<{ shouldSend: boolean; email: string | null }> {
+): Promise<{ shouldSend: boolean; email: string | null }> => {
   const user = await ctx.db.get(userId);
   const profile = await ctx.db
     .query("profiles")
@@ -42,11 +46,13 @@ async function shouldSendMatchEmail(
   const wantsNotifications =
     profile?.emailNotifications !== false && profile?.notifyOnMatch !== false;
 
+  const email = isNonEmptyString(user?.email) ? user.email : null;
+
   return {
-    shouldSend: wantsNotifications && !!user?.email,
-    email: user?.email || null,
+    shouldSend: wantsNotifications && email !== null,
+    email,
   };
-}
+};
 
 // Get invitations for current user (both sent and received)
 export const getMyInvitations = query({
@@ -89,9 +95,11 @@ export const getMyInvitations = query({
     };
 
     return {
-      sent: await Promise.all(sent.map((inv) => enrichInvitation(inv, true))),
+      sent: await Promise.all(
+        sent.map(async (inv) => await enrichInvitation(inv, true))
+      ),
       received: await Promise.all(
-        received.map((inv) => enrichInvitation(inv, false))
+        received.map(async (inv) => await enrichInvitation(inv, false))
       ),
     };
   },
@@ -144,7 +152,11 @@ export const send = mutation({
       .withIndex("by_userId", (q) => q.eq("userId", userId))
       .first();
 
-    if (recipientCheck.shouldSend && recipientCheck.email && senderProfile) {
+    if (
+      recipientCheck.shouldSend &&
+      recipientCheck.email !== null &&
+      senderProfile
+    ) {
       await ctx.scheduler.runAfter(0, internal.email.sendEmail, {
         to: recipientCheck.email,
         type: "invitationReceived",
@@ -225,7 +237,11 @@ export const respond = mutation({
       .withIndex("by_userId", (q) => q.eq("userId", userId))
       .first();
 
-    if (senderCheck.shouldSend && senderCheck.email && responderProfile) {
+    if (
+      senderCheck.shouldSend &&
+      senderCheck.email !== null &&
+      responderProfile
+    ) {
       await ctx.scheduler.runAfter(0, internal.email.sendEmail, {
         to: senderCheck.email,
         type: args.accept ? "invitationAccepted" : "invitationDeclined",
@@ -328,13 +344,16 @@ export const getMatches = query({
             ? {
                 userId: otherUserId,
                 firstName: profile.firstName,
-                lastName: profile.lastName, // REVEALED
+                // REVEALED
+                lastName: profile.lastName,
                 age: profile.age,
                 city: profile.city,
                 bio: profile.bio,
                 photoUrl: profile.photoUrl,
-                phone: profile.phone, // REVEALED
-                address: profile.address, // REVEALED
+                // REVEALED
+                phone: profile.phone,
+                // REVEALED
+                address: profile.address,
                 languages: profile.languages,
                 role: profile.role,
                 concept: profile.concept,
@@ -346,7 +365,7 @@ export const getMatches = query({
     );
 
     // Sort by match date (most recent first)
-    return enrichedMatches.sort(
+    return enrichedMatches.toSorted(
       (a, b) => (b.matchedAt ?? 0) - (a.matchedAt ?? 0)
     );
   },
@@ -422,7 +441,7 @@ export const getConnectionStatus = query({
     ) {
       return {
         status: "matched" as const,
-        date: sentInvitation?.date || receivedInvitation?.date,
+        date: sentInvitation?.date ?? receivedInvitation?.date,
       };
     }
 

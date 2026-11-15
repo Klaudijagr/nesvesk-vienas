@@ -2,26 +2,26 @@ import { Check, HelpCircle, X } from "lucide-react";
 
 export type IconType = "check" | "question" | "x";
 
-type PreferenceOption = {
+interface PreferenceOption {
   id: string;
   title: string;
   description: string;
   iconType: IconType;
-};
+}
 
-type PreferenceCardProps = {
+interface PreferenceCardProps {
   option: PreferenceOption;
   isSelected: boolean;
   onSelect: (id: string) => void;
-};
+}
 
-function IconWrapper({
+const IconWrapper = ({
   type,
   isSelected,
 }: {
   type: IconType;
   isSelected: boolean;
-}) {
+}) => {
   const bgColorClass = isSelected ? "bg-red-600" : "bg-gray-400";
 
   return (
@@ -37,41 +37,41 @@ function IconWrapper({
       {type === "x" && <X className="h-6 w-6 text-white" strokeWidth={3} />}
     </div>
   );
-}
+};
 
-export function PreferenceCard({
+export const PreferenceCard = ({
   option,
   isSelected,
   onSelect,
-}: PreferenceCardProps) {
-  return (
-    <button
-      className={`relative flex h-full min-h-[180px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 p-6 text-center transition-all duration-200 ${
-        isSelected
-          ? "border-red-500 bg-red-50 shadow-md"
-          : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm"
+}: PreferenceCardProps) => (
+  <button
+    className={`relative flex h-full min-h-[180px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 p-6 text-center transition-all duration-200 ${
+      isSelected
+        ? "border-red-500 bg-red-50 shadow-md"
+        : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm"
+    }`}
+    onClick={() => {
+      onSelect(option.id);
+    }}
+    type="button"
+  >
+    <div className="mb-4">
+      <IconWrapper isSelected={isSelected} type={option.iconType} />
+    </div>
+
+    <h3
+      className={`mb-2 text-lg font-bold ${
+        isSelected ? "text-red-900" : "text-gray-800"
       }`}
-      onClick={() => onSelect(option.id)}
-      type="button"
     >
-      <div className="mb-4">
-        <IconWrapper isSelected={isSelected} type={option.iconType} />
-      </div>
+      {option.title}
+    </h3>
 
-      <h3
-        className={`mb-2 font-bold text-lg ${
-          isSelected ? "text-red-900" : "text-gray-800"
-        }`}
-      >
-        {option.title}
-      </h3>
-
-      <p className={`text-sm ${isSelected ? "text-red-700" : "text-gray-500"}`}>
-        {option.description}
-      </p>
-    </button>
-  );
-}
+    <p className={`text-sm ${isSelected ? "text-red-700" : "text-gray-500"}`}>
+      {option.description}
+    </p>
+  </button>
+);
 
 // Pre-defined option sets for hosting and meetup
 export const HOSTING_OPTIONS: PreferenceOption[] = [

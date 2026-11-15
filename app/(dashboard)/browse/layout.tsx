@@ -11,10 +11,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BrowseLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return children;
-}
+const BrowseLayout = ({ children }: { children: React.ReactNode }) => children;
+
+export default BrowseLayout;

@@ -2,21 +2,24 @@
 
 import { useMutation } from "convex/react";
 import { Camera, Loader2, X } from "lucide-react";
-import posthog from "posthog-js";
+import Image from "next/image";
+import { posthog } from "posthog-js";
+
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { usePhotoUpload } from "@/hooks/use-photo-upload";
+
 import { Button } from "./ui/button";
 
-type PhotoUploadProps = {
+interface PhotoUploadProps {
   currentPhotoUrl?: string;
   onPhotoUploaded: (url: string) => void;
-};
+}
 
-export function PhotoUpload({
+export const PhotoUpload = ({
   currentPhotoUrl,
   onPhotoUploaded,
-}: PhotoUploadProps) {
+}: PhotoUploadProps) => {
   const saveProfilePhoto = useMutation(api.files.saveProfilePhoto);
 
   const {
@@ -40,17 +43,21 @@ export function PhotoUpload({
     onPhotoUploaded("");
   };
 
-  const displayUrl = previewUrl || currentPhotoUrl;
+  const hasPreview = previewUrl !== null && previewUrl !== "";
+  const displayUrl = hasPreview ? previewUrl : currentPhotoUrl;
+  const hasPhoto = displayUrl !== undefined && displayUrl !== "";
 
   return (
     <div className="flex items-center gap-3">
-      {displayUrl ? (
+      {hasPhoto ? (
         <div className="relative">
-          <img
+          {/* The local preview is a data: URL, which the image optimizer cannot fetch. */}
+          <Image
             alt="Profile"
             className="h-24 w-24 rounded-xl object-cover"
             height={96}
             src={displayUrl}
+            unoptimized={hasPreview}
             width={96}
           />
           {!isUploading && (
@@ -70,24 +77,26 @@ export function PhotoUpload({
         </div>
       ) : (
         <button
-          className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-gray-300 border-dashed bg-gray-50 transition-colors hover:border-gray-400 hover:bg-gray-100"
+          className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 transition-colors hover:border-gray-400 hover:bg-gray-100"
           onClick={triggerFileSelect}
           type="button"
         >
           <Camera className="h-6 w-6 text-gray-400" />
-          <span className="mt-1 text-gray-500 text-xs">Add photo</span>
+          <span className="mt-1 text-xs text-gray-500">Add photo</span>
         </button>
       )}
 
       <input
         accept="image/*"
         className="hidden"
-        onChange={handleFileChange}
+        onChange={(event) => {
+          void handleFileChange(event);
+        }}
         ref={fileInputRef}
         type="file"
       />
 
-      {displayUrl && !isUploading && (
+      {hasPhoto && !isUploading && (
         <Button
           onClick={triggerFileSelect}
           size="sm"
@@ -100,4 +109,4 @@ export function PhotoUpload({
       )}
     </div>
   );
-}
+};

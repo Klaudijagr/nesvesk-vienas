@@ -8,21 +8,26 @@
  * Actual face verification should be done client-side using the useFaceVerification hook
  * since face-api.js works best in the browser with canvas support.
  */
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export async function POST(request: NextRequest) {
+const isProvided = (
+  entry: FormDataEntryValue | null
+): entry is FormDataEntryValue => entry !== null && entry !== "";
+
+export const POST = async (request: NextRequest) => {
   try {
     const formData = await request.formData();
-    const image1 = formData.get("image1") as File | null;
-    const image2 = formData.get("image2") as File | null;
+    const image1 = formData.get("image1");
+    const image2 = formData.get("image2");
 
-    if (!(image1 && image2)) {
+    if (!(isProvided(image1) && isProvided(image2))) {
       return NextResponse.json(
         {
           error: "Both image1 and image2 are required",
           details: {
-            image1: image1 ? "provided" : "missing",
-            image2: image2 ? "provided" : "missing",
+            image1: isProvided(image1) ? "provided" : "missing",
+            image2: isProvided(image2) ? "provided" : "missing",
           },
         },
         { status: 400 }
@@ -30,14 +35,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file types
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-    if (!allowedTypes.includes(image1.type)) {
+    const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+    if (!(image1 instanceof File && allowedTypes.has(image1.type))) {
       return NextResponse.json(
         { error: "image1 must be a JPEG, PNG, or WebP image" },
         { status: 400 }
       );
     }
-    if (!allowedTypes.includes(image2.type)) {
+    if (!(image2 instanceof File && allowedTypes.has(image2.type))) {
       return NextResponse.json(
         { error: "image2 must be a JPEG, PNG, or WebP image" },
         { status: 400 }
@@ -79,10 +84,10 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+};
 
-export function GET() {
-  return NextResponse.json({
+export const GET = () =>
+  NextResponse.json({
     service: "Face Verification API",
     version: "1.0.0",
     library: "@vladmandic/face-api",
@@ -92,4 +97,3 @@ export function GET() {
     },
     note: "Face verification is performed client-side using the useFaceVerification hook",
   });
-}

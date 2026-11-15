@@ -211,16 +211,26 @@ const emailTranslations = {
 
 // Site colors (matching the dark theme)
 const colors = {
-  background: "#0F172A", // slate-900
-  cardBg: "#1E293B", // slate-800
-  border: "#334155", // slate-700
-  text: "#CBD5E1", // slate-300
-  textMuted: "#94A3B8", // slate-400
-  textLight: "#F8FAFC", // slate-50
-  amber: "#F59E0B", // amber-500
-  amberLight: "#FCD34D", // amber-300
-  green: "#22C55E", // green-500
-  greenLight: "#86EFAC", // green-300
+  // slate-900
+  background: "#0F172A",
+  // slate-800
+  cardBg: "#1E293B",
+  // slate-700
+  border: "#334155",
+  // slate-300
+  text: "#CBD5E1",
+  // slate-400
+  textMuted: "#94A3B8",
+  // slate-50
+  textLight: "#F8FAFC",
+  // amber-500
+  amber: "#F59E0B",
+  // amber-300
+  amberLight: "#FCD34D",
+  // green-500
+  green: "#22C55E",
+  // green-300
+  greenLight: "#86EFAC",
 };
 
 type EmailType =
@@ -245,12 +255,19 @@ const locales: { value: Locale; label: string }[] = [
   { value: "ru", label: "Русский" },
 ];
 
-function getTranslations(locale: Locale) {
-  return emailTranslations[locale] || emailTranslations.en;
-}
+// Sample send time shown in the preview, captured when the page loads.
+const PREVIEW_DATE = new Date();
+
+const getTranslations = (locale: Locale) => emailTranslations[locale];
 
 // Email preview component
-function EmailPreview({ type, locale }: { type: EmailType; locale: Locale }) {
+const EmailPreview = ({
+  type,
+  locale,
+}: {
+  type: EmailType;
+  locale: Locale;
+}) => {
   const t = getTranslations(locale);
   const senderName = "Jonas Jonaitis";
   const date = "24 Dec";
@@ -341,7 +358,7 @@ function EmailPreview({ type, locale }: { type: EmailType; locale: Locale }) {
                   margin: "24px 0 0",
                 }}
               >
-                {t.sentAt} {new Date().toISOString()}
+                {t.sentAt} {PREVIEW_DATE.toISOString()}
               </p>
             </>
           )}
@@ -746,15 +763,15 @@ function EmailPreview({ type, locale }: { type: EmailType; locale: Locale }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} Nešvęsk vienas. {t.copyright}
+            © {PREVIEW_DATE.getFullYear()} Nešvęsk vienas. {t.copyright}
           </p>
         </div>
       </div>
     </div>
   );
-}
+};
 
-export default function EmailPreviewPage() {
+const EmailPreviewPage = () => {
   const [selectedType, setSelectedType] =
     useState<EmailType>("invitationReceived");
   const [selectedLocale, setSelectedLocale] = useState<Locale>("lt");
@@ -762,25 +779,32 @@ export default function EmailPreviewPage() {
   return (
     <div className="min-h-screen bg-slate-950">
       {/* Control Panel */}
-      <div className="sticky top-0 z-10 border-slate-700 border-b bg-slate-900 p-4">
+      <div className="sticky top-0 z-10 border-b border-slate-700 bg-slate-900 p-4">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold font-serif text-amber-500 text-lg">
+            <span className="font-serif text-lg font-bold text-amber-500">
               Nešvęsk vienas
             </span>
-            <span className="text-slate-400 text-sm">Email Preview</span>
+            <span className="text-sm text-slate-400">Email Preview</span>
           </div>
 
           <div className="ml-auto flex items-center gap-4">
             {/* Email Type Selector */}
             <div className="flex items-center gap-2">
-              <label className="text-slate-400 text-sm" htmlFor="email-type">
+              <label className="text-sm text-slate-400" htmlFor="email-type">
                 Template:
               </label>
               <select
-                className="rounded-md border border-slate-600 bg-slate-800 px-3 py-1.5 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="rounded-md border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm text-slate-200 focus:ring-2 focus:ring-amber-500 focus:outline-none"
                 id="email-type"
-                onChange={(e) => setSelectedType(e.target.value as EmailType)}
+                onChange={(e) => {
+                  const match = emailTypes.find(
+                    (type) => type.value === e.target.value
+                  );
+                  if (match) {
+                    setSelectedType(match.value);
+                  }
+                }}
                 value={selectedType}
               >
                 {emailTypes.map((type) => (
@@ -793,13 +817,20 @@ export default function EmailPreviewPage() {
 
             {/* Language Selector */}
             <div className="flex items-center gap-2">
-              <label className="text-slate-400 text-sm" htmlFor="locale">
+              <label className="text-sm text-slate-400" htmlFor="locale">
                 Language:
               </label>
               <select
-                className="rounded-md border border-slate-600 bg-slate-800 px-3 py-1.5 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="rounded-md border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm text-slate-200 focus:ring-2 focus:ring-amber-500 focus:outline-none"
                 id="locale"
-                onChange={(e) => setSelectedLocale(e.target.value as Locale)}
+                onChange={(e) => {
+                  const match = locales.find(
+                    (locale) => locale.value === e.target.value
+                  );
+                  if (match) {
+                    setSelectedLocale(match.value);
+                  }
+                }}
                 value={selectedLocale}
               >
                 {locales.map((locale) => (
@@ -820,7 +851,7 @@ export default function EmailPreviewPage() {
 
       {/* Info Box */}
       <div className="mx-auto max-w-2xl px-4 pb-8">
-        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4 text-slate-400 text-sm">
+        <div className="rounded-lg border border-slate-700 bg-slate-800 p-4 text-sm text-slate-400">
           <p className="mb-2">
             <strong className="text-slate-200">Preview mode:</strong> This page
             shows how emails will look when sent to users.
@@ -834,4 +865,6 @@ export default function EmailPreviewPage() {
       </div>
     </div>
   );
-}
+};
+
+export default EmailPreviewPage;

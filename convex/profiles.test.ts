@@ -1,16 +1,17 @@
 import { convexTest } from "convex-test";
-import { describe, expect, test } from "vitest";
+import { describe, expect, it } from "vitest";
+
 import { api } from "./_generated/api";
 import schema from "./schema";
 
 describe("profiles", () => {
-  test("listProfiles returns empty array when no profiles exist", async () => {
+  it("listProfiles returns empty array when no profiles exist", async () => {
     const t = convexTest(schema);
     const profiles = await t.query(api.profiles.listProfiles, {});
-    expect(profiles).toEqual([]);
+    expect(profiles).toStrictEqual([]);
   });
 
-  test("listProfiles filters by city", async () => {
+  it("listProfiles filters by city", async () => {
     const t = convexTest(schema);
 
     // Create a test user first
@@ -51,17 +52,17 @@ describe("profiles", () => {
     const vilniusProfiles = await t.query(api.profiles.listProfiles, {
       city: "Vilnius",
     });
-    expect(vilniusProfiles.length).toBe(1);
+    expect(vilniusProfiles).toHaveLength(1);
     expect(vilniusProfiles[0].city).toBe("Vilnius");
 
     // Query for Kaunas should return empty
     const kaunasProfiles = await t.query(api.profiles.listProfiles, {
       city: "Kaunas",
     });
-    expect(kaunasProfiles.length).toBe(0);
+    expect(kaunasProfiles).toHaveLength(0);
   });
 
-  test("listProfiles filters by role", async () => {
+  it("listProfiles filters by role", async () => {
     const t = convexTest(schema);
 
     // Create test users
@@ -128,12 +129,12 @@ describe("profiles", () => {
 
     // Filter by host role
     const hosts = await t.query(api.profiles.listProfiles, { role: "host" });
-    expect(hosts.length).toBe(1);
+    expect(hosts).toHaveLength(1);
     expect(hosts[0].role).toBe("host");
 
     // Filter by guest role
     const guests = await t.query(api.profiles.listProfiles, { role: "guest" });
-    expect(guests.length).toBe(1);
+    expect(guests).toHaveLength(1);
     expect(guests[0].role).toBe("guest");
   });
 });

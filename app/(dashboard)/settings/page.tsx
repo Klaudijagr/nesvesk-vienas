@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -32,6 +33,81 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useLocale } from "@/contexts/locale-context";
 import { api } from "@/convex/_generated/api";
+
+const DeleteAccountDialog = ({
+  open,
+  onOpenChange,
+  confirmText,
+  onConfirmTextChange,
+  isDeleting,
+  onConfirm,
+  t,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  confirmText: string;
+  onConfirmTextChange: (text: string) => void;
+  isDeleting: boolean;
+  onConfirm: () => void;
+  t: ReturnType<typeof useLocale>["t"];
+}) => {
+  const isConfirmValid = confirmText === "DELETE";
+
+  return (
+    <AlertDialog onOpenChange={onOpenChange} open={open}>
+      <AlertDialogTrigger asChild>
+        <Button variant="destructive">
+          <Trash2 className="mr-2 h-4 w-4" />
+          {t.deleteAccount}
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription className="space-y-3">
+            <span className="block">
+              This action cannot be undone. This will permanently delete your
+              account and remove all your data from our servers, including:
+            </span>
+            <ul className="list-inside list-disc space-y-1 text-sm">
+              <li>Your profile and photos</li>
+              <li>All your messages and conversations</li>
+              <li>Your connection history</li>
+              <li>Any pending invitations</li>
+            </ul>
+            <span className="block pt-2">
+              Type <strong>DELETE</strong> to confirm:
+            </span>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <Input
+          onChange={(e) => {
+            onConfirmTextChange(e.target.value);
+          }}
+          placeholder="Type DELETE to confirm"
+          value={confirmText}
+        />
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <Button
+            disabled={!isConfirmValid || isDeleting}
+            onClick={onConfirm}
+            variant="destructive"
+          >
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              "Delete Account"
+            )}
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
 
 /**
  * Render the settings page for managing profile, account, security, notification preferences, and account deletion.
@@ -68,7 +144,7 @@ export default function SettingsPage() {
   ) => {
     try {
       await updateNotificationPreferences({ [field]: value });
-    } catch (_error) {
+    } catch {
       toast.error("Failed to update notification preferences");
     }
   };
@@ -86,23 +162,26 @@ export default function SettingsPage() {
         toast.success("Account deleted successfully");
         router.push("/");
       } else {
-        toast.error(result.error || "Failed to delete account");
+        toast.error(
+          result.error !== undefined && result.error !== ""
+            ? result.error
+            : "Failed to delete account"
+        );
       }
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to delete account"
       );
-    } finally {
-      setIsDeleting(false);
-      setDialogOpen(false);
     }
+    setIsDeleting(false);
+    setDialogOpen(false);
   };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <h1 className="font-bold text-2xl">{t.settingsTitle}</h1>
+          <h1 className="text-2xl font-bold">{t.settingsTitle}</h1>
           <p className="text-muted-foreground text-sm">
             {t.manageProfileAndAccount}
           </p>
@@ -123,7 +202,9 @@ export default function SettingsPage() {
               </Link>
               <Link
                 href={
-                  profile?.username ? `/people/${profile.username}` : "/profile"
+                  profile?.username !== undefined && profile.username !== ""
+                    ? `/people/${profile.username}`
+                    : "/profile"
                 }
               >
                 <Button variant="outline">View Profile</Button>
@@ -189,7 +270,9 @@ export default function SettingsPage() {
                   <Label className="text-base">{t.password}</Label>
                   <p className="text-muted-foreground text-sm">
                     {t.managedBy}{" "}
-                    {user?.primaryEmailAddress?.emailAddress?.includes("gmail")
+                    {user?.primaryEmailAddress?.emailAddress?.includes(
+                      "gmail"
+                    ) === true
                       ? t.google
                       : t.yourAuthProvider}
                   </p>
@@ -241,9 +324,12 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   checked={profile?.emailNotifications ?? true}
-                  onCheckedChange={(checked) =>
-                    handleNotificationChange("emailNotifications", checked)
-                  }
+                  onCheckedChange={(checked) => {
+                    void handleNotificationChange(
+                      "emailNotifications",
+                      checked
+                    );
+                  }}
                 />
               </div>
               <Separator />
@@ -256,9 +342,12 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   checked={profile?.notifyOnInvitation ?? true}
-                  onCheckedChange={(checked) =>
-                    handleNotificationChange("notifyOnInvitation", checked)
-                  }
+                  onCheckedChange={(checked) => {
+                    void handleNotificationChange(
+                      "notifyOnInvitation",
+                      checked
+                    );
+                  }}
                 />
               </div>
               <Separator />
@@ -271,9 +360,9 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   checked={profile?.notifyOnMessage ?? true}
-                  onCheckedChange={(checked) =>
-                    handleNotificationChange("notifyOnMessage", checked)
-                  }
+                  onCheckedChange={(checked) => {
+                    void handleNotificationChange("notifyOnMessage", checked);
+                  }}
                 />
               </div>
               <Separator />
@@ -286,9 +375,9 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   checked={profile?.notifyOnMatch ?? true}
-                  onCheckedChange={(checked) =>
-                    handleNotificationChange("notifyOnMatch", checked)
-                  }
+                  onCheckedChange={(checked) => {
+                    void handleNotificationChange("notifyOnMatch", checked);
+                  }}
                 />
               </div>
               <Separator />
@@ -301,9 +390,9 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   checked={profile?.marketingEmails ?? false}
-                  onCheckedChange={(checked) =>
-                    handleNotificationChange("marketingEmails", checked)
-                  }
+                  onCheckedChange={(checked) => {
+                    void handleNotificationChange("marketingEmails", checked);
+                  }}
                 />
               </div>
             </CardContent>
@@ -341,7 +430,9 @@ export default function SettingsPage() {
                 <DeleteAccountDialog
                   confirmText={confirmText}
                   isDeleting={isDeleting}
-                  onConfirm={handleDeleteAccount}
+                  onConfirm={() => {
+                    void handleDeleteAccount();
+                  }}
                   onConfirmTextChange={setConfirmText}
                   onOpenChange={setDialogOpen}
                   open={dialogOpen}
@@ -353,78 +444,5 @@ export default function SettingsPage() {
         </div>
       </div>
     </div>
-  );
-}
-
-function DeleteAccountDialog({
-  open,
-  onOpenChange,
-  confirmText,
-  onConfirmTextChange,
-  isDeleting,
-  onConfirm,
-  t,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  confirmText: string;
-  onConfirmTextChange: (text: string) => void;
-  isDeleting: boolean;
-  onConfirm: () => void;
-  t: ReturnType<typeof useLocale>["t"];
-}) {
-  const isConfirmValid = confirmText === "DELETE";
-
-  return (
-    <AlertDialog onOpenChange={onOpenChange} open={open}>
-      <AlertDialogTrigger asChild>
-        <Button variant="destructive">
-          <Trash2 className="mr-2 h-4 w-4" />
-          {t.deleteAccount}
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription className="space-y-3">
-            <span className="block">
-              This action cannot be undone. This will permanently delete your
-              account and remove all your data from our servers, including:
-            </span>
-            <ul className="list-inside list-disc space-y-1 text-sm">
-              <li>Your profile and photos</li>
-              <li>All your messages and conversations</li>
-              <li>Your connection history</li>
-              <li>Any pending invitations</li>
-            </ul>
-            <span className="block pt-2">
-              Type <strong>DELETE</strong> to confirm:
-            </span>
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <Input
-          onChange={(e) => onConfirmTextChange(e.target.value)}
-          placeholder="Type DELETE to confirm"
-          value={confirmText}
-        />
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-          <Button
-            disabled={!isConfirmValid || isDeleting}
-            onClick={onConfirm}
-            variant="destructive"
-          >
-            {isDeleting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Deleting...
-              </>
-            ) : (
-              "Delete Account"
-            )}
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
   );
 }

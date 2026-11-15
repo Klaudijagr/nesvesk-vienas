@@ -1,5 +1,6 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+
 import { internal } from "./_generated/api";
 import {
   action,
@@ -8,6 +9,7 @@ import {
   query,
 } from "./_generated/server";
 import { extractClerkUserId, getCurrentUserId } from "./lib/auth";
+import { isNonEmptyString } from "./lib/helpers";
 
 /**
  * Upsert user from Clerk webhook (user.created / user.updated)
@@ -39,7 +41,8 @@ export const upsertFromClerk = internalMutation({
                   status: v.optional(v.string()),
                   strategy: v.optional(v.string()),
                 }),
-                v.null() // Allow null for verification field
+                // Allow null for verification field
+                v.null()
               )
             ),
             // Add other potential fields as optional
@@ -66,7 +69,10 @@ export const upsertFromClerk = internalMutation({
       .unique();
 
     const email = data.email_addresses?.[0]?.email_address;
-    const emailLower = email?.trim().toLowerCase() || undefined;
+    const normalizedEmail = email?.trim().toLowerCase();
+    const emailLower = isNonEmptyString(normalizedEmail)
+      ? normalizedEmail
+      : undefined;
     const name = [data.first_name, data.last_name].filter(Boolean).join(" ");
 
     if (existingUser) {
@@ -133,16 +139,20 @@ export const deleteFromClerk = internalMutation({
       .collect();
 
     const allConversations = [...guestConversations, ...hostConversations];
-    for (const conv of allConversations) {
-      const messages = await ctx.db
-        .query("messages")
-        .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
-        .collect();
-      for (const msg of messages) {
-        await ctx.db.delete(msg._id);
-      }
-      await ctx.db.delete(conv._id);
-    }
+    await Promise.all(
+      allConversations.map(async (conv) => {
+        const messages = await ctx.db
+          .query("messages")
+          .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
+          .collect();
+        await Promise.all(
+          messages.map(async (msg) => {
+            await ctx.db.delete(msg._id);
+          })
+        );
+        await ctx.db.delete(conv._id);
+      })
+    );
 
     // 3. Delete invitations where user is sender or recipient
     const sentInvitations = await ctx.db
@@ -154,9 +164,11 @@ export const deleteFromClerk = internalMutation({
       .withIndex("by_to", (q) => q.eq("toUserId", userId))
       .collect();
 
-    for (const inv of [...sentInvitations, ...receivedInvitations]) {
-      await ctx.db.delete(inv._id);
-    }
+    await Promise.all(
+      [...sentInvitations, ...receivedInvitations].map(async (inv) => {
+        await ctx.db.delete(inv._id);
+      })
+    );
 
     // 4. Finally, delete the user
     await ctx.db.delete(userId);
@@ -287,18 +299,19 @@ export const deleteUser = action({
       return { success: false, error: "User not found" };
     }
 
-    const clerkUserId = user.clerkUserId;
+    const { clerkUserId } = user;
 
     // If user has no clerkUserId (legacy user), just delete from Convex directly
-    if (!clerkUserId) {
+    if (!isNonEmptyString(clerkUserId)) {
       await ctx.runMutation(internal.users.deleteFromClerk, {
-        clerkUserId: user.clerkId, // Fall back to clerkId for cleanup
+        // Fall back to clerkId for cleanup
+        clerkUserId: user.clerkId,
       });
       return { success: true };
     }
 
     const clerkSecretKey = process.env.CLERK_SECRET_KEY;
-    if (!clerkSecretKey) {
+    if (!isNonEmptyString(clerkSecretKey)) {
       return { success: false, error: "CLERK_SECRET_KEY not configured" };
     }
 

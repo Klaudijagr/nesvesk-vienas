@@ -1,6 +1,6 @@
 "use client";
 
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { Show, UserButton } from "@clerk/nextjs";
 import { useConvexAuth } from "convex/react";
 import {
   ArrowRight,
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+
 import { Footer } from "@/components/footer";
 import {
   Sheet,
@@ -35,7 +36,7 @@ const languages: { code: Locale; label: string }[] = [
   { code: "ru", label: "RU" },
 ];
 
-function MagicLanguageSelector({ compact = false }: { compact?: boolean }) {
+const MagicLanguageSelector = ({ compact = false }: { compact?: boolean }) => {
   const { locale, setLocale } = useLocale();
 
   return (
@@ -44,13 +45,15 @@ function MagicLanguageSelector({ compact = false }: { compact?: boolean }) {
     >
       {languages.map((lang) => (
         <button
-          className={`rounded px-1.5 py-0.5 font-medium text-[10px] transition-all md:min-w-7 md:px-2 md:py-1 md:text-xs ${
+          className={`rounded px-1.5 py-0.5 text-[10px] font-medium transition-all md:min-w-7 md:px-2 md:py-1 md:text-xs ${
             locale === lang.code
               ? "bg-amber-400 text-slate-900"
               : "text-amber-100/70 hover:bg-amber-400/10 hover:text-amber-100"
           }`}
           key={lang.code}
-          onClick={() => setLocale(lang.code)}
+          onClick={() => {
+            setLocale(lang.code);
+          }}
           type="button"
         >
           {lang.label}
@@ -58,35 +61,35 @@ function MagicLanguageSelector({ compact = false }: { compact?: boolean }) {
       ))}
     </div>
   );
-}
+};
 
-export default function LandingPage() {
-  const { isAuthenticated: isSignedIn } = useConvexAuth();
-  const { t } = useLocale();
-
-  const scrollToSection = (id: string, delay = 0) => {
-    const doScroll = () => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      }
-    };
-    if (delay > 0) {
-      setTimeout(doScroll, delay);
-    } else {
-      doScroll();
+const scrollToSection = (id: string, delay = 0) => {
+  const doScroll = () => {
+    const element = document.querySelector(`#${id}`);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
     }
   };
+  if (delay > 0) {
+    setTimeout(doScroll, delay);
+  } else {
+    doScroll();
+  }
+};
+
+const LandingPage = () => {
+  const { isAuthenticated: isSignedIn } = useConvexAuth();
+  const { t } = useLocale();
 
   return (
     <div className="flex min-h-screen flex-col bg-[#0F172A] text-white">
       {/* Navbar */}
-      <nav className="relative z-20 border-white/10 border-b bg-[#0F172A]/80 backdrop-blur-md">
+      <nav className="relative z-20 border-b border-white/10 bg-[#0F172A]/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-8">
           {/* Logo */}
           <Link className="flex items-center gap-1.5 sm:gap-2" href="/">
             <Gift className="h-5 w-5 text-amber-400 sm:h-6 sm:w-6" />
-            <span className="font-bold font-serif text-amber-100 text-base sm:text-lg">
+            <span className="font-serif text-base font-bold text-amber-100 sm:text-lg">
               {t.appName}
             </span>
           </Link>
@@ -94,15 +97,19 @@ export default function LandingPage() {
           {/* Center nav links - desktop */}
           <div className="hidden items-center gap-6 md:flex lg:gap-8">
             <button
-              className="font-medium text-amber-100/80 text-sm transition-colors hover:text-amber-100"
-              onClick={() => scrollToSection("how-it-works")}
+              className="text-sm font-medium text-amber-100/80 transition-colors hover:text-amber-100"
+              onClick={() => {
+                scrollToSection("how-it-works");
+              }}
               type="button"
             >
               {t.howItWorks}
             </button>
             <button
-              className="font-medium text-amber-100/80 text-sm transition-colors hover:text-amber-100"
-              onClick={() => scrollToSection("about")}
+              className="text-sm font-medium text-amber-100/80 transition-colors hover:text-amber-100"
+              onClick={() => {
+                scrollToSection("about");
+              }}
               type="button"
             >
               {t.about}
@@ -112,23 +119,23 @@ export default function LandingPage() {
           {/* Right side - desktop */}
           <div className="hidden items-center gap-2 md:flex lg:gap-3">
             <MagicLanguageSelector />
-            <SignedOut>
+            <Show when="signed-out">
               <Link
-                className="rounded-full border border-amber-200/30 px-3 py-1.5 font-medium text-amber-100 text-sm backdrop-blur-sm transition-all hover:bg-amber-200/10 lg:px-4 lg:py-2"
+                className="rounded-full border border-amber-200/30 px-3 py-1.5 text-sm font-medium text-amber-100 backdrop-blur-sm transition-all hover:bg-amber-200/10 lg:px-4 lg:py-2"
                 href="/sign-in"
               >
                 {t.signIn}
               </Link>
               <Link
-                className="rounded-full bg-amber-400 px-3 py-1.5 font-medium text-slate-900 text-sm transition-all hover:bg-amber-300 lg:px-4 lg:py-2"
+                className="rounded-full bg-amber-400 px-3 py-1.5 text-sm font-medium text-slate-900 transition-all hover:bg-amber-300 lg:px-4 lg:py-2"
                 href="/sign-up"
               >
                 {t.signUp}
               </Link>
-            </SignedOut>
-            <SignedIn>
+            </Show>
+            <Show when="signed-in">
               <Link
-                className="rounded-full bg-amber-400 px-3 py-1.5 font-medium text-slate-900 text-sm transition-all hover:bg-amber-300 lg:px-4 lg:py-2"
+                className="rounded-full bg-amber-400 px-3 py-1.5 text-sm font-medium text-slate-900 transition-all hover:bg-amber-300 lg:px-4 lg:py-2"
                 href="/browse"
               >
                 {t.goToApp}
@@ -140,7 +147,7 @@ export default function LandingPage() {
                   },
                 }}
               />
-            </SignedIn>
+            </Show>
           </div>
 
           {/* Mobile: language + menu */}
@@ -156,7 +163,7 @@ export default function LandingPage() {
                 className="w-[300px] border-slate-700/50 bg-linear-to-b from-slate-900 to-slate-950 p-0"
                 side="right"
               >
-                <SheetHeader className="border-slate-700/50 border-b p-4">
+                <SheetHeader className="border-b border-slate-700/50 p-4">
                   <SheetTitle className="flex items-center gap-2 text-amber-100">
                     <Gift className="h-5 w-5 text-amber-400" />
                     {t.appName}
@@ -168,7 +175,9 @@ export default function LandingPage() {
                   <SheetClose asChild>
                     <button
                       className="flex w-full items-center justify-between rounded-lg px-4 py-3 text-left transition-colors hover:bg-slate-800/50"
-                      onClick={() => scrollToSection("how-it-works", 300)}
+                      onClick={() => {
+                        scrollToSection("how-it-works", 300);
+                      }}
                       type="button"
                     >
                       <span className="font-medium text-amber-100/90">
@@ -181,7 +190,9 @@ export default function LandingPage() {
                   <SheetClose asChild>
                     <button
                       className="flex w-full items-center justify-between rounded-lg px-4 py-3 text-left transition-colors hover:bg-slate-800/50"
-                      onClick={() => scrollToSection("about", 300)}
+                      onClick={() => {
+                        scrollToSection("about", 300);
+                      }}
                       type="button"
                     >
                       <span className="font-medium text-amber-100/90">
@@ -195,11 +206,11 @@ export default function LandingPage() {
 
                   {/* Auth buttons */}
                   <div className="p-4">
-                    <SignedOut>
+                    <Show when="signed-out">
                       <div className="flex gap-3">
                         <SheetClose asChild>
                           <Link
-                            className="flex-1 rounded-lg border border-amber-200/30 py-2.5 text-center font-medium text-amber-100 text-sm transition-colors hover:bg-amber-200/10"
+                            className="flex-1 rounded-lg border border-amber-200/30 py-2.5 text-center text-sm font-medium text-amber-100 transition-colors hover:bg-amber-200/10"
                             href="/sign-in"
                           >
                             {t.signIn}
@@ -207,24 +218,24 @@ export default function LandingPage() {
                         </SheetClose>
                         <SheetClose asChild>
                           <Link
-                            className="flex-1 rounded-lg bg-amber-400 py-2.5 text-center font-medium text-slate-900 text-sm transition-colors hover:bg-amber-300"
+                            className="flex-1 rounded-lg bg-amber-400 py-2.5 text-center text-sm font-medium text-slate-900 transition-colors hover:bg-amber-300"
                             href="/sign-up"
                           >
                             {t.signUp}
                           </Link>
                         </SheetClose>
                       </div>
-                    </SignedOut>
-                    <SignedIn>
+                    </Show>
+                    <Show when="signed-in">
                       <SheetClose asChild>
                         <Link
-                          className="block w-full rounded-lg bg-amber-400 py-2.5 text-center font-medium text-slate-900 text-sm transition-colors hover:bg-amber-300"
+                          className="block w-full rounded-lg bg-amber-400 py-2.5 text-center text-sm font-medium text-slate-900 transition-colors hover:bg-amber-300"
                           href="/browse"
                         >
                           {t.goToApp}
                         </Link>
                       </SheetClose>
-                    </SignedIn>
+                    </Show>
                   </div>
                 </div>
               </SheetContent>
@@ -252,27 +263,27 @@ export default function LandingPage() {
         <div className="relative z-10 mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 md:py-32 lg:px-8 lg:py-40">
           {/* Constrained text container for mobile */}
           <div className="mx-auto max-w-sm sm:mx-0 sm:max-w-2xl">
-            <h1 className="mb-4 text-center font-bold font-serif text-3xl text-amber-100 tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] sm:mb-6 sm:text-left sm:text-4xl md:text-5xl lg:text-7xl">
+            <h1 className="mb-4 text-center font-serif text-3xl font-bold tracking-tight text-amber-100 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] sm:mb-6 sm:text-left sm:text-4xl md:text-5xl lg:text-7xl">
               {t.heroTitle}
               <br />
               <span className="text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.3)]">
                 {t.heroHighlight}
               </span>
             </h1>
-            <p className="mb-6 text-center text-blue-100/90 text-sm leading-relaxed drop-shadow-md sm:mb-8 sm:text-left sm:text-base md:text-lg lg:text-xl">
+            <p className="mb-6 text-center text-sm leading-relaxed text-blue-100/90 drop-shadow-md sm:mb-8 sm:text-left sm:text-base md:text-lg lg:text-xl">
               {t.heroDescription}
             </p>
             {/* Mobile: side-by-side centered buttons */}
             <div className="flex justify-center gap-3 sm:justify-start sm:gap-4">
               <Link
-                className="group relative overflow-hidden rounded-full bg-amber-400 px-4 py-2.5 font-semibold text-slate-900 text-sm shadow-amber-400/20 shadow-lg transition-all hover:scale-105 hover:shadow-amber-400/40 sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base lg:text-lg"
+                className="group relative overflow-hidden rounded-full bg-amber-400 px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-lg shadow-amber-400/20 transition-all hover:scale-105 hover:shadow-amber-400/40 sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base lg:text-lg"
                 href={isSignedIn ? "/onboarding" : "/sign-in"}
               >
                 <span className="relative z-10">{t.inviteGuests}</span>
                 <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
               </Link>
               <Link
-                className="rounded-full border-2 border-amber-200/30 px-4 py-2.5 font-semibold text-amber-100 text-sm backdrop-blur-sm transition-all hover:border-amber-200/60 hover:bg-amber-200/10 sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base lg:text-lg"
+                className="rounded-full border-2 border-amber-200/30 px-4 py-2.5 text-sm font-semibold text-amber-100 backdrop-blur-sm transition-all hover:border-amber-200/60 hover:bg-amber-200/10 sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base lg:text-lg"
                 href={isSignedIn ? "/browse" : "/sign-in"}
               >
                 {t.becomeGuest}
@@ -300,34 +311,34 @@ export default function LandingPage() {
         >
           <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div className="mx-auto mb-8 max-w-xs text-center sm:mb-12 sm:max-w-none md:mb-16">
-              <h2 className="mb-2 font-bold font-serif text-2xl text-amber-100 sm:mb-4 sm:text-3xl md:text-4xl">
+              <h2 className="mb-2 font-serif text-2xl font-bold text-amber-100 sm:mb-4 sm:text-3xl md:text-4xl">
                 {t.howItWorks}
               </h2>
-              <p className="mx-auto max-w-2xl text-blue-100/70 text-sm sm:text-base">
+              <p className="mx-auto max-w-2xl text-sm text-blue-100/70 sm:text-base">
                 {t.howItWorksSubtitle}
               </p>
             </div>
 
             <div className="mx-auto grid max-w-xs grid-cols-1 gap-6 sm:max-w-none sm:gap-8 md:grid-cols-3 md:gap-12">
               <div className="flex flex-col items-center text-center">
-                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-amber-400/20 bg-slate-900/60 shadow-amber-500/10 shadow-lg backdrop-blur-sm sm:mb-4 sm:h-16 sm:w-16 md:mb-6 md:h-20 md:w-20">
+                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-amber-400/20 bg-slate-900/60 shadow-lg shadow-amber-500/10 backdrop-blur-sm sm:mb-4 sm:h-16 sm:w-16 md:mb-6 md:h-20 md:w-20">
                   <Users className="h-7 w-7 text-amber-400 sm:h-8 sm:w-8 md:h-10 md:w-10" />
                 </div>
-                <h3 className="mb-2 font-bold text-amber-100 text-base sm:mb-3 sm:text-lg md:text-xl">
+                <h3 className="mb-2 text-base font-bold text-amber-100 sm:mb-3 sm:text-lg md:text-xl">
                   1. {t.step1Title}
                 </h3>
-                <p className="text-blue-100/60 text-xs sm:text-sm">
+                <p className="text-xs text-blue-100/60 sm:text-sm">
                   {t.step1Description}
                 </p>
               </div>
               <div className="flex flex-col items-center text-center">
-                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-emerald-400/20 bg-slate-900/60 shadow-emerald-500/10 shadow-lg backdrop-blur-sm sm:mb-4 sm:h-16 sm:w-16 md:mb-6 md:h-20 md:w-20">
+                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-emerald-400/20 bg-slate-900/60 shadow-lg shadow-emerald-500/10 backdrop-blur-sm sm:mb-4 sm:h-16 sm:w-16 md:mb-6 md:h-20 md:w-20">
                   <Calendar className="h-7 w-7 text-emerald-400 sm:h-8 sm:w-8 md:h-10 md:w-10" />
                 </div>
-                <h3 className="mb-2 font-bold text-amber-100 text-base sm:mb-3 sm:text-lg md:text-xl">
+                <h3 className="mb-2 text-base font-bold text-amber-100 sm:mb-3 sm:text-lg md:text-xl">
                   2. {t.step2Title}
                 </h3>
-                <p className="text-blue-100/60 text-xs sm:text-sm">
+                <p className="text-xs text-blue-100/60 sm:text-sm">
                   {t.step2Description}
                 </p>
               </div>
@@ -335,10 +346,10 @@ export default function LandingPage() {
                 <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-rose-400/20 bg-slate-900/60 shadow-lg shadow-rose-500/10 backdrop-blur-sm sm:mb-4 sm:h-16 sm:w-16 md:mb-6 md:h-20 md:w-20">
                   <Heart className="h-7 w-7 text-rose-400 sm:h-8 sm:w-8 md:h-10 md:w-10" />
                 </div>
-                <h3 className="mb-2 font-bold text-amber-100 text-base sm:mb-3 sm:text-lg md:text-xl">
+                <h3 className="mb-2 text-base font-bold text-amber-100 sm:mb-3 sm:text-lg md:text-xl">
                   3. {t.step3Title}
                 </h3>
-                <p className="text-blue-100/60 text-xs sm:text-sm">
+                <p className="text-xs text-blue-100/60 sm:text-sm">
                   {t.step3Description}
                 </p>
               </div>
@@ -376,13 +387,13 @@ export default function LandingPage() {
               <div className="flex flex-1 flex-col">
                 {/* Quote section */}
                 <div className="p-4 sm:p-6 md:p-8">
-                  <h3 className="mb-3 font-bold font-serif text-amber-100 text-lg sm:text-xl md:text-2xl">
+                  <h3 className="mb-3 font-serif text-lg font-bold text-amber-100 sm:text-xl md:text-2xl">
                     {t.originStoryTitle}
                   </h3>
-                  <p className="mb-3 text-amber-200/80 text-sm italic leading-relaxed sm:text-base">
-                    "{t.originStoryQuote}"
+                  <p className="mb-3 text-sm leading-relaxed text-amber-200/80 italic sm:text-base">
+                    &quot;{t.originStoryQuote}&quot;
                   </p>
-                  <p className="text-amber-100/60 text-xs sm:text-sm">
+                  <p className="text-xs text-amber-100/60 sm:text-sm">
                     — {t.originStoryAuthor}
                   </p>
                 </div>
@@ -392,7 +403,7 @@ export default function LandingPage() {
 
                 {/* Highlighted footer section */}
                 <div className="bg-slate-800/30 p-4 sm:p-6 md:p-8">
-                  <p className="text-center text-blue-100/70 text-xs leading-relaxed sm:text-left sm:text-sm">
+                  <p className="text-center text-xs leading-relaxed text-blue-100/70 sm:text-left sm:text-sm">
                     {t.originStoryDescription}
                   </p>
                 </div>
@@ -415,10 +426,10 @@ export default function LandingPage() {
       <div className="relative bg-slate-900/50 px-4 pb-12 sm:pb-16 md:pb-24">
         <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="mx-auto mb-8 max-w-xs text-center sm:mb-12 sm:max-w-none md:mb-16">
-            <h2 className="mb-2 font-bold font-serif text-2xl text-amber-100 sm:mb-4 sm:text-3xl md:text-4xl">
+            <h2 className="mb-2 font-serif text-2xl font-bold text-amber-100 sm:mb-4 sm:text-3xl md:text-4xl">
               {t.safetyTitle}
             </h2>
-            <p className="mx-auto max-w-2xl text-blue-100/70 text-sm sm:text-base">
+            <p className="mx-auto max-w-2xl text-sm text-blue-100/70 sm:text-base">
               {t.howItWorksSubtitle}
             </p>
           </div>
@@ -430,10 +441,10 @@ export default function LandingPage() {
               <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-amber-400/10 sm:mx-0 sm:mb-4 sm:h-12 sm:w-12 md:h-14 md:w-14">
                 <Star className="h-5 w-5 text-amber-400 sm:h-6 sm:w-6 md:h-7 md:w-7" />
               </div>
-              <h3 className="mb-1.5 font-semibold text-amber-100 text-base sm:mb-2 sm:text-lg">
+              <h3 className="mb-1.5 text-base font-semibold text-amber-100 sm:mb-2 sm:text-lg">
                 {t.identityVerification}
               </h3>
-              <p className="text-blue-100/60 text-xs leading-relaxed sm:text-sm">
+              <p className="text-xs leading-relaxed text-blue-100/60 sm:text-sm">
                 {t.identityVerificationDesc}
               </p>
             </div>
@@ -443,10 +454,10 @@ export default function LandingPage() {
               <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-rose-400/10 sm:mx-0 sm:mb-4 sm:h-12 sm:w-12 md:h-14 md:w-14">
                 <MessageCircle className="h-5 w-5 text-rose-400 sm:h-6 sm:w-6 md:h-7 md:w-7" />
               </div>
-              <h3 className="mb-1.5 font-semibold text-amber-100 text-base sm:mb-2 sm:text-lg">
+              <h3 className="mb-1.5 text-base font-semibold text-amber-100 sm:mb-2 sm:text-lg">
                 {t.mutualConsent}
               </h3>
-              <p className="text-blue-100/60 text-xs leading-relaxed sm:text-sm">
+              <p className="text-xs leading-relaxed text-blue-100/60 sm:text-sm">
                 {t.mutualConsentDesc}
               </p>
             </div>
@@ -470,15 +481,15 @@ export default function LandingPage() {
 
         <div className="relative mx-auto max-w-xs px-4 text-center sm:max-w-4xl">
           <Flame className="mx-auto mb-4 h-8 w-8 text-amber-400 sm:mb-6 sm:h-10 sm:w-10 md:h-12 md:w-12" />
-          <h2 className="mb-2 font-bold font-serif text-2xl text-amber-100 sm:mb-4 sm:text-3xl md:text-4xl">
+          <h2 className="mb-2 font-serif text-2xl font-bold text-amber-100 sm:mb-4 sm:text-3xl md:text-4xl">
             {t.finalCtaTitle}
           </h2>
-          <p className="mx-auto mb-6 max-w-xl text-blue-100/70 text-sm sm:mb-8 sm:text-base">
+          <p className="mx-auto mb-6 max-w-xl text-sm text-blue-100/70 sm:mb-8 sm:text-base">
             {t.finalCtaDescription}
           </p>
           <div className="flex justify-center gap-3 sm:gap-4">
             <Link
-              className="group relative flex items-center justify-center gap-1.5 overflow-hidden rounded-full bg-amber-400 px-4 py-2.5 font-semibold text-slate-900 text-sm shadow-amber-400/20 shadow-lg transition-all hover:scale-105 hover:shadow-amber-400/40 sm:gap-2 sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base"
+              className="group relative flex items-center justify-center gap-1.5 overflow-hidden rounded-full bg-amber-400 px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-lg shadow-amber-400/20 transition-all hover:scale-105 hover:shadow-amber-400/40 sm:gap-2 sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base"
               href={isSignedIn ? "/onboarding" : "/sign-in"}
             >
               <span className="relative z-10">{t.getStarted}</span>
@@ -486,7 +497,7 @@ export default function LandingPage() {
               <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
             </Link>
             <Link
-              className="flex items-center justify-center rounded-full border-2 border-amber-200/30 px-4 py-2.5 font-semibold text-amber-100 text-sm backdrop-blur-sm transition-all hover:border-amber-200/60 hover:bg-amber-200/10 sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base"
+              className="flex items-center justify-center rounded-full border-2 border-amber-200/30 px-4 py-2.5 text-sm font-semibold text-amber-100 backdrop-blur-sm transition-all hover:border-amber-200/60 hover:bg-amber-200/10 sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base"
               href="/browse"
             >
               {t.browseHosts}
@@ -498,4 +509,6 @@ export default function LandingPage() {
       <Footer />
     </div>
   );
-}
+};
+
+export default LandingPage;

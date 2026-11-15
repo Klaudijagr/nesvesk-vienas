@@ -34,9 +34,10 @@ This document lists all PostHog events that have been automatically added to you
 - **sidebar_logo_clicked**: Fired when a user clicks the application logo in the sidebar to navigate to the homepage.
 - **sidebar_nav_item_clicked**: Fired when a user clicks a navigation item in the sidebar.
 
-
 ## Events still awaiting implementation
+
 - (human: you can fill these in)
+
 ---
 
 ## Next Steps

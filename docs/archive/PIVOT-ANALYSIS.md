@@ -5,6 +5,7 @@
 ### What We Have Now
 
 **Current Flow:**
+
 1. User signs up → Multi-step onboarding (3 steps: Photo/Basic Info → Bio → Languages/Dates)
 2. Pick role (Host/Guest/Both)
 3. Browse page with filters by City, Date, Language
@@ -12,6 +13,7 @@
 5. Events page for confirmed gatherings
 
 **Current Schema Fields (profiles):**
+
 - `role` - host/guest/both
 - `firstName`, `lastName`, `age`, `city`, `bio`
 - `photoUrl`, `photos[]` - up to 5 photos
@@ -23,6 +25,7 @@
 - Contact (hidden): `phone`, `address`
 
 **Current Limitations:**
+
 - Onboarding is quick but shallow (doesn't capture hosting preferences well)
 - Role selection is binary (host/guest/both) - not like Couchers' fluidity
 - Holiday-date focus is good for niche but limits flexibility
@@ -38,16 +41,16 @@
 Like your `user-preferences-ui` reference project:
 
 | Status | Icon | Description |
-|--------|------|-------------|
+| --- | --- | --- |
 | **Can host** | ✓ | "I am eager to let people stay with me" |
 | **May host** | ? | "I might be able to host, depending on circumstances" |
 | **Can't host** | ✗ | "I'm not able to host travelers at the moment" |
 
-| Meetup Status | Icon | Description |
-|---------------|------|-------------|
-| **Wants to meet** | ✓ | "I'm eager to meet up with others" |
-| **Open to meet** | ? | "I might meet up, depending on circumstances" |
-| **Can't meet** | ✗ | "I prefer not to meet up with others" |
+| Meetup Status     | Icon | Description                                   |
+| ----------------- | ---- | --------------------------------------------- |
+| **Wants to meet** | ✓    | "I'm eager to meet up with others"            |
+| **Open to meet**  | ?    | "I might meet up, depending on circumstances" |
+| **Can't meet**    | ✗    | "I prefer not to meet up with others"         |
 
 ### "My Home" Section (Couchers/Couchsurfing)
 
@@ -65,7 +68,7 @@ Like your `user-preferences-ui` reference project:
 ### Key Differences
 
 | Aspect | Nešvęsk vienas (Current) | Couchers Model |
-|--------|--------------------------|----------------|
+| --- | --- | --- |
 | **Role** | Binary (host/guest/both) | Fluid (status can change anytime) |
 | **Availability** | Specific dates (24-31 Dec) | Always-on (Can host / Maybe / Can't) |
 | **Focus** | Event-based matching | Profile-based exploration |
@@ -148,6 +151,7 @@ home: {
 #### 4. **Events Tab: Keep but Repurpose**
 
 Instead of being the primary flow, events become:
+
 - **Post-match confirmation** - When matched, host creates "event" with details
 - **Public holiday gatherings** - Optional: hosts can post open events
 - Could also work for "host is having a dinner party, looking for 3 guests"
@@ -218,6 +222,7 @@ Instead of being the primary flow, events become:
 ### `docs/reference-projects/user-preferences-ui`
 
 **Use for:** Preference Cards component (Hosting Status, Meetup Status)
+
 - Beautiful card-based selection UI
 - Already styled, just needs integration
 - Icons: ✓ / ? / ✗ for clear visual hierarchy
@@ -225,6 +230,7 @@ Instead of being the primary flow, events become:
 ### `docs/reference-projects/couchers-event-manager`
 
 **Use for:** Event creation modal design
+
 - AI-powered event description
 - Nice form layout with date/time/location
 - Could inform public events feature

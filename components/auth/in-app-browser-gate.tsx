@@ -1,8 +1,9 @@
 "use client";
 
 import { ExternalLink, Link as LinkIcon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,15 +15,14 @@ import {
 import { Input } from "@/components/ui/input";
 
 const IN_APP_BROWSER_RE =
-  /FBAN|FBAV|Instagram|Messenger|LinkedIn|TikTok|Snapchat|Pinterest|Twitter|Line|WeChat|MicroMessenger/i;
-const ANDROID_RE = /Android/i;
+  /FBAN|FBAV|Instagram|Messenger|LinkedIn|TikTok|Snapchat|Pinterest|Twitter|Line|WeChat|MicroMessenger/iu;
+const ANDROID_RE = /Android/iu;
 
-function detectInAppBrowser(userAgent: string): boolean {
-  // Common in-app browser identifiers (Instagram/FB/TikTok/etc).
-  return IN_APP_BROWSER_RE.test(userAgent);
-}
+// Common in-app browser identifiers (Instagram/FB/TikTok/etc).
+const detectInAppBrowser = (userAgent: string): boolean =>
+  IN_APP_BROWSER_RE.test(userAgent);
 
-function buildChromeIntentUrl(currentUrl: string): string | null {
+const buildChromeIntentUrl = (currentUrl: string): string | null => {
   try {
     const u = new URL(currentUrl);
     const scheme = u.protocol.replace(":", "");
@@ -30,46 +30,66 @@ function buildChromeIntentUrl(currentUrl: string): string | null {
   } catch {
     return null;
   }
-}
+};
 
-function isAndroid(userAgent: string): boolean {
-  return ANDROID_RE.test(userAgent);
-}
+const isAndroid = (userAgent: string): boolean => ANDROID_RE.test(userAgent);
+
+const subscribeToNothing = () => () => {
+  // The browser identity and the entry URL do not change while the gate is shown.
+};
+const getIsInApp = (): boolean => {
+  const ua = navigator.userAgent || navigator.vendor || "";
+  const params = new URLSearchParams(window.location.search);
+  const forceGate = params.get("forceGate") === "true";
+  return forceGate || detectInAppBrowser(ua);
+};
+const getCurrentUrl = (): string => window.location.href;
+const getServerSnapshot = (): null => null;
 
 type Mode = "sign-in" | "sign-up";
 
-export function InAppBrowserGate({
+export const InAppBrowserGate = ({
   mode,
   children,
 }: {
   mode: Mode;
-  children: React.ReactNode;
-}) {
-  const [gateState, setGateState] = useState<{
-    isInApp: boolean;
-    currentUrl: string;
-  } | null>(null);
+  children: React.ReactElement;
+}) => {
+  // Both values are null on the server and during hydration, then resolve in
+  // the browser.
+  const isInApp = useSyncExternalStore<boolean | null>(
+    subscribeToNothing,
+    getIsInApp,
+    getServerSnapshot
+  );
+  const currentUrl = useSyncExternalStore<string | null>(
+    subscribeToNothing,
+    getCurrentUrl,
+    getServerSnapshot
+  );
 
-  useEffect(() => {
-    const ua = navigator.userAgent || navigator.vendor || "";
-    const params = new URLSearchParams(window.location.search);
-    const forceGate = params.get("forceGate") === "true";
-    setGateState({
-      isInApp: forceGate || detectInAppBrowser(ua),
-      currentUrl: window.location.href,
-    });
-  }, []);
+  const copyLink = async () => {
+    if (currentUrl === null) {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(currentUrl);
+      toast.success("Link copied. Paste it into Safari/Chrome.");
+    } catch {
+      toast.error("Couldn’t copy automatically. Copy it manually.");
+    }
+  };
 
   const copyLabel = useMemo(
     () => (mode === "sign-in" ? "Copy sign-in link" : "Copy sign-up link"),
     [mode]
   );
 
-  // Important: we intentionally avoid rendering `children` until after the
-  // first client effect runs. Some in-app browsers (notably Facebook on iOS)
+  // Important: we intentionally avoid rendering `children` until the browser
+  // has been identified on the client. Some in-app browsers (notably Facebook on iOS)
   // can crash during auth widget initialization (e.g. `postMessage`) and we
   // want to gate those browsers before mounting Clerk.
-  if (gateState === null) {
+  if (isInApp === null || currentUrl === null) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
         <Card className="w-full max-w-md">
@@ -83,8 +103,6 @@ export function InAppBrowserGate({
       </div>
     );
   }
-
-  const { isInApp, currentUrl } = gateState;
 
   if (!isInApp) {
     return children;
@@ -122,7 +140,7 @@ export function InAppBrowserGate({
                   // - Otherwise: open a new tab/window (some in-app browsers hand off to Safari)
                   if (isAndroid(ua)) {
                     const intentUrl = buildChromeIntentUrl(currentUrl);
-                    if (intentUrl) {
+                    if (intentUrl !== null) {
                       window.location.href = intentUrl;
                       return;
                     }
@@ -138,15 +156,8 @@ export function InAppBrowserGate({
 
               <Button
                 className="w-full"
-                onClick={async () => {
-                  try {
-                    await navigator.clipboard.writeText(currentUrl);
-                    toast.success("Link copied. Paste it into Safari/Chrome.");
-                  } catch {
-                    toast.error(
-                      "Couldn’t copy automatically. Copy it manually."
-                    );
-                  }
+                onClick={() => {
+                  void copyLink();
                 }}
                 type="button"
                 variant="outline"
@@ -160,4 +171,4 @@ export function InAppBrowserGate({
       </Card>
     </div>
   );
-}
+};

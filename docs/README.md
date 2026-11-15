@@ -18,7 +18,7 @@ A holiday hosting/guest matching platform for Lithuania. Connect hosts with gues
 - **Backend**: [Convex](https://convex.dev) (real-time database + functions)
 - **Auth**: Convex Auth with magic links
 - **Face Verification**: Python + FastAPI + ONNX Runtime
-- **Linting**: Ultracite + Biome
+- **Linting**: Ultracite (Oxlint + Oxfmt)
 
 ## Getting Started
 

@@ -2,19 +2,20 @@
 
 import { useMutation, useQuery } from "convex/react";
 import { Camera, Loader2, Star, X } from "lucide-react";
+import Image from "next/image";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
+
 import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
 import { uploadCompressedImage } from "@/lib/image-compression";
 
 const MAX_PHOTOS = 5;
 
-type PhotoGalleryProps = {
+interface PhotoGalleryProps {
   fallbackPhotoUrl?: string;
-};
+}
 
-export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
+export const PhotoGallery = ({ fallbackPhotoUrl }: PhotoGalleryProps) => {
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [previewUrls, setPreviewUrls] = useState<Map<number, string>>(
     new Map()
@@ -34,13 +35,18 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
   // Build the display array: photos + empty slots
   const displaySlots = Array.from({ length: MAX_PHOTOS }, (_, i) => {
     const previewUrl = previewUrls.get(i);
-    if (previewUrl) {
+    if (previewUrl !== undefined) {
       return { type: "preview" as const, url: previewUrl };
     }
     if (photos[i]) {
       return { type: "photo" as const, url: photos[i] };
     }
-    if (i === 0 && photos.length === 0 && fallbackPhotoUrl) {
+    if (
+      i === 0 &&
+      photos.length === 0 &&
+      fallbackPhotoUrl !== undefined &&
+      fallbackPhotoUrl !== ""
+    ) {
       return { type: "fallback" as const, url: fallbackPhotoUrl };
     }
     return { type: "empty" as const, url: null };
@@ -62,6 +68,29 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
     });
   }, []);
 
+  const uploadPhoto = async (file: File, currentSlot: number) => {
+    try {
+      const uploadResult = await uploadCompressedImage(file, generateUploadUrl);
+      if (!uploadResult.success) {
+        toast.error(uploadResult.error);
+        clearSlotPreview(currentSlot);
+        return;
+      }
+
+      await addProfilePhoto({
+        storageId: uploadResult.storageId,
+        setAsMain: photos.length === 0,
+      });
+      clearSlotPreview(currentSlot);
+      toast.success("Photo uploaded");
+    } catch (error) {
+      clearSlotPreview(currentSlot);
+      const message =
+        error instanceof Error ? error.message : "Failed to save photo";
+      toast.error(message);
+    }
+  };
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || activeSlot === null) {
@@ -77,42 +106,24 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
 
     // Show preview immediately
     const reader = new FileReader();
-    reader.onload = (event) => {
-      setPreviewUrls((prev) => {
-        const next = new Map(prev);
-        next.set(currentSlot, event.target?.result as string);
-        return next;
-      });
-    };
+    reader.addEventListener("load", () => {
+      const { result } = reader;
+      if (typeof result !== "string") {
+        return;
+      }
+      setPreviewUrls((prev) => new Map([...prev, [currentSlot, result]]));
+    });
     reader.readAsDataURL(file);
 
     setUploadingIndex(currentSlot);
 
-    try {
-      const uploadResult = await uploadCompressedImage(file, generateUploadUrl);
-      if (!uploadResult.success) {
-        toast.error(uploadResult.error);
-        clearSlotPreview(currentSlot);
-        return;
-      }
+    // uploadPhoto reports its own failures, so the cleanup below always runs.
+    await uploadPhoto(file, currentSlot);
 
-      await addProfilePhoto({
-        storageId: uploadResult.storageId as Id<"_storage">,
-        setAsMain: photos.length === 0,
-      });
-      clearSlotPreview(currentSlot);
-      toast.success("Photo uploaded");
-    } catch (err) {
-      clearSlotPreview(currentSlot);
-      const message =
-        err instanceof Error ? err.message : "Failed to save photo";
-      toast.error(message);
-    } finally {
-      setUploadingIndex(null);
-      setActiveSlot(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+    setUploadingIndex(null);
+    setActiveSlot(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -120,9 +131,9 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
     try {
       await removeProfilePhoto({ photoUrl });
       toast.success("Photo removed");
-    } catch (err) {
+    } catch (error) {
       const message =
-        err instanceof Error ? err.message : "Failed to remove photo";
+        error instanceof Error ? error.message : "Failed to remove photo";
       toast.error(message);
     }
   };
@@ -134,9 +145,9 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
     try {
       await setMainPhoto({ photoUrl });
       toast.success("Main photo updated");
-    } catch (err) {
+    } catch (error) {
       const message =
-        err instanceof Error ? err.message : "Failed to set main photo";
+        error instanceof Error ? error.message : "Failed to set main photo";
       toast.error(message);
     }
   };
@@ -144,7 +155,7 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <span className="font-medium text-sm">Photos</span>
+        <span className="text-sm font-medium">Photos</span>
         <span className="text-muted-foreground text-sm">
           ({photos.length}/{MAX_PHOTOS})
         </span>
@@ -153,31 +164,35 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
         {displaySlots.map((slot, index) => (
           <div
             className="group relative aspect-square"
-            key={`slot-${index}-${slot.url || "empty"}`}
+            key={`slot-${index}-${slot.url ?? "empty"}`}
           >
             {slot.type === "empty" ? (
               <button
-                className="flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-gray-300 border-dashed bg-gray-50 transition-colors hover:border-gray-400 hover:bg-gray-100"
-                onClick={() => handleSlotClick(index)}
+                className="flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 transition-colors hover:border-gray-400 hover:bg-gray-100"
+                onClick={() => {
+                  handleSlotClick(index);
+                }}
                 type="button"
               >
                 <Camera className="h-5 w-5 text-gray-400" />
-                <span className="mt-1 text-gray-500 text-xs">
+                <span className="mt-1 text-xs text-gray-500">
                   {index === 0 ? "Main" : "Add"}
                 </span>
               </button>
             ) : (
               <div className="relative h-full w-full">
-                <img
+                {/* The local preview is a data: URL, which the image optimizer cannot fetch. */}
+                <Image
                   alt={`Gallery item ${index + 1}`}
                   className="h-full w-full rounded-lg object-cover"
                   height={128}
                   src={slot.url ?? ""}
+                  unoptimized={slot.type === "preview"}
                   width={128}
                 />
 
                 {slot.type === "photo" && slot.url === mainPhoto && (
-                  <div className="absolute top-1 left-1 rounded bg-amber-500 px-1.5 py-0.5 font-medium text-white text-xs shadow-sm">
+                  <div className="absolute top-1 left-1 rounded bg-amber-500 px-1.5 py-0.5 text-xs font-medium text-white shadow-sm">
                     Main
                   </div>
                 )}
@@ -193,7 +208,9 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
                     {slot.url !== mainPhoto && slot.url && (
                       <button
                         className="rounded-full bg-white/90 p-1.5 text-amber-600 shadow-sm transition-colors hover:bg-white"
-                        onClick={() => handleSetMain(slot.url)}
+                        onClick={() => {
+                          void handleSetMain(slot.url);
+                        }}
                         title="Set as main photo"
                         type="button"
                       >
@@ -203,7 +220,9 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
                     {slot.url && (
                       <button
                         className="rounded-full bg-white/90 p-1.5 text-red-600 shadow-sm transition-colors hover:bg-white"
-                        onClick={() => handleRemovePhoto(slot.url)}
+                        onClick={() => {
+                          void handleRemovePhoto(slot.url);
+                        }}
                         title="Remove photo"
                         type="button"
                       >
@@ -216,7 +235,9 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
                 {slot.type === "fallback" && (
                   <button
                     className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-lg bg-black/0 opacity-0 transition-all hover:bg-black/40 hover:opacity-100"
-                    onClick={() => handleSlotClick(index)}
+                    onClick={() => {
+                      handleSlotClick(index);
+                    }}
                     type="button"
                   >
                     <div className="flex flex-col items-center text-white">
@@ -234,10 +255,12 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
       <input
         accept="image/*"
         className="hidden"
-        onChange={handleFileSelect}
+        onChange={(event) => {
+          void handleFileSelect(event);
+        }}
         ref={fileInputRef}
         type="file"
       />
     </div>
   );
-}
+};

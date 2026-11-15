@@ -11,7 +11,7 @@ Full control, zero per-verification costs, runs on Mac or small server.
 ### Stack
 
 | Layer | Technology | Purpose |
-|-------|------------|---------|
+| --- | --- | --- |
 | **API Server** | Bun | File uploads, orchestration, user-facing endpoints |
 | **Face Recognition** | DeepFace (Python) | Face matching + liveness detection |
 | **OCR** | docTR (Python) | Extract text from ID documents |
@@ -42,17 +42,20 @@ Full control, zero per-verification costs, runs on Mac or small server.
 ### What Each Service Does
 
 **Face Service (DeepFace)**
+
 - Liveness detection (anti-spoofing) on selfie
 - Face extraction from ID photo
 - Face matching: selfie vs ID photo
 - Returns: `verified: bool`, `distance: float`, `is_real: bool`
 
 **OCR Service (docTR)**
+
 - Text extraction from ID document images
 - Handles Lithuanian, English, and other EU languages
 - Returns: extracted fields as JSON
 
 **MRZ Service (PassportEye)**
+
 - Locates MRZ zone in ID/passport images
 - Parses standardized fields: name, DOB, nationality, doc number, expiry
 - Validates checksums
@@ -85,6 +88,7 @@ Full control, zero per-verification costs, runs on Mac or small server.
 ### Key Code Snippets
 
 **Face Service (Python/Flask)**
+
 ```python
 from deepface import DeepFace
 
@@ -104,6 +108,7 @@ def verify_faces():
 ```
 
 **MRZ Service (Python)**
+
 ```python
 from passporteye import read_mrz
 
@@ -116,24 +121,25 @@ def parse_mrz():
 ```
 
 **Bun Orchestration**
+
 ```typescript
 const verifyUser = async (idPhoto: File, selfie: File) => {
   // 1. Extract MRZ data
-  const mrzData = await fetch('http://localhost:5003/parse-mrz', {
-    method: 'POST',
-    body: formData
-  }).then(r => r.json());
+  const mrzData = await fetch("http://localhost:5003/parse-mrz", {
+    method: "POST",
+    body: formData,
+  }).then((r) => r.json());
 
   // 2. Verify face + liveness
-  const faceResult = await fetch('http://localhost:5001/verify', {
-    method: 'POST', 
-    body: formData
-  }).then(r => r.json());
+  const faceResult = await fetch("http://localhost:5001/verify", {
+    method: "POST",
+    body: formData,
+  }).then((r) => r.json());
 
   return {
     identity: mrzData,
     faceMatch: faceResult.verified,
-    confidence: 1 - faceResult.distance
+    confidence: 1 - faceResult.distance,
   };
 };
 ```
@@ -147,12 +153,12 @@ const verifyUser = async (idPhoto: File, selfie: File) => {
 
 ### Pros/Cons
 
-| Pros | Cons |
-|------|------|
-| Zero per-verification cost | More dev effort to build |
-| Full data control | Lower accuracy than commercial |
-| No vendor lock-in | You handle edge cases |
-| Works offline | No government database checks |
+| Pros                       | Cons                           |
+| -------------------------- | ------------------------------ |
+| Zero per-verification cost | More dev effort to build       |
+| Full data control          | Lower accuracy than commercial |
+| No vendor lock-in          | You handle edge cases          |
+| Works offline              | No government database checks  |
 
 ---
 
@@ -163,7 +169,7 @@ Leverage Persona's **500 free verifications/month for 12 months**, then $1/verif
 ### Stack
 
 | Layer | Technology | Purpose |
-|-------|------------|---------|
+| --- | --- | --- |
 | **API Server** | Bun | User management, Persona webhook handler |
 | **ID Verification** | Persona (hosted) | Document OCR, liveness, face match, fraud |
 | **Fallback** | DeepFace (optional) | Handle edge cases Persona rejects |
@@ -218,42 +224,44 @@ Leverage Persona's **500 free verifications/month for 12 months**, then $1/verif
 ### Key Code Snippets
 
 **Create Verification Inquiry (Bun)**
+
 ```typescript
 const createVerification = async (userId: string) => {
-  const response = await fetch('https://api.withpersona.com/api/v1/inquiries', {
-    method: 'POST',
+  const response = await fetch("https://api.withpersona.com/api/v1/inquiries", {
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${PERSONA_API_KEY}`,
-      'Content-Type': 'application/json'
+      Authorization: `Bearer ${PERSONA_API_KEY}`,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       data: {
         attributes: {
-          'inquiry-template-id': 'itmpl_xxx', // Your template
-          'reference-id': userId
-        }
-      }
-    })
+          "inquiry-template-id": "itmpl_xxx", // Your template
+          "reference-id": userId,
+        },
+      },
+    }),
   });
-  
+
   const inquiry = await response.json();
-  return inquiry.data.attributes['hosted-flow-url'];
+  return inquiry.data.attributes["hosted-flow-url"];
   // Redirect user to this URL
 };
 ```
 
 **Handle Webhook (Bun)**
+
 ```typescript
-app.post('/webhooks/persona', async (req) => {
+app.post("/webhooks/persona", async (req) => {
   const event = req.body;
-  
-  if (event.data.attributes.status === 'completed') {
-    const userId = event.data.attributes['reference-id'];
+
+  if (event.data.attributes.status === "completed") {
+    const userId = event.data.attributes["reference-id"];
     const passed = event.data.attributes.payload.verification.passed;
-    
+
     await db.users.update(userId, {
       verified: passed,
-      verifiedAt: new Date()
+      verifiedAt: new Date(),
     });
   }
 });
@@ -261,32 +269,32 @@ app.post('/webhooks/persona', async (req) => {
 
 ### Pricing
 
-| Period | Cost |
-|--------|------|
-| Months 1-12 | **FREE** (500/month) |
-| After year 1 | $1.00/verification |
+| Period          | Cost                       |
+| --------------- | -------------------------- |
+| Months 1-12     | **FREE** (500/month)       |
+| After year 1    | $1.00/verification         |
 | Monthly minimum | $250/month (if using paid) |
 
 ### Pros/Cons
 
-| Pros | Cons |
-|------|------|
-| 500 free/month for a year | Vendor dependency |
-| Enterprise-grade accuracy | $1/check after free tier |
+| Pros                       | Cons                     |
+| -------------------------- | ------------------------ |
+| 500 free/month for a year  | Vendor dependency        |
+| Enterprise-grade accuracy  | $1/check after free tier |
 | Lithuania support built-in | Data goes to third party |
-| Zero infrastructure | Less customization |
-| Handles fraud detection | Monthly minimum after Y1 |
+| Zero infrastructure        | Less customization       |
+| Handles fraud detection    | Monthly minimum after Y1 |
 
 ---
 
 ## Recommendation
 
-| Scenario | Choose |
-|----------|--------|
-| Testing/MVP phase | **Persona** (free tier) |
-| <500 verifications/month | **Persona** (stays free) |
-| >500/month, budget conscious | **Open Source** |
-| Maximum data control required | **Open Source** |
+| Scenario                        | Choose                         |
+| ------------------------------- | ------------------------------ |
+| Testing/MVP phase               | **Persona** (free tier)        |
+| <500 verifications/month        | **Persona** (stays free)       |
+| >500/month, budget conscious    | **Open Source**                |
+| Maximum data control required   | **Open Source**                |
 | Need government database checks | **Persona** (or Veriff/iDenfy) |
 
 **Suggested path**: Start with Persona free tier to validate your platform. Build the open-source stack in parallel as a fallback. Once you exceed 500/month or need more control, you have both options ready.
@@ -295,13 +303,13 @@ app.post('/webhooks/persona', async (req) => {
 
 ## Quick Reference: Services Comparison
 
-| Capability | Open Source | Persona |
-|------------|-------------|---------|
-| Face matching | DeepFace (99.4% LFW) | Persona (enterprise) |
-| Liveness | DeepFace anti_spoofing | iBeta L2 certified |
-| Document OCR | docTR + PassportEye | Built-in |
-| Lithuania IDs | ✓ (MRZ parsing) | ✓ (full support) |
-| Fraud detection | ✗ | ✓ |
-| Gov database checks | ✗ | ✓ |
-| Per-check cost | $0 | $0 → $1 |
-| Dev effort | High | Low |
+| Capability          | Open Source            | Persona              |
+| ------------------- | ---------------------- | -------------------- |
+| Face matching       | DeepFace (99.4% LFW)   | Persona (enterprise) |
+| Liveness            | DeepFace anti_spoofing | iBeta L2 certified   |
+| Document OCR        | docTR + PassportEye    | Built-in             |
+| Lithuania IDs       | ✓ (MRZ parsing)        | ✓ (full support)     |
+| Fraud detection     | ✗                      | ✓                    |
+| Gov database checks | ✗                      | ✓                    |
+| Per-check cost      | $0                     | $0 → $1              |
+| Dev effort          | High                   | Low                  |

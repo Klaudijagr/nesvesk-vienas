@@ -1,7 +1,6 @@
 # Nešvęsk vienas - Landing Page Copy
 
-Original client document with Lithuanian and English translations.
-**Note**: This content has been integrated into `lib/i18n.ts`
+Original client document with Lithuanian and English translations. **Note**: This content has been integrated into `lib/i18n.ts`
 
 ---
 
@@ -14,13 +13,13 @@ Original client document with Lithuanian and English translations.
 **Description**: Ši platforma skirta tiems, kurie nori dalintis didžiųjų metų švenčių džiaugsmu. Jei prie Tavo stalo yra vietos tiems, kurie šventes sutinka vieni – pakviesk juos į svečius. Jei ieškai kompanijos – pasisiūlyk į svečius. Šiemet nešvęsk vienas.
 
 **CTA Buttons**:
+
 - Kviesti į svečius
 - Būti svečiu
 
 ### How It Works
 
-**Section Title**: Kaip tai veikia?
-**Subtitle**: Saugūs, paprasti ir prasmingi ryšiai švenčių sezonui.
+**Section Title**: Kaip tai veikia? **Subtitle**: Saugūs, paprasti ir prasmingi ryšiai švenčių sezonui.
 
 1. **Susikurkite profilį** - Užsiregistruokite kaip šeimininkas arba svečias. Prisistatykite: kokiomis kalbomis kalbate, kokios Jūsų mitybos preferencijos, pasirinkite dominančią datą.
 
@@ -54,15 +53,14 @@ Original client document with Lithuanian and English translations.
 
 ### Final CTA
 
-**Title**: Pasirengę dalintis šventine dvasia?
-**Description**: Prisijunkite prie šimtų žmonių Lietuvoje, kurie šį sezoną atveria savo namus ir širdis.
-**Button**: Pradėti
+**Title**: Pasirengę dalintis šventine dvasia? **Description**: Prisijunkite prie šimtų žmonių Lietuvoje, kurie šį sezoną atveria savo namus ir širdis. **Button**: Pradėti
 
 ### Footer
 
 **Tagline**: Nešvęsk vienas - Iniciatyva, jungianti žmones švenčių laikotarpiu. Nesvarbu, ar turite laisvą kėdę prie stalo, ar ieškote jaukios kompanijos — čia esate laukiamas.
 
 **Links**:
+
 - Platforma: Būti svečiu, Kviesti į svečius
 - Teisinė informacija ir saugumas: Saugos gairės, Paslaugų teikimo sąlygos, Privatumo politika
 
@@ -77,13 +75,13 @@ Original client document with Lithuanian and English translations.
 **Description**: This platform is for anyone who wants to share the joy of the holiday season. If you have a spare seat at your table — invite someone who would otherwise celebrate alone. If you're looking for company — offer to be a guest. This year, don't celebrate alone.
 
 **CTA Buttons**:
+
 - Invite Guests
 - Become a Guest
 
 ### How It Works
 
-**Section Title**: How it Works
-**Subtitle**: Safe, simple, and meaningful connections for the holiday season.
+**Section Title**: How it Works **Subtitle**: Safe, simple, and meaningful connections for the holiday season.
 
 1. **Create a Profile** - Register as a host or a guest. Introduce yourself: languages you speak, dietary preferences, and the date you prefer.
 
@@ -117,14 +115,13 @@ Original client document with Lithuanian and English translations.
 
 ### Final CTA
 
-**Title**: Ready to share the holiday spirit?
-**Description**: Join the hundreds of people across Lithuania who are opening their homes and hearts this season.
-**Button**: Get Started
+**Title**: Ready to share the holiday spirit? **Description**: Join the hundreds of people across Lithuania who are opening their homes and hearts this season. **Button**: Get Started
 
 ### Footer
 
 **Tagline**: Don't Celebrate Alone - An initiative connecting people during the holiday season. Whether you have an extra seat or are looking for warm company — you're welcome here.
 
 **Links**:
+
 - Platform: Become a Guest, Invite Guests
 - Legal & Safety: Safety Guidelines, Terms of Service, Privacy Policy

@@ -1,23 +1,24 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import type { HolidayDate } from "@/lib/types";
-import {
-  type CITIES,
-  type DIETARY_OPTIONS,
-  HOLIDAY_DATES,
-  type LANGUAGES,
-  type VIBES_OPTIONS,
+
+import { HOLIDAY_DATES } from "@/lib/types";
+import type {
+  HolidayDate,
+  CITIES,
+  DIETARY_OPTIONS,
+  LANGUAGES,
+  VIBES_OPTIONS,
 } from "@/lib/types";
 
-export type OnboardingFormData = {
+export interface OnboardingFormData {
   // Step 0: GDPR Consent
   termsAccepted: boolean;
   privacyAccepted: boolean;
   marketingConsent: boolean;
   // Step 1: Preferences
-  hostingStatus: string;
-  guestStatus: string;
+  hostingStatus: "can-host" | "may-host" | "cant-host";
+  guestStatus: "looking" | "maybe-guest" | "not-looking";
   hostingDates: HolidayDate[];
   guestDates: HolidayDate[];
   // Step 2: Basic Info
@@ -37,7 +38,7 @@ export type OnboardingFormData = {
   drinkingAllowed: boolean;
   petsAllowed: boolean;
   hasPets: boolean;
-};
+}
 
 const initialFormData: OnboardingFormData = {
   termsAccepted: false,
@@ -61,7 +62,15 @@ const initialFormData: OnboardingFormData = {
   hasPets: false,
 };
 
-export function useOnboardingForm() {
+const toggleItem = <T>(items: readonly T[], item: T): T[] =>
+  items.includes(item)
+    ? items.filter((existing) => existing !== item)
+    : [...items, item];
+
+const parseAge = (age: string | number): number =>
+  typeof age === "number" ? age : Math.trunc(Number(age));
+
+export const useOnboardingForm = () => {
   const [formData, setFormData] = useState<OnboardingFormData>(initialFormData);
 
   // Generic updater for any field
@@ -76,44 +85,40 @@ export function useOnboardingForm() {
   );
 
   // Toggle functions for array fields
-  const toggleArrayItem = useCallback(
-    <T>(field: keyof OnboardingFormData, item: T) => {
-      setFormData((prev) => {
-        const arr = prev[field] as T[];
-        const newArr = arr.includes(item)
-          ? arr.filter((i) => i !== item)
-          : [...arr, item];
-        return { ...prev, [field]: newArr };
-      });
+  const toggleHostingDate = useCallback((date: HolidayDate) => {
+    setFormData((prev) => ({
+      ...prev,
+      hostingDates: toggleItem(prev.hostingDates, date),
+    }));
+  }, []);
+
+  const toggleGuestDate = useCallback((date: HolidayDate) => {
+    setFormData((prev) => ({
+      ...prev,
+      guestDates: toggleItem(prev.guestDates, date),
+    }));
+  }, []);
+
+  const toggleLanguage = useCallback((lang: (typeof LANGUAGES)[number]) => {
+    setFormData((prev) => ({
+      ...prev,
+      languages: toggleItem(prev.languages, lang),
+    }));
+  }, []);
+
+  const toggleDietary = useCallback(
+    (diet: (typeof DIETARY_OPTIONS)[number]) => {
+      setFormData((prev) => ({
+        ...prev,
+        dietaryInfo: toggleItem(prev.dietaryInfo, diet),
+      }));
     },
     []
   );
 
-  const toggleHostingDate = useCallback(
-    (date: HolidayDate) => toggleArrayItem("hostingDates", date),
-    [toggleArrayItem]
-  );
-
-  const toggleGuestDate = useCallback(
-    (date: HolidayDate) => toggleArrayItem("guestDates", date),
-    [toggleArrayItem]
-  );
-
-  const toggleLanguage = useCallback(
-    (lang: (typeof LANGUAGES)[number]) => toggleArrayItem("languages", lang),
-    [toggleArrayItem]
-  );
-
-  const toggleDietary = useCallback(
-    (diet: (typeof DIETARY_OPTIONS)[number]) =>
-      toggleArrayItem("dietaryInfo", diet),
-    [toggleArrayItem]
-  );
-
-  const toggleVibe = useCallback(
-    (vibe: (typeof VIBES_OPTIONS)[number]) => toggleArrayItem("vibes", vibe),
-    [toggleArrayItem]
-  );
+  const toggleVibe = useCallback((vibe: (typeof VIBES_OPTIONS)[number]) => {
+    setFormData((prev) => ({ ...prev, vibes: toggleItem(prev.vibes, vibe) }));
+  }, []);
 
   // Derived values
   const getRole = useCallback((): "host" | "guest" | "both" => {
@@ -138,24 +143,21 @@ export function useOnboardingForm() {
       ...formData.hostingDates,
       ...formData.guestDates,
     ]);
-    return Array.from(combined) as HolidayDate[];
+    return [...combined] as HolidayDate[];
   }, [formData.hostingDates, formData.guestDates]);
 
   // Validation
   const isStep0Valid = formData.termsAccepted && formData.privacyAccepted;
 
   const isStep1Valid =
-    (formData.hostingStatus !== "cant-host"
-      ? formData.hostingDates.length > 0
-      : true) ||
-    (formData.guestStatus !== "not-looking"
-      ? formData.guestDates.length > 0
-      : true);
+    (formData.hostingStatus === "cant-host"
+      ? true
+      : formData.hostingDates.length > 0) ||
+    (formData.guestStatus === "not-looking"
+      ? true
+      : formData.guestDates.length > 0);
 
-  const ageValue =
-    typeof formData.age === "number"
-      ? formData.age
-      : Number.parseInt(formData.age as string, 10);
+  const ageValue = parseAge(formData.age);
 
   const isStep2Valid =
     formData.firstName.length > 0 && !Number.isNaN(ageValue) && ageValue >= 18;
@@ -167,11 +169,11 @@ export function useOnboardingForm() {
   // Pre-fill from external data (e.g., Clerk user)
   const prefillFromUser = useCallback(
     (user: { firstName?: string | null; lastName?: string | null }) => {
-      if (user && !formData.firstName) {
+      if (formData.firstName === "") {
         setFormData((prev) => ({
           ...prev,
-          firstName: user.firstName || "",
-          lastName: user.lastName || "",
+          firstName: user.firstName ?? "",
+          lastName: user.lastName ?? "",
         }));
       }
     },
@@ -187,22 +189,13 @@ export function useOnboardingForm() {
 
     return {
       role: getRole(),
-      hostingStatus: formData.hostingStatus as
-        | "can-host"
-        | "may-host"
-        | "cant-host",
-      guestStatus: formData.guestStatus as
-        | "looking"
-        | "maybe-guest"
-        | "not-looking",
+      hostingStatus: formData.hostingStatus,
+      guestStatus: formData.guestStatus,
       hostingDates: formData.hostingDates,
       guestDates: formData.guestDates,
       firstName: formData.firstName,
       lastName: formData.lastName || undefined,
-      age:
-        typeof formData.age === "number"
-          ? formData.age
-          : Number.parseInt(formData.age as string, 10),
+      age: parseAge(formData.age),
       city: formData.city,
       bio: formData.bio,
       languages: formData.languages,
@@ -242,4 +235,4 @@ export function useOnboardingForm() {
     prefillFromUser,
     getSubmitData,
   };
-}
+};

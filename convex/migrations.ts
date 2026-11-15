@@ -1,15 +1,26 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import type { ActionCtx } from "./_generated/server";
 import { action } from "./_generated/server";
 import { assertAdmin } from "./lib/admin";
+import { isNonEmptyString, mapSequential } from "./lib/helpers";
 
-async function clerkGetFirstUserIdByEmail(args: {
+// Read the string `id` field of a Clerk API user object, if there is one.
+const readClerkUserId = (value: unknown): string | undefined =>
+  typeof value === "object" &&
+  value !== null &&
+  "id" in value &&
+  typeof value.id === "string"
+    ? value.id
+    : undefined;
+
+const clerkGetFirstUserIdByEmail = async (args: {
   clerkSecretKey: string;
   email: string;
-}): Promise<string | undefined> {
+}): Promise<string | undefined> => {
   const lookup = await fetch(
     `https://api.clerk.com/v1/users?email_address=${encodeURIComponent(
       args.email
@@ -25,16 +36,19 @@ async function clerkGetFirstUserIdByEmail(args: {
     throw new Error(`Clerk lookup failed (${lookup.status}): ${text}`);
   }
 
-  const matches = (await lookup.json()) as Array<{ id: string }>;
-  return matches?.[0]?.id;
-}
+  const matches: unknown = await lookup.json();
+  return Array.isArray(matches) ? readClerkUserId(matches[0]) : undefined;
+};
 
-async function clerkCreateUserFromEmail(args: {
+const clerkCreateUserFromEmail = async (args: {
   clerkSecretKey: string;
   email: string;
   externalId: string;
   name?: string;
-}): Promise<string> {
+}): Promise<string | undefined> => {
+  const [firstName, ...otherNames] = args.name?.split(" ") ?? [];
+  const lastName = otherNames.join(" ");
+
   const create = await fetch("https://api.clerk.com/v1/users", {
     method: "POST",
     headers: {
@@ -44,8 +58,8 @@ async function clerkCreateUserFromEmail(args: {
     body: JSON.stringify({
       email_address: [args.email],
       external_id: args.externalId,
-      first_name: args.name?.split(" ").at(0) || undefined,
-      last_name: args.name?.split(" ").slice(1).join(" ") || undefined,
+      first_name: isNonEmptyString(firstName) ? firstName : undefined,
+      last_name: isNonEmptyString(lastName) ? lastName : undefined,
     }),
   });
 
@@ -54,35 +68,43 @@ async function clerkCreateUserFromEmail(args: {
     throw new Error(`Clerk create failed (${create.status}): ${text}`);
   }
 
-  const createdUser = (await create.json()) as { id: string };
-  return createdUser.id;
-}
+  const createdUser: unknown = await create.json();
+  return readClerkUserId(createdUser);
+};
 
 type RelinkResult =
   | { status: "skipped_no_email" }
   | { status: "skipped_no_clerk_match" }
   | { status: "relinked"; created: boolean };
 
-type RelinkSummary = {
+interface RelinkError {
+  userId: string;
+  email?: string;
+  error: string;
+}
+
+type RelinkOutcome = RelinkResult | { status: "failed"; failure: RelinkError };
+
+interface RelinkSummary {
   relinked: number;
   created: number;
   skippedNoEmail: number;
   skippedNoClerkMatch: number;
-  errors: Array<{ userId: string; email?: string; error: string }>;
+  errors: RelinkError[];
   isDone: boolean;
   continueCursor: string | null;
-};
+}
 
-async function relinkOneUserByEmail(args: {
+const relinkOneUserByEmail = async (args: {
   ctx: ActionCtx;
   user: { _id: Id<"users">; email?: string; name?: string };
   clerkSecretKey: string;
   issuer: string;
   createMissing?: boolean;
   dryRun?: boolean;
-}): Promise<RelinkResult> {
+}): Promise<RelinkResult> => {
   const email = args.user.email?.trim();
-  if (!email) {
+  if (!isNonEmptyString(email)) {
     return { status: "skipped_no_email" };
   }
 
@@ -92,7 +114,7 @@ async function relinkOneUserByEmail(args: {
   });
 
   let created = false;
-  if (!clerkUserId && args.createMissing) {
+  if (!isNonEmptyString(clerkUserId) && args.createMissing === true) {
     clerkUserId = await clerkCreateUserFromEmail({
       clerkSecretKey: args.clerkSecretKey,
       email,
@@ -102,11 +124,11 @@ async function relinkOneUserByEmail(args: {
     created = true;
   }
 
-  if (!clerkUserId) {
+  if (!isNonEmptyString(clerkUserId)) {
     return { status: "skipped_no_clerk_match" };
   }
 
-  if (!args.dryRun) {
+  if (args.dryRun !== true) {
     const clerkId = `${args.issuer}|${clerkUserId}`;
     await args.ctx.runMutation(internal.users.patchUserClerkLink, {
       userId: args.user._id,
@@ -117,7 +139,7 @@ async function relinkOneUserByEmail(args: {
   }
 
   return { status: "relinked", created };
-}
+};
 
 /**
  * Admin tool: Relink existing Convex users to the current Clerk instance by email.
@@ -141,70 +163,62 @@ export const relinkUsersByEmailToClerk: unknown = action({
     await assertAdmin(ctx);
 
     const clerkSecretKey = process.env.CLERK_SECRET_KEY;
-    if (!clerkSecretKey) {
+    if (!isNonEmptyString(clerkSecretKey)) {
       throw new Error("CLERK_SECRET_KEY not configured");
     }
-    const clerkSecretKeyValue = clerkSecretKey;
 
     const issuer = process.env.CLERK_ISSUER_DOMAIN;
-    if (!issuer) {
+    if (!isNonEmptyString(issuer)) {
       throw new Error("CLERK_ISSUER_DOMAIN not configured");
     }
-    const issuerValue = issuer;
 
-    const page = (await ctx.runQuery(internal.users.listUsersForMigration, {
+    const page = await ctx.runQuery(internal.users.listUsersForMigration, {
       paginationOpts,
-    })) as unknown as {
-      page: Array<{ _id: Id<"users">; email?: string; name?: string }>;
-      isDone: boolean;
-      continueCursor: string | null;
-    };
+    });
 
-    let relinked = 0;
-    let skippedNoEmail = 0;
-    let skippedNoClerkMatch = 0;
-    let created = 0;
-    const errors: Array<{ userId: string; email?: string; error: string }> = [];
-
-    for (const user of page.page) {
-      try {
-        const result = await relinkOneUserByEmail({
-          ctx,
-          user,
-          clerkSecretKey: clerkSecretKeyValue,
-          issuer: issuerValue,
-          createMissing,
-          dryRun,
-        });
-
-        if (result.status === "skipped_no_email") {
-          skippedNoEmail++;
-          continue;
+    // Sequential on purpose: one user at a time keeps the Clerk API calls
+    // within its rate limit, as the original loop did.
+    const outcomes = await mapSequential(
+      page.page,
+      async (user): Promise<RelinkOutcome> => {
+        try {
+          return await relinkOneUserByEmail({
+            ctx,
+            user,
+            clerkSecretKey,
+            issuer,
+            createMissing,
+            dryRun,
+          });
+        } catch (error) {
+          return {
+            status: "failed",
+            failure: {
+              userId: user._id,
+              email: user.email,
+              error: error instanceof Error ? error.message : String(error),
+            },
+          };
         }
-        if (result.status === "skipped_no_clerk_match") {
-          skippedNoClerkMatch++;
-          continue;
-        }
-
-        if (result.created) {
-          created++;
-        }
-        relinked++;
-      } catch (e) {
-        errors.push({
-          userId: user._id,
-          email: user.email,
-          error: e instanceof Error ? e.message : String(e),
-        });
       }
-    }
+    );
+
+    const relinked = outcomes.filter(
+      (outcome) => outcome.status === "relinked"
+    );
 
     return {
-      relinked,
-      created,
-      skippedNoEmail,
-      skippedNoClerkMatch,
-      errors,
+      relinked: relinked.length,
+      created: relinked.filter((outcome) => outcome.created).length,
+      skippedNoEmail: outcomes.filter(
+        (outcome) => outcome.status === "skipped_no_email"
+      ).length,
+      skippedNoClerkMatch: outcomes.filter(
+        (outcome) => outcome.status === "skipped_no_clerk_match"
+      ).length,
+      errors: outcomes.flatMap((outcome) =>
+        outcome.status === "failed" ? [outcome.failure] : []
+      ),
       isDone: page.isDone,
       continueCursor: page.continueCursor,
     };

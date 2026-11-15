@@ -1,6 +1,7 @@
 "use client";
 
 import { SignIn } from "@clerk/nextjs";
+
 import { InAppBrowserGate } from "@/components/auth/in-app-browser-gate";
 
 export default function SignInPage() {

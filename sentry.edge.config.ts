@@ -5,16 +5,22 @@
 
 import * as Sentry from "@sentry/nextjs";
 
+// An unset or empty server DSN falls back to the public one.
+const serverDsn = process.env.SENTRY_DSN;
+
 Sentry.init({
-  dsn: process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN,
+  dsn:
+    serverDsn === undefined || serverDsn === ""
+      ? process.env.NEXT_PUBLIC_SENTRY_DSN
+      : serverDsn,
 
   // Define how likely traces are sampled. 10% sampling for production.
   tracesSampleRate: 0.1,
 
-  // Enable logs to be sent to Sentry
-  enableLogs: true,
-
-  // Enable sending user PII (Personally Identifiable Information)
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
-  sendDefaultPii: false,
+  // Keep personal data out of Sentry: no user fields, cookies or request/response bodies.
+  dataCollection: {
+    userInfo: false,
+    cookies: false,
+    httpBodies: [],
+  },
 });

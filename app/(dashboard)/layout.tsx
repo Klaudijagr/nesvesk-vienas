@@ -4,6 +4,7 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
+
 import { DashboardNavbar } from "@/components/dashboard-navbar";
 import { Footer } from "@/components/footer";
 import { VerifyBanner } from "@/components/verify-banner";
@@ -29,7 +30,7 @@ export default function DashboardLayout({
   useEffect(() => {
     if (isAuthenticated && profile && !hasUpdatedLastActive.current) {
       hasUpdatedLastActive.current = true;
-      updateLastActive();
+      void updateLastActive();
     }
   }, [isAuthenticated, profile, updateLastActive]);
 

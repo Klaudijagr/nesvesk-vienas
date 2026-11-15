@@ -2,6 +2,7 @@
 
 import { Check, Clock, Loader2, MessageCircle, Send, X } from "lucide-react";
 import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 
 type ConnectionStatus =
@@ -13,7 +14,7 @@ type ConnectionStatus =
   | "none"
   | "not_authenticated";
 
-type ProfileActionButtonProps = {
+interface ProfileActionButtonProps {
   status: ConnectionStatus | undefined;
   userId: string;
   hasAvailableDates: boolean;
@@ -21,9 +22,9 @@ type ProfileActionButtonProps = {
   onConnect: () => void;
   onAccept: () => void;
   onDecline: () => void;
-};
+}
 
-export function ProfileActionButton({
+export const ProfileActionButton = ({
   status,
   userId,
   hasAvailableDates,
@@ -31,7 +32,7 @@ export function ProfileActionButton({
   onConnect,
   onAccept,
   onDecline,
-}: ProfileActionButtonProps) {
+}: ProfileActionButtonProps) => {
   if (status === "matched") {
     return (
       <Link
@@ -127,4 +128,4 @@ export function ProfileActionButton({
       )}
     </Button>
   );
-}
+};

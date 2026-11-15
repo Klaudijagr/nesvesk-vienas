@@ -1,18 +1,13 @@
 import { Button, Heading, Section, Text } from "@react-email/components";
-import {
-  BaseLayout,
-  colors,
-  getTranslations,
-  type Locale,
-} from "./base-layout";
 
-type InvitationDeclinedEmailProps = {
+import { BaseLayout, baseUrl, colors, getTranslations } from "./base-layout";
+import type { Locale } from "./base-layout";
+
+interface InvitationDeclinedEmailProps {
   declinerName?: string;
   date?: string;
   locale?: Locale;
-};
-
-const baseUrl = process.env.SITE_URL || "https://nesveskvienas.lt";
+}
 
 export const InvitationDeclinedEmail = ({
   declinerName = "Jonas Jonaitis",

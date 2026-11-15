@@ -1,15 +1,15 @@
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
+import { isNonEmptyString } from "./helpers";
 
-function normalizeEmail(email: string | null | undefined): string | undefined {
+const normalizeEmail = (
+  email: string | null | undefined
+): string | undefined => {
   const trimmed = email?.trim();
-  if (!trimmed) {
-    return;
-  }
-  return trimmed.toLowerCase();
-}
+  return isNonEmptyString(trimmed) ? trimmed.toLowerCase() : undefined;
+};
 
-async function patchUserFromIdentity(args: {
+const patchUserFromIdentity = async (args: {
   ctx: MutationCtx;
   userId: Id<"users">;
   clerkUserId: string;
@@ -17,7 +17,7 @@ async function patchUserFromIdentity(args: {
   email: string | null | undefined;
   name: string | null | undefined;
   pictureUrl: string | null | undefined;
-}) {
+}) => {
   const emailLower = normalizeEmail(args.email);
   await args.ctx.db.patch(args.userId, {
     clerkId: args.tokenIdentifier,
@@ -27,13 +27,13 @@ async function patchUserFromIdentity(args: {
     name: args.name ?? undefined,
     imageUrl: args.pictureUrl ?? undefined,
   });
-}
+};
 
-async function moveUserReferences(args: {
+const moveUserReferences = async (args: {
   ctx: MutationCtx;
   fromUserId: Id<"users">;
   toUserId: Id<"users">;
-}) {
+}) => {
   // Profile: keep existing profile if present; otherwise move.
   const keepProfile = await args.ctx.db
     .query("profiles")
@@ -55,88 +55,108 @@ async function moveUserReferences(args: {
     .query("conversations")
     .withIndex("by_guest", (q) => q.eq("guestId", args.fromUserId))
     .collect();
-  for (const conv of guestConversations) {
-    await args.ctx.db.patch(conv._id, { guestId: args.toUserId });
-  }
+  await Promise.all(
+    guestConversations.map(async (conv) => {
+      await args.ctx.db.patch(conv._id, { guestId: args.toUserId });
+    })
+  );
 
   const hostConversations = await args.ctx.db
     .query("conversations")
     .withIndex("by_host", (q) => q.eq("hostId", args.fromUserId))
     .collect();
-  for (const conv of hostConversations) {
-    await args.ctx.db.patch(conv._id, { hostId: args.toUserId });
-  }
+  await Promise.all(
+    hostConversations.map(async (conv) => {
+      await args.ctx.db.patch(conv._id, { hostId: args.toUserId });
+    })
+  );
 
   const sentMessages = await args.ctx.db
     .query("messages")
     .withIndex("by_sender", (q) => q.eq("senderId", args.fromUserId))
     .collect();
-  for (const msg of sentMessages) {
-    await args.ctx.db.patch(msg._id, { senderId: args.toUserId });
-  }
+  await Promise.all(
+    sentMessages.map(async (msg) => {
+      await args.ctx.db.patch(msg._id, { senderId: args.toUserId });
+    })
+  );
 
   const sentInvitations = await args.ctx.db
     .query("invitations")
     .withIndex("by_from", (q) => q.eq("fromUserId", args.fromUserId))
     .collect();
-  for (const inv of sentInvitations) {
-    await args.ctx.db.patch(inv._id, { fromUserId: args.toUserId });
-  }
+  await Promise.all(
+    sentInvitations.map(async (inv) => {
+      await args.ctx.db.patch(inv._id, { fromUserId: args.toUserId });
+    })
+  );
 
   const receivedInvitations = await args.ctx.db
     .query("invitations")
     .withIndex("by_to", (q) => q.eq("toUserId", args.fromUserId))
     .collect();
-  for (const inv of receivedInvitations) {
-    await args.ctx.db.patch(inv._id, { toUserId: args.toUserId });
-  }
+  await Promise.all(
+    receivedInvitations.map(async (inv) => {
+      await args.ctx.db.patch(inv._id, { toUserId: args.toUserId });
+    })
+  );
 
   const blocksByBlocker = await args.ctx.db
     .query("blocks")
     .withIndex("by_blocker", (q) => q.eq("blockerId", args.fromUserId))
     .collect();
-  for (const block of blocksByBlocker) {
-    await args.ctx.db.patch(block._id, { blockerId: args.toUserId });
-  }
+  await Promise.all(
+    blocksByBlocker.map(async (block) => {
+      await args.ctx.db.patch(block._id, { blockerId: args.toUserId });
+    })
+  );
 
   const blocksByBlocked = await args.ctx.db
     .query("blocks")
     .withIndex("by_blocked", (q) => q.eq("blockedId", args.fromUserId))
     .collect();
-  for (const block of blocksByBlocked) {
-    await args.ctx.db.patch(block._id, { blockedId: args.toUserId });
-  }
+  await Promise.all(
+    blocksByBlocked.map(async (block) => {
+      await args.ctx.db.patch(block._id, { blockedId: args.toUserId });
+    })
+  );
 
   const reportsByReporter = await args.ctx.db
     .query("reports")
     .withIndex("by_reporter", (q) => q.eq("reporterId", args.fromUserId))
     .collect();
-  for (const report of reportsByReporter) {
-    await args.ctx.db.patch(report._id, { reporterId: args.toUserId });
-  }
+  await Promise.all(
+    reportsByReporter.map(async (report) => {
+      await args.ctx.db.patch(report._id, { reporterId: args.toUserId });
+    })
+  );
 
   const reportsByReported = await args.ctx.db
     .query("reports")
     .withIndex("by_reported", (q) => q.eq("reportedUserId", args.fromUserId))
     .collect();
-  for (const report of reportsByReported) {
-    await args.ctx.db.patch(report._id, { reportedUserId: args.toUserId });
-  }
+  await Promise.all(
+    reportsByReported.map(async (report) => {
+      await args.ctx.db.patch(report._id, { reportedUserId: args.toUserId });
+    })
+  );
 
   const consents = await args.ctx.db
     .query("userConsents")
     .withIndex("by_userId", (q) => q.eq("userId", args.fromUserId))
     .collect();
-  for (const consent of consents) {
-    await args.ctx.db.patch(consent._id, { userId: args.toUserId });
-  }
-}
+  await Promise.all(
+    consents.map(async (consent) => {
+      await args.ctx.db.patch(consent._id, { userId: args.toUserId });
+    })
+  );
+};
 
-async function prefersUserWithProfile(args: {
+const prefersUserWithProfile = async (args: {
   ctx: MutationCtx;
   a: Id<"users">;
   b: Id<"users">;
-}): Promise<Id<"users">> {
+}): Promise<Id<"users">> => {
   const profileA = await args.ctx.db
     .query("profiles")
     .withIndex("by_userId", (q) => q.eq("userId", args.a))
@@ -153,26 +173,26 @@ async function prefersUserWithProfile(args: {
     return args.b;
   }
   return args.a;
-}
+};
 
 /**
  * Extract the Clerk user id from a token identifier.
  * Token identifiers are typically "issuer|userId".
  * Falls back to the whole string if it doesn't match the expected format.
  */
-export function extractClerkUserId(tokenIdentifier: string): string {
+export const extractClerkUserId = (tokenIdentifier: string): string => {
   const parts = tokenIdentifier.split("|");
   const last = parts.at(-1);
-  return parts.length > 1 && last ? last : tokenIdentifier;
-}
+  return parts.length > 1 && isNonEmptyString(last) ? last : tokenIdentifier;
+};
 
 /**
  * Get the current user's ID from the Clerk auth context.
  * Creates a user record if one doesn't exist for this Clerk user.
  */
-export async function getCurrentUserId(
+export const getCurrentUserId = async (
   ctx: QueryCtx | MutationCtx
-): Promise<Id<"users"> | null> {
+): Promise<Id<"users"> | null> => {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {
     return null;
@@ -200,15 +220,15 @@ export async function getCurrentUserId(
   }
 
   return null;
-}
+};
 
 /**
  * Get or create a user from the Clerk identity.
  * Use this in mutations where you need to ensure the user exists.
  */
-export async function getOrCreateUser(
+export const getOrCreateUser = async (
   ctx: MutationCtx
-): Promise<Id<"users"> | null> {
+): Promise<Id<"users"> | null> => {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {
     return null;
@@ -236,12 +256,13 @@ export async function getOrCreateUser(
   // If we have an email, try to find an existing Convex user record by emailLower.
   // This is critical for migrations where the Clerk issuer/user id changed but we
   // want to keep the existing Convex user _id (so profiles/messages remain linked).
-  const existingByEmailLower = emailLower
-    ? await ctx.db
-        .query("users")
-        .withIndex("by_emailLower", (q) => q.eq("emailLower", emailLower))
-        .unique()
-    : null;
+  const existingByEmailLower =
+    emailLower === undefined
+      ? null
+      : await ctx.db
+          .query("users")
+          .withIndex("by_emailLower", (q) => q.eq("emailLower", emailLower))
+          .unique();
 
   // If both exist but are different records, merge them.
   if (
@@ -313,4 +334,4 @@ export async function getOrCreateUser(
   });
 
   return userId;
-}
+};

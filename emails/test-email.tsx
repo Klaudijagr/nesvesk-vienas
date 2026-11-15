@@ -1,17 +1,21 @@
 import { Heading, Section, Text } from "@react-email/components";
-import {
-  BaseLayout,
-  colors,
-  getTranslations,
-  type Locale,
-} from "./base-layout";
 
-type TestEmailProps = {
+import { BaseLayout, colors, getTranslations } from "./base-layout";
+import type { Locale } from "./base-layout";
+
+interface TestEmailProps {
   locale?: Locale;
-};
+  /** ISO timestamp shown in the email; defaults to the render time. */
+  sentAt?: string;
+}
 
-export const TestEmail = ({ locale = "lt" }: TestEmailProps) => {
+// Emails are rendered once per send, so the send time is read here when the
+// caller does not pass one.
+const getCurrentTimestamp = (): string => new Date().toISOString();
+
+export const TestEmail = ({ locale = "lt", sentAt }: TestEmailProps) => {
   const t = getTranslations(locale);
+  const sentAtLabel = sentAt ?? getCurrentTimestamp();
 
   return (
     <BaseLayout locale={locale} preview={t.testSuccess}>
@@ -26,7 +30,7 @@ export const TestEmail = ({ locale = "lt" }: TestEmailProps) => {
       <Text style={paragraph}>{t.testWorking}</Text>
 
       <Text style={timestamp}>
-        {t.sentAt} {new Date().toISOString()}
+        {t.sentAt} {sentAtLabel}
       </Text>
     </BaseLayout>
   );

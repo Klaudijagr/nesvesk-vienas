@@ -1,6 +1,7 @@
 "use node";
 
 import { v } from "convex/values";
+
 import { action, internalAction } from "./_generated/server";
 import {
   renderInvitationAccepted,
@@ -9,18 +10,19 @@ import {
   renderNewMessage,
   renderTestEmail,
 } from "./emailTemplates";
+import { isNonEmptyString } from "./lib/helpers";
 
 // Maileroo API configuration
 const MAILEROO_API_URL = "https://smtp.maileroo.com/api/v2/emails";
 
 // Regex patterns for parsing email addresses (top-level for performance)
-const EMAIL_ADDRESS_REGEX = /<(.+)>/;
-const EMAIL_NAME_REGEX = /^(.+)\s*</;
+const EMAIL_ADDRESS_REGEX = /<(?<address>.+)>/u;
+const EMAIL_NAME_REGEX = /^(?<name>.+)\s*</u;
 
 // Get Maileroo API key from environment
 const getMailerooKey = () => {
   const apiKey = process.env.MAILEROO_API_KEY;
-  if (!apiKey) {
+  if (!isNonEmptyString(apiKey)) {
     console.warn(
       "MAILEROO_API_KEY environment variable not set - emails disabled"
     );
@@ -30,19 +32,22 @@ const getMailerooKey = () => {
 };
 
 // Send email via Maileroo API
-async function sendMailerooEmail(params: {
+const sendMailerooEmail = async (params: {
   to: string;
   subject: string;
   html: string;
   from?: string;
-}) {
+}) => {
   const apiKey = getMailerooKey();
-  if (!apiKey) {
+  if (apiKey === null) {
     return { success: false, error: "API key not configured" };
   }
 
-  const fromAddress =
-    params.from || "Nešvęsk vienas <noreply@nesveskvienas.lt>";
+  const fromAddress = isNonEmptyString(params.from)
+    ? params.from
+    : "Nešvęsk vienas <noreply@nesveskvienas.lt>";
+  const parsedAddress = EMAIL_ADDRESS_REGEX.exec(fromAddress)?.groups?.address;
+  const parsedName = EMAIL_NAME_REGEX.exec(fromAddress)?.groups?.name?.trim();
 
   try {
     const response = await fetch(MAILEROO_API_URL, {
@@ -53,10 +58,10 @@ async function sendMailerooEmail(params: {
       },
       body: JSON.stringify({
         from: {
-          address: fromAddress.match(EMAIL_ADDRESS_REGEX)?.[1] || fromAddress,
-          name:
-            fromAddress.match(EMAIL_NAME_REGEX)?.[1]?.trim() ||
-            "Nešvęsk vienas",
+          address: isNonEmptyString(parsedAddress)
+            ? parsedAddress
+            : fromAddress,
+          name: isNonEmptyString(parsedName) ? parsedName : "Nešvęsk vienas",
         },
         to: [{ address: params.to }],
         subject: params.subject,
@@ -70,13 +75,17 @@ async function sendMailerooEmail(params: {
       return { success: false, error: `API error: ${response.status}` };
     }
 
-    const result = await response.json();
-    return { success: true, messageId: result.message_id };
+    const result: unknown = await response.json();
+    const messageId: unknown =
+      typeof result === "object" && result !== null && "message_id" in result
+        ? result.message_id
+        : undefined;
+    return { success: true, messageId };
   } catch (error) {
     console.error("Maileroo request failed:", error);
     return { success: false, error: String(error) };
   }
-}
+};
 
 // Email subject lines
 const subjects = {
@@ -107,34 +116,39 @@ export const sendEmail = internalAction({
     try {
       const apiKey = getMailerooKey();
 
-      if (!apiKey) {
+      if (apiKey === null) {
         console.log("Email would be sent to:", args.to, "type:", args.type);
         return { success: true, skipped: true };
       }
 
       let subject: string;
       let html: string;
-      const date = args.date || "the holidays";
+      const date = isNonEmptyString(args.date) ? args.date : "the holidays";
 
       switch (args.type) {
-        case "invitationReceived":
+        case "invitationReceived": {
           subject = subjects.invitationReceived(args.senderName, date);
           html = await renderInvitationReceived(args.senderName, date);
           break;
-        case "invitationAccepted":
+        }
+        case "invitationAccepted": {
           subject = subjects.invitationAccepted(args.senderName, date);
           html = await renderInvitationAccepted(args.senderName, date);
           break;
-        case "invitationDeclined":
+        }
+        case "invitationDeclined": {
           subject = subjects.invitationDeclined(args.senderName, date);
           html = await renderInvitationDeclined(args.senderName, date);
           break;
-        case "newMessage":
+        }
+        case "newMessage": {
           subject = subjects.newMessage(args.senderName);
           html = await renderNewMessage(args.senderName);
           break;
-        default:
-          throw new Error(`Unknown email type: ${args.type}`);
+        }
+        default: {
+          throw new Error(`Unknown email type: ${String(args.type)}`);
+        }
       }
 
       const result = await sendMailerooEmail({
@@ -176,35 +190,41 @@ export const testEmail = action({
       throw new Error("testEmail is disabled in production");
     }
 
-    const emailType = args.type || "test";
+    const emailType = args.type ?? "test";
 
     let subject: string;
     let html: string;
 
     switch (emailType) {
-      case "test":
+      case "test": {
         subject = subjects.test();
         html = await renderTestEmail();
         break;
-      case "invitationReceived":
+      }
+      case "invitationReceived": {
         subject = subjects.invitationReceived("Test User", "24 Dec");
         html = await renderInvitationReceived("Test User", "24 Dec");
         break;
-      case "invitationAccepted":
+      }
+      case "invitationAccepted": {
         subject = subjects.invitationAccepted("Test User", "24 Dec");
         html = await renderInvitationAccepted("Test User", "24 Dec");
         break;
-      case "invitationDeclined":
+      }
+      case "invitationDeclined": {
         subject = subjects.invitationDeclined("Test User", "24 Dec");
         html = await renderInvitationDeclined("Test User", "24 Dec");
         break;
-      case "newMessage":
+      }
+      case "newMessage": {
         subject = subjects.newMessage("Test User");
         html = await renderNewMessage("Test User");
         break;
-      default:
+      }
+      default: {
         subject = subjects.test();
         html = await renderTestEmail();
+      }
     }
 
     const result = await sendMailerooEmail({

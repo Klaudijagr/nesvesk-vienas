@@ -2,22 +2,24 @@
 
 import { ArrowLeft, Cookie } from "lucide-react";
 import Link from "next/link";
+
 import { Navbar } from "@/components/navbar";
 import { useLocale } from "@/contexts/locale-context";
+import type { Locale } from "@/lib/i18n";
 
-type Section = {
+interface Section {
   title: string;
   content: string | string[];
-};
+}
 
-type CookieContentItem = {
+interface CookieContentItem {
   title: string;
   lastUpdated: string;
   intro: string;
   sections: Section[];
-};
+}
 
-type CookieContent = Record<string, CookieContentItem>;
+type CookieContent = Record<Locale, CookieContentItem>;
 
 const cookieContent: CookieContent = {
   lt: {
@@ -248,7 +250,7 @@ const cookieContent: CookieContent = {
 
 export default function CookiesPage() {
   const { locale } = useLocale();
-  const content = cookieContent[locale] || cookieContent.en;
+  const content = cookieContent[locale];
 
   return (
     <div className="flex min-h-screen flex-col bg-[#0F172A]">
@@ -269,10 +271,10 @@ export default function CookiesPage() {
                 <Cookie className="h-6 w-6 text-amber-400" />
               </div>
               <div>
-                <h1 className="font-bold font-serif text-2xl text-amber-100 sm:text-3xl">
+                <h1 className="font-serif text-2xl font-bold text-amber-100 sm:text-3xl">
                   {content.title}
                 </h1>
-                <p className="text-slate-400 text-sm">{content.lastUpdated}</p>
+                <p className="text-sm text-slate-400">{content.lastUpdated}</p>
               </div>
             </div>
 
@@ -281,18 +283,18 @@ export default function CookiesPage() {
             <div className="space-y-8">
               {content.sections.map((section) => (
                 <section key={section.title}>
-                  <h2 className="mb-3 font-semibold text-amber-100 text-lg">
+                  <h2 className="mb-3 text-lg font-semibold text-amber-100">
                     {section.title}
                   </h2>
                   {typeof section.content === "string" ? (
-                    <p className="text-slate-300 leading-relaxed">
+                    <p className="leading-relaxed text-slate-300">
                       {section.content}
                     </p>
                   ) : (
                     <ul className="space-y-3">
                       {section.content.map((item) => (
                         <li
-                          className="flex gap-3 text-slate-300 leading-relaxed"
+                          className="flex gap-3 leading-relaxed text-slate-300"
                           key={item.slice(0, 50)}
                         >
                           <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />

@@ -15,10 +15,14 @@ import {
 import { render } from "@react-email/render";
 import type * as React from "react";
 
+import { isNonEmptyString } from "./lib/helpers";
+
 // Supported locales
 type Locale = "lt" | "en" | "ua" | "ru";
 
-const baseUrl = process.env.SITE_URL || "https://nesveskvienas.lt";
+const baseUrl = isNonEmptyString(process.env.SITE_URL)
+  ? process.env.SITE_URL
+  : "https://nesveskvienas.lt";
 
 // Email translations
 const emailTranslations = {
@@ -224,35 +228,46 @@ const emailTranslations = {
   },
 };
 
-function getTranslations(locale: Locale) {
-  return emailTranslations[locale] || emailTranslations.en;
-}
+const getTranslations = (locale: Locale) => emailTranslations[locale];
 
 // Site colors (matching the dark theme)
 const colors = {
-  background: "#0F172A", // slate-900
-  cardBg: "#1E293B", // slate-800
-  border: "#334155", // slate-700
-  text: "#CBD5E1", // slate-300
-  textMuted: "#94A3B8", // slate-400
-  textLight: "#F8FAFC", // slate-50
-  amber: "#F59E0B", // amber-500
-  amberLight: "#FCD34D", // amber-300
-  amberDark: "#B45309", // amber-700
-  green: "#22C55E", // green-500
-  greenLight: "#86EFAC", // green-300
+  // slate-900
+  background: "#0F172A",
+  // slate-800
+  cardBg: "#1E293B",
+  // slate-700
+  border: "#334155",
+  // slate-300
+  text: "#CBD5E1",
+  // slate-400
+  textMuted: "#94A3B8",
+  // slate-50
+  textLight: "#F8FAFC",
+  // amber-500
+  amber: "#F59E0B",
+  // amber-300
+  amberLight: "#FCD34D",
+  // amber-700
+  amberDark: "#B45309",
+  // green-500
+  green: "#22C55E",
+  // green-300
+  greenLight: "#86EFAC",
 };
 
 // Base layout component
-function BaseLayout({
+const BaseLayout = ({
   preview,
   children,
+  year,
   locale = "lt",
 }: {
   preview: string;
   children: React.ReactNode;
+  year: number;
   locale?: Locale;
-}) {
+}) => {
   const t = getTranslations(locale);
 
   return (
@@ -281,20 +296,30 @@ function BaseLayout({
               </Link>
             </Text>
             <Text style={styles.copyright}>
-              © {new Date().getFullYear()} Nešvęsk vienas. {t.copyright}
+              © {year} Nešvęsk vienas. {t.copyright}
             </Text>
           </Section>
         </Container>
       </Body>
     </Html>
   );
-}
+};
 
 // Email Templates
-function TestEmailTemplate({ locale = "lt" }: { locale?: Locale }) {
+const TestEmailTemplate = ({
+  sentAt,
+  locale = "lt",
+}: {
+  sentAt: Date;
+  locale?: Locale;
+}) => {
   const t = getTranslations(locale);
   return (
-    <BaseLayout locale={locale} preview={t.testSuccess}>
+    <BaseLayout
+      locale={locale}
+      preview={t.testSuccess}
+      year={sentAt.getFullYear()}
+    >
       <Section style={styles.iconContainer}>
         <Text style={styles.iconText}>✅</Text>
       </Section>
@@ -304,26 +329,29 @@ function TestEmailTemplate({ locale = "lt" }: { locale?: Locale }) {
       <Text style={styles.paragraphCenter}>{t.testMessage}</Text>
       <Text style={styles.paragraphCenter}>{t.testWorking}</Text>
       <Text style={styles.timestamp}>
-        {t.sentAt} {new Date().toISOString()}
+        {t.sentAt} {sentAt.toISOString()}
       </Text>
     </BaseLayout>
   );
-}
+};
 
-function InvitationReceivedTemplate({
+const InvitationReceivedTemplate = ({
   senderName,
   date,
+  year,
   locale = "lt",
 }: {
   senderName: string;
   date: string;
+  year: number;
   locale?: Locale;
-}) {
+}) => {
   const t = getTranslations(locale);
   return (
     <BaseLayout
       locale={locale}
       preview={`${senderName} ${t.invitedYou} ${date}!`}
+      year={year}
     >
       <Section style={styles.iconContainer}>
         <Text style={styles.iconText}>🎄</Text>
@@ -349,22 +377,25 @@ function InvitationReceivedTemplate({
       </Text>
     </BaseLayout>
   );
-}
+};
 
-function InvitationAcceptedTemplate({
+const InvitationAcceptedTemplate = ({
   accepterName,
   date,
+  year,
   locale = "lt",
 }: {
   accepterName: string;
   date: string;
+  year: number;
   locale?: Locale;
-}) {
+}) => {
   const t = getTranslations(locale);
   return (
     <BaseLayout
       locale={locale}
       preview={`${accepterName} ${t.acceptedYour} ${date}!`}
+      year={year}
     >
       <Section style={styles.iconContainer}>
         <Text style={styles.iconText}>🎉</Text>
@@ -393,20 +424,26 @@ function InvitationAcceptedTemplate({
       </Section>
     </BaseLayout>
   );
-}
+};
 
-function InvitationDeclinedTemplate({
+const InvitationDeclinedTemplate = ({
   declinerName,
   date,
+  year,
   locale = "lt",
 }: {
   declinerName: string;
   date: string;
+  year: number;
   locale?: Locale;
-}) {
+}) => {
   const t = getTranslations(locale);
   return (
-    <BaseLayout locale={locale} preview={`${t.invitationUpdate}: ${date}`}>
+    <BaseLayout
+      locale={locale}
+      preview={`${t.invitationUpdate}: ${date}`}
+      year={year}
+    >
       <Section style={styles.iconContainer}>
         <Text style={styles.iconText}>💫</Text>
       </Section>
@@ -428,18 +465,24 @@ function InvitationDeclinedTemplate({
       <Text style={styles.encouragementBox}>{t.encouragement}</Text>
     </BaseLayout>
   );
-}
+};
 
-function NewMessageTemplate({
+const NewMessageTemplate = ({
   senderName,
+  year,
   locale = "lt",
 }: {
   senderName: string;
+  year: number;
   locale?: Locale;
-}) {
+}) => {
   const t = getTranslations(locale);
   return (
-    <BaseLayout locale={locale} preview={`${t.newMessage} - ${senderName}`}>
+    <BaseLayout
+      locale={locale}
+      preview={`${t.newMessage} - ${senderName}`}
+      year={year}
+    >
       <Section style={styles.iconContainer}>
         <Text style={styles.iconText}>💬</Text>
       </Section>
@@ -460,7 +503,7 @@ function NewMessageTemplate({
       </Text>
     </BaseLayout>
   );
-}
+};
 
 // Styles - Dark theme matching site
 const styles = {
@@ -627,57 +670,59 @@ const styles = {
 };
 
 // Render functions that return HTML strings
-export async function renderTestEmail(locale: Locale = "lt"): Promise<string> {
-  return await render(<TestEmailTemplate locale={locale} />);
-}
+export const renderTestEmail = async (locale: Locale = "lt"): Promise<string> =>
+  await render(<TestEmailTemplate locale={locale} sentAt={new Date()} />);
 
-export async function renderInvitationReceived(
+export const renderInvitationReceived = async (
   senderName: string,
   date: string,
   locale: Locale = "lt"
-): Promise<string> {
-  return await render(
+): Promise<string> =>
+  await render(
     <InvitationReceivedTemplate
       date={date}
       locale={locale}
       senderName={senderName}
+      year={new Date().getFullYear()}
     />
   );
-}
 
-export async function renderInvitationAccepted(
+export const renderInvitationAccepted = async (
   accepterName: string,
   date: string,
   locale: Locale = "lt"
-): Promise<string> {
-  return await render(
+): Promise<string> =>
+  await render(
     <InvitationAcceptedTemplate
       accepterName={accepterName}
       date={date}
       locale={locale}
+      year={new Date().getFullYear()}
     />
   );
-}
 
-export async function renderInvitationDeclined(
+export const renderInvitationDeclined = async (
   declinerName: string,
   date: string,
   locale: Locale = "lt"
-): Promise<string> {
-  return await render(
+): Promise<string> =>
+  await render(
     <InvitationDeclinedTemplate
       date={date}
       declinerName={declinerName}
       locale={locale}
+      year={new Date().getFullYear()}
     />
   );
-}
 
-export async function renderNewMessage(
+export const renderNewMessage = async (
   senderName: string,
   locale: Locale = "lt"
-): Promise<string> {
-  return await render(
-    <NewMessageTemplate locale={locale} senderName={senderName} />
+): Promise<string> =>
+  await render(
+    <NewMessageTemplate
+      locale={locale}
+      senderName={senderName}
+      year={new Date().getFullYear()}
+    />
   );
-}

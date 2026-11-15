@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Check, HelpCircle, X } from "lucide-react";
 import { memo, useCallback } from "react";
+
 import type { HolidayDate } from "@/lib/types";
 import { HOLIDAY_DATES } from "@/lib/types";
 
@@ -11,14 +12,14 @@ type ColorType = "green" | "amber" | "red";
 type HostingStatus = "can-host" | "may-host" | "cant-host";
 type GuestStatus = "looking" | "maybe-guest" | "not-looking";
 
-type PreferenceOption = {
+interface PreferenceOption {
   id: string;
   title: string;
   description: string;
   iconType: IconType;
   colorType: ColorType;
   showDates: boolean;
-};
+}
 
 const HOSTING_OPTIONS: PreferenceOption[] = [
   {
@@ -107,7 +108,7 @@ const COLOR_SCHEMES = {
   },
 } as const;
 
-const IconBadge = memo(function IconBadgeInner({
+const IconBadgeInner = ({
   type,
   colorType,
   isSelected,
@@ -115,7 +116,7 @@ const IconBadge = memo(function IconBadgeInner({
   type: IconType;
   colorType: ColorType;
   isSelected: boolean;
-}) {
+}) => {
   const bgColor = isSelected ? COLOR_SCHEMES[colorType].iconBg : "bg-gray-400";
 
   return (
@@ -129,25 +130,27 @@ const IconBadge = memo(function IconBadgeInner({
       {type === "x" && <X className="h-4 w-4 text-white" strokeWidth={3} />}
     </div>
   );
-});
+};
 
-const DateButton = memo(function DateButtonInner({
+const IconBadge = memo(IconBadgeInner);
+
+const DateButtonInner = ({
   date,
   isSelected,
   colorType,
   onToggle,
 }: {
-  date: string;
+  date: HolidayDate;
   isSelected: boolean;
   colorType: ColorType;
-  onToggle: (date: string) => void;
-}) {
+  onToggle: (date: HolidayDate) => void;
+}) => {
   const c = COLOR_SCHEMES[colorType];
 
   return (
     <motion.button
       animate={{ opacity: 1, scale: 1 }}
-      className={`rounded-md border px-2 py-1 font-medium text-xs transition-colors ${
+      className={`rounded-md border px-2 py-1 text-xs font-medium transition-colors ${
         isSelected ? c.dateSelected : c.dateUnselected
       }`}
       initial={{ opacity: 0, scale: 0.8 }}
@@ -162,9 +165,11 @@ const DateButton = memo(function DateButtonInner({
       {date}
     </motion.button>
   );
-});
+};
 
-const PreferenceCard = memo(function PreferenceCardInner({
+const DateButton = memo(DateButtonInner);
+
+const PreferenceCardInner = ({
   option,
   isSelected,
   onSelect,
@@ -174,9 +179,9 @@ const PreferenceCard = memo(function PreferenceCardInner({
   option: PreferenceOption;
   isSelected: boolean;
   onSelect: (id: string) => void;
-  selectedDates: string[];
-  onToggleDate: (date: string) => void;
-}) {
+  selectedDates: HolidayDate[];
+  onToggleDate: (date: HolidayDate) => void;
+}) => {
   const c = COLOR_SCHEMES[option.colorType];
   const showDates = isSelected && option.showDates;
 
@@ -205,7 +210,7 @@ const PreferenceCard = memo(function PreferenceCardInner({
           />
         </div>
         <h3
-          className={`mb-0.5 font-bold text-sm ${
+          className={`mb-0.5 text-sm font-bold ${
             isSelected ? c.title : "text-gray-800"
           }`}
         >
@@ -228,7 +233,7 @@ const PreferenceCard = memo(function PreferenceCardInner({
             initial={{ y: -10, opacity: 0 }}
             transition={{ delay: 0.1, duration: 0.2 }}
           >
-            <p className={`mb-2 pt-2 font-medium text-xs ${c.title}`}>
+            <p className={`mb-2 pt-2 text-xs font-medium ${c.title}`}>
               Select dates:
             </p>
             <div className="flex flex-wrap gap-1">
@@ -253,45 +258,56 @@ const PreferenceCard = memo(function PreferenceCardInner({
       )}
     </div>
   );
-});
+};
 
-type ProfilePreferenceCardsProps = {
+const PreferenceCard = memo(PreferenceCardInner);
+
+const isHostingStatus = (id: string): id is HostingStatus =>
+  id === "can-host" || id === "may-host" || id === "cant-host";
+
+const isGuestStatus = (id: string): id is GuestStatus =>
+  id === "looking" || id === "maybe-guest" || id === "not-looking";
+
+interface ProfilePreferenceCardsProps {
   hostingStatus: HostingStatus;
   guestStatus: GuestStatus;
   availableDates: HolidayDate[];
   onHostingChange: (status: HostingStatus) => void;
   onGuestChange: (status: GuestStatus) => void;
   onDatesChange: (dates: HolidayDate[]) => void;
-};
+}
 
-export function ProfilePreferenceCards({
+export const ProfilePreferenceCards = ({
   hostingStatus,
   guestStatus,
   availableDates,
   onHostingChange,
   onGuestChange,
   onDatesChange,
-}: ProfilePreferenceCardsProps) {
+}: ProfilePreferenceCardsProps) => {
   const handleHostingSelect = useCallback(
     (id: string) => {
-      onHostingChange(id as HostingStatus);
+      if (isHostingStatus(id)) {
+        onHostingChange(id);
+      }
     },
     [onHostingChange]
   );
 
   const handleGuestSelect = useCallback(
     (id: string) => {
-      onGuestChange(id as GuestStatus);
+      if (isGuestStatus(id)) {
+        onGuestChange(id);
+      }
     },
     [onGuestChange]
   );
 
   const toggleDate = useCallback(
-    (date: string) => {
-      const holidayDate = date as HolidayDate;
-      const newDates = availableDates.includes(holidayDate)
-        ? availableDates.filter((d) => d !== holidayDate)
-        : [...availableDates, holidayDate];
+    (date: HolidayDate) => {
+      const newDates = availableDates.includes(date)
+        ? availableDates.filter((d) => d !== date)
+        : [...availableDates, date];
       onDatesChange(newDates);
     },
     [availableDates, onDatesChange]
@@ -301,7 +317,7 @@ export function ProfilePreferenceCards({
     <div className="space-y-6">
       {/* Hosting Section */}
       <div className="space-y-2">
-        <h3 className="font-semibold text-sm">Are you open to hosting?</h3>
+        <h3 className="text-sm font-semibold">Are you open to hosting?</h3>
         <div className="grid grid-cols-1 items-start gap-2 sm:grid-cols-3">
           {HOSTING_OPTIONS.map((option) => (
             <PreferenceCard
@@ -318,7 +334,7 @@ export function ProfilePreferenceCards({
 
       {/* Guest Section */}
       <div className="space-y-2">
-        <h3 className="font-semibold text-sm">
+        <h3 className="text-sm font-semibold">
           Are you looking to be a guest?
         </h3>
         <div className="grid grid-cols-1 items-start gap-2 sm:grid-cols-3">
@@ -336,4 +352,4 @@ export function ProfilePreferenceCards({
       </div>
     </div>
   );
-}
+};

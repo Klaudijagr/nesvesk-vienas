@@ -11,16 +11,18 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
+
 import { Navbar } from "@/components/navbar";
 import { useLocale } from "@/contexts/locale-context";
+import type { Locale } from "@/lib/i18n";
 
-type SafetyTip = {
-  icon: string;
+interface SafetyTip {
+  icon: "eye" | "alert" | "mappin" | "message" | "users" | "shield";
   title: string;
   content: string;
-};
+}
 
-type SafetyContentItem = {
+interface SafetyContentItem {
   title: string;
   subtitle: string;
   intro: string;
@@ -29,9 +31,9 @@ type SafetyContentItem = {
   reportContent: string;
   emergencyTitle: string;
   emergencyContent: string;
-};
+}
 
-type SafetyContent = Record<string, SafetyContentItem>;
+type SafetyContent = Record<Locale, SafetyContentItem>;
 
 const safetyContent: SafetyContent = {
   lt: {
@@ -240,7 +242,10 @@ const safetyContent: SafetyContent = {
   },
 };
 
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+const iconMap: Record<
+  SafetyTip["icon"],
+  React.ComponentType<{ className?: string }>
+> = {
   eye: Eye,
   alert: AlertTriangle,
   mappin: MapPin,
@@ -251,7 +256,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export default function SafetyPage() {
   const { t, locale } = useLocale();
-  const c = safetyContent[locale] || safetyContent.lt;
+  const c = safetyContent[locale];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -269,16 +274,16 @@ export default function SafetyPage() {
           <div className="mb-8 flex items-center gap-3">
             <Shield className="h-10 w-10 text-green-600" />
             <div>
-              <h1 className="font-bold text-3xl text-gray-900">{c.title}</h1>
+              <h1 className="text-3xl font-bold text-gray-900">{c.title}</h1>
               <p className="text-gray-600">{c.subtitle}</p>
             </div>
           </div>
 
-          <p className="mb-8 text-gray-600 text-lg">{c.intro}</p>
+          <p className="mb-8 text-lg text-gray-600">{c.intro}</p>
 
           <div className="grid gap-6 md:grid-cols-2">
             {c.tips.map((tip) => {
-              const IconComponent = iconMap[tip.icon] || ShieldCheck;
+              const IconComponent = iconMap[tip.icon];
               return (
                 <div
                   className="rounded-lg border border-gray-100 bg-gray-50 p-6"
@@ -290,21 +295,21 @@ export default function SafetyPage() {
                     </div>
                     <h3 className="font-semibold text-gray-900">{tip.title}</h3>
                   </div>
-                  <p className="text-gray-600 text-sm">{tip.content}</p>
+                  <p className="text-sm text-gray-600">{tip.content}</p>
                 </div>
               );
             })}
           </div>
 
           <div className="mt-8 rounded-lg bg-amber-50 p-6">
-            <h2 className="mb-2 font-semibold text-amber-800 text-lg">
+            <h2 className="mb-2 text-lg font-semibold text-amber-800">
               {c.reportTitle}
             </h2>
             <p className="text-amber-700">{c.reportContent}</p>
           </div>
 
           <div className="mt-6 rounded-lg bg-red-50 p-6">
-            <h2 className="mb-2 font-semibold text-lg text-red-800">
+            <h2 className="mb-2 text-lg font-semibold text-red-800">
               {c.emergencyTitle}
             </h2>
             <p className="font-medium text-red-700">{c.emergencyContent}</p>

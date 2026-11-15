@@ -3,10 +3,12 @@
 import { Cookie, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+
 import { useCookieConsent } from "@/contexts/cookie-consent-context";
+
 import { Button } from "./ui/button";
 
-export function CookieBanner() {
+export const CookieBanner = () => {
   const { hasConsented, acceptAll, acceptNecessary, updateConsent } =
     useCookieConsent();
   const [showSettings, setShowSettings] = useState(false);
@@ -31,10 +33,12 @@ export function CookieBanner() {
         {showSettings ? (
           <div>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-semibold text-lg">Cookie Settings</h3>
+              <h3 className="text-lg font-semibold">Cookie Settings</h3>
               <button
                 className="p-1 text-slate-500 hover:text-slate-700"
-                onClick={() => setShowSettings(false)}
+                onClick={() => {
+                  setShowSettings(false);
+                }}
                 type="button"
               >
                 <X className="h-5 w-5" />
@@ -62,7 +66,9 @@ export function CookieBanner() {
                 <input
                   checked={analytics}
                   className="h-5 w-5 rounded text-amber-500 focus:ring-amber-500"
-                  onChange={(e) => setAnalytics(e.target.checked)}
+                  onChange={(e) => {
+                    setAnalytics(e.target.checked);
+                  }}
                   type="checkbox"
                 />
               </label>
@@ -76,7 +82,9 @@ export function CookieBanner() {
                 <input
                   checked={marketing}
                   className="h-5 w-5 rounded text-amber-500 focus:ring-amber-500"
-                  onChange={(e) => setMarketing(e.target.checked)}
+                  onChange={(e) => {
+                    setMarketing(e.target.checked);
+                  }}
                   type="checkbox"
                 />
               </label>
@@ -118,7 +126,9 @@ export function CookieBanner() {
             </div>
             <div className="flex flex-wrap gap-2 sm:shrink-0">
               <Button
-                onClick={() => setShowSettings(true)}
+                onClick={() => {
+                  setShowSettings(true);
+                }}
                 size="sm"
                 variant="ghost"
               >
@@ -140,4 +150,4 @@ export function CookieBanner() {
       </div>
     </div>
   );
-}
+};

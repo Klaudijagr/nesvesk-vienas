@@ -32,6 +32,7 @@
 **File**: `convex/schema.ts`
 
 1. Add `username` field to `profiles` table:
+
    ```typescript
    username: v.optional(v.string()), // Unique, lowercase, alphanumeric + hyphens
    ```
@@ -42,6 +43,7 @@
    ```
 
 **Migration considerations:**
+
 - Existing profiles won't have usernames initially
 - Need to handle null/undefined usernames during transition
 - Can make username required later after migration
@@ -51,13 +53,16 @@
 **File**: `convex/profiles.ts`
 
 1. **Add query to get profile by username**:
+
    ```typescript
    export const getProfileByUsername = query({
      args: { username: v.string() },
      handler: async (ctx, args) => {
        const profile = await ctx.db
          .query("profiles")
-         .withIndex("by_username", (q) => q.eq("username", args.username.toLowerCase()))
+         .withIndex("by_username", (q) =>
+           q.eq("username", args.username.toLowerCase())
+         )
          .first();
        // ... same privacy logic as getProfile
      },
@@ -65,6 +70,7 @@
    ```
 
 2. **Add mutation to check username availability**:
+
    ```typescript
    export const checkUsernameAvailability = query({
      args: { username: v.string() },
@@ -80,37 +86,38 @@
    ```
 
 3. **Add mutation to set/update username**:
+
    ```typescript
    export const setUsername = mutation({
      args: { username: v.string() },
      handler: async (ctx, args) => {
        const userId = await getCurrentUserId(ctx);
        if (!userId) throw new Error("Not authenticated");
-       
+
        const normalized = args.username.toLowerCase().trim();
        // Validate format: alphanumeric + hyphens, 3-20 chars
        if (!/^[a-z0-9-]{3,20}$/.test(normalized)) {
          throw new Error("Invalid username format");
        }
-       
+
        // Check availability
        const existing = await ctx.db
          .query("profiles")
          .withIndex("by_username", (q) => q.eq("username", normalized))
          .first();
-       
+
        if (existing && existing.userId !== userId) {
          throw new Error("Username already taken");
        }
-       
+
        // Update profile
        const profile = await ctx.db
          .query("profiles")
          .withIndex("by_userId", (q) => q.eq("userId", userId))
          .first();
-       
+
        if (!profile) throw new Error("Profile not found");
-       
+
        await ctx.db.patch(profile._id, { username: normalized });
      },
    });
@@ -129,10 +136,12 @@
 - Handle both username and ID routes for backward compatibility
 
 **Option A: Keep both routes** (recommended for gradual migration)
+
 - `/profile/[id]` - still works for existing links
 - `/people/[username]` - new preferred route
 
 **Option B: Redirect old route to new**
+
 - `/profile/[id]` → fetch profile → redirect to `/people/[username]`
 - More complex, breaks existing links temporarily
 
@@ -141,6 +150,7 @@
 **File**: `app/onboarding/page.tsx` or `app/(dashboard)/settings/page.tsx`
 
 Add username input field:
+
 - Real-time availability checking
 - Format validation (3-20 chars, alphanumeric + hyphens)
 - Show suggestions if taken
@@ -149,6 +159,7 @@ Add username input field:
 ### Phase 5: Update All Profile Links
 
 **Files to update**:
+
 1. `components/listing-card.tsx` - change `/profile/${userId}` → `/people/${username}`
 2. `app/(dashboard)/browse/page.tsx` - update link
 3. `app/(dashboard)/profile/page.tsx` - redirect to username route
@@ -156,8 +167,12 @@ Add username input field:
 5. Any other components linking to profiles
 
 **Helper function**: Create `getProfileUrl(profile)` utility:
+
 ```typescript
-export function getProfileUrl(profile: { username?: string; userId: Id<"users"> }): string {
+export function getProfileUrl(profile: {
+  username?: string;
+  userId: Id<"users">;
+}): string {
   if (profile.username) {
     return `/people/${profile.username}`;
   }
@@ -168,15 +183,15 @@ export function getProfileUrl(profile: { username?: string; userId: Id<"users"> 
 
 ## Effort Estimate
 
-| Phase | Time | Complexity |
-|-------|------|------------|
-| Schema changes | 15 min | Low |
-| Backend functions | 1-2 hours | Medium |
-| New route page | 30 min | Low |
-| Username UI | 1-2 hours | Medium |
-| Update all links | 30-45 min | Low |
-| Testing & edge cases | 1 hour | Medium |
-| **Total** | **4-6 hours** | **Medium** |
+| Phase                | Time          | Complexity |
+| -------------------- | ------------- | ---------- |
+| Schema changes       | 15 min        | Low        |
+| Backend functions    | 1-2 hours     | Medium     |
+| New route page       | 30 min        | Low        |
+| Username UI          | 1-2 hours     | Medium     |
+| Update all links     | 30-45 min     | Low        |
+| Testing & edge cases | 1 hour        | Medium     |
+| **Total**            | **4-6 hours** | **Medium** |
 
 ## Edge Cases to Handle
 

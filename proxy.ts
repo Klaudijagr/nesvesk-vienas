@@ -1,18 +1,28 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
 
-const isPublicRoute = createRouteMatcher([
+/** Pages and files anyone may load without signing in. */
+const PUBLIC_PATHS = new Set([
   "/",
-  "/sign-in(.*)",
-  "/sign-up(.*)",
   "/safety",
   "/terms",
   "/privacy",
   "/cookies",
-  "/api/webhooks(.*)",
+  "/robots.txt",
+  "/sitemap.xml",
 ]);
 
+/**
+ * Path prefixes that stay public: Clerk's own sign-in and sign-up flows,
+ * signed webhooks, and the PostHog proxy that signed-out visitors also use.
+ */
+const PUBLIC_PREFIXES = ["/sign-in", "/sign-up", "/api/webhooks", "/ingest"];
+
+const isPublicPath = (pathname: string): boolean =>
+  PUBLIC_PATHS.has(pathname) ||
+  PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+
 export const proxy = clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) {
+  if (!isPublicPath(request.nextUrl.pathname)) {
     await auth.protect();
   }
 });

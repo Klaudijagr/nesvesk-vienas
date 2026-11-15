@@ -1,17 +1,12 @@
 import { Button, Heading, Section, Text } from "@react-email/components";
-import {
-  BaseLayout,
-  colors,
-  getTranslations,
-  type Locale,
-} from "./base-layout";
 
-type NewMessageEmailProps = {
+import { BaseLayout, baseUrl, colors, getTranslations } from "./base-layout";
+import type { Locale } from "./base-layout";
+
+interface NewMessageEmailProps {
   senderName?: string;
   locale?: Locale;
-};
-
-const baseUrl = process.env.SITE_URL || "https://nesveskvienas.lt";
+}
 
 export const NewMessageEmail = ({
   senderName = "Jonas Jonaitis",

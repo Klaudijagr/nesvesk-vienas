@@ -2,22 +2,24 @@
 
 import { ArrowLeft, Lock } from "lucide-react";
 import Link from "next/link";
+
 import { Navbar } from "@/components/navbar";
 import { useLocale } from "@/contexts/locale-context";
+import type { Locale } from "@/lib/i18n";
 
-type Section = {
+interface Section {
   title: string;
   content: string | string[];
-};
+}
 
-type PrivacyContentItem = {
+interface PrivacyContentItem {
   title: string;
   lastUpdated: string;
   intro: string;
   sections: Section[];
-};
+}
 
-type PrivacyContent = Record<string, PrivacyContentItem>;
+type PrivacyContent = Record<Locale, PrivacyContentItem>;
 
 const privacyContent: PrivacyContent = {
   lt: {
@@ -500,7 +502,7 @@ const privacyContent: PrivacyContent = {
 
 export default function PrivacyPage() {
   const { t, locale } = useLocale();
-  const c = privacyContent[locale] || privacyContent.lt;
+  const c = privacyContent[locale];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -518,24 +520,24 @@ export default function PrivacyPage() {
           <div className="mb-6 flex items-center gap-3">
             <Lock className="h-8 w-8 text-green-600" />
             <div>
-              <h1 className="font-bold text-3xl text-gray-900">{c.title}</h1>
-              <p className="text-gray-500 text-sm">{c.lastUpdated}</p>
+              <h1 className="text-3xl font-bold text-gray-900">{c.title}</h1>
+              <p className="text-sm text-gray-500">{c.lastUpdated}</p>
             </div>
           </div>
 
-          <p className="mb-8 text-gray-600 text-lg">{c.intro}</p>
+          <p className="mb-8 text-lg text-gray-600">{c.intro}</p>
 
           <div className="space-y-8">
             {c.sections.map((section) => (
               <div key={section.title}>
-                <h2 className="mb-3 font-semibold text-gray-900 text-xl">
+                <h2 className="mb-3 text-xl font-semibold text-gray-900">
                   {section.title}
                 </h2>
                 {Array.isArray(section.content) ? (
                   <ul className="list-inside list-disc space-y-2">
                     {section.content.map((item, index) => (
                       <li
-                        className="text-gray-600 leading-relaxed"
+                        className="leading-relaxed text-gray-600"
                         key={`${section.title}-${index}`}
                       >
                         {item}
@@ -543,7 +545,7 @@ export default function PrivacyPage() {
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="leading-relaxed text-gray-600">
                     {section.content}
                   </p>
                 )}

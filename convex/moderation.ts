@@ -1,7 +1,9 @@
 import { v } from "convex/values";
+
 import { mutation, query } from "./_generated/server";
 import { assertAdmin } from "./lib/admin";
 import { getCurrentUserId } from "./lib/auth";
+import { mapSequential } from "./lib/helpers";
 
 // Block a user
 export const blockUser = mutation({
@@ -285,7 +287,7 @@ export const getArchivedAndBlocked = query({
 
     // Combine and sort by date (most recent first)
     const allItems = [...archivedItems, ...blockedItems];
-    return allItems.sort((a, b) => (b.sortDate ?? 0) - (a.sortDate ?? 0));
+    return allItems.toSorted((a, b) => (b.sortDate ?? 0) - (a.sortDate ?? 0));
   },
 });
 
@@ -298,14 +300,18 @@ export const checkContent = query({
     const lowerContent = args.content.toLowerCase();
 
     for (const banned of bannedWords) {
-      if (banned.isRegex) {
+      if (banned.isRegex === true) {
         try {
-          const regex = new RegExp(banned.word, "i");
+          const regex = new RegExp(banned.word, "iu");
           if (regex.test(args.content)) {
             return { flagged: true, category: banned.category };
           }
-        } catch {
-          // Invalid regex, skip
+        } catch (error) {
+          console.error(
+            "Skipping invalid banned-word pattern",
+            banned.word,
+            error
+          );
         }
       } else if (lowerContent.includes(banned.word.toLowerCase())) {
         return { flagged: true, category: banned.category };
@@ -343,9 +349,9 @@ export const seedBannedWords = mutation({
       { word: "kys", category: "harassment", isRegex: false },
     ];
 
-    for (const word of words) {
+    await mapSequential(words, async (word) => {
       await ctx.db.insert("bannedWords", word);
-    }
+    });
 
     return { message: "Seeded banned words", count: words.length };
   },
