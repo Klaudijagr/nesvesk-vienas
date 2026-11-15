@@ -30,6 +30,7 @@ import { useLocale } from "@/contexts/locale-context";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { CITIES, HOLIDAY_DATES, LANGUAGES } from "@/lib/types";
+import { getInitialsAvatarUrl } from "@/lib/utils";
 
 // PostHog event names - centralized for consistency and typo prevention
 const POSTHOG_EVENTS = {
@@ -425,7 +426,7 @@ const ListViewItem = ({
         src={
           profile.photoUrl !== undefined && profile.photoUrl !== ""
             ? profile.photoUrl
-            : `https://api.dicebear.com/7.x/initials/svg?seed=${profile.firstName}`
+            : getInitialsAvatarUrl(profile.firstName)
         }
       />
     </div>

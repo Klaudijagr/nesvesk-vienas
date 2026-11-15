@@ -61,7 +61,9 @@ const sendMailerooEmail = async (params: {
           address: isNonEmptyString(parsedAddress)
             ? parsedAddress
             : fromAddress,
-          name: isNonEmptyString(parsedName) ? parsedName : "Nešvęsk vienas",
+          display_name: isNonEmptyString(parsedName)
+            ? parsedName
+            : "Nešvęsk vienas",
         },
         to: [{ address: params.to }],
         subject: params.subject,

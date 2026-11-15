@@ -18,6 +18,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { SlimProfile } from "@/lib/types";
+import { getInitialsAvatarUrl } from "@/lib/utils";
 
 // ============================================================================
 // Shared utilities
@@ -61,7 +62,7 @@ const getStatusLabel = (
 // A removed photo is stored as an empty string, which also gets the avatar.
 const getPhotoUrl = (profile: SlimProfile): string =>
   profile.photoUrl === undefined || profile.photoUrl === ""
-    ? `https://api.dicebear.com/7.x/initials/svg?seed=${profile.firstName}`
+    ? getInitialsAvatarUrl(profile.firstName)
     : profile.photoUrl;
 
 const formatLastActive = (lastActive: number | undefined): string | null => {

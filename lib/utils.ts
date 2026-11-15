@@ -49,3 +49,10 @@ export const formatRelativeTime = (timestamp: number | undefined): string => {
   }
   return "Active 30+ days ago";
 };
+
+/**
+ * Initials avatar for profiles without a photo. Uses DiceBear's PNG endpoint:
+ * the Next.js image optimizer rejects the SVG one.
+ */
+export const getInitialsAvatarUrl = (firstName: string): string =>
+  `https://api.dicebear.com/7.x/initials/png?seed=${encodeURIComponent(firstName)}`;
