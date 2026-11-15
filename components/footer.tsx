@@ -20,14 +20,16 @@ export const Footer = ({ variant = "dark" }: FooterProps) => {
     <footer
       className={
         isDark
-          ? "border-t border-white/10 bg-slate-950 py-6"
-          : "border-t border-gray-200 bg-gray-50 py-6"
+          ? "bg-night-deep border-t border-white/10 py-6"
+          : "border-border bg-muted/50 border-t py-6"
       }
     >
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6 lg:px-8">
         <span
           className={
-            isDark ? "text-sm text-blue-100/40" : "text-sm text-gray-500"
+            isDark
+              ? "text-night-foreground/40 text-sm"
+              : "text-muted-foreground text-sm"
           }
         >
           &copy; {CURRENT_YEAR} {t.appName}
@@ -35,15 +37,15 @@ export const Footer = ({ variant = "dark" }: FooterProps) => {
         <nav
           className={
             isDark
-              ? "flex gap-6 text-sm text-blue-100/50"
-              : "flex gap-6 text-sm text-gray-500"
+              ? "text-night-foreground/50 flex gap-6 text-sm"
+              : "text-muted-foreground flex gap-6 text-sm"
           }
         >
           <Link
             className={
               isDark
-                ? "transition-colors hover:text-amber-400"
-                : "transition-colors hover:text-green-600"
+                ? "hover:text-gold transition-colors"
+                : "hover:text-success transition-colors"
             }
             href="/safety"
           >
@@ -52,8 +54,8 @@ export const Footer = ({ variant = "dark" }: FooterProps) => {
           <Link
             className={
               isDark
-                ? "transition-colors hover:text-amber-400"
-                : "transition-colors hover:text-green-600"
+                ? "hover:text-gold transition-colors"
+                : "hover:text-success transition-colors"
             }
             href="/terms"
           >
@@ -62,8 +64,8 @@ export const Footer = ({ variant = "dark" }: FooterProps) => {
           <Link
             className={
               isDark
-                ? "transition-colors hover:text-amber-400"
-                : "transition-colors hover:text-green-600"
+                ? "hover:text-gold transition-colors"
+                : "hover:text-success transition-colors"
             }
             href="/privacy"
           >

@@ -69,7 +69,7 @@ export const TopBar = () => {
           >
             <Bell className="h-5 w-5" />
             {totalNotifications > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs font-medium text-white">
+              <span className="bg-brand absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-xs font-medium text-white">
                 {totalNotifications > 9 ? "9+" : totalNotifications}
               </span>
             )}

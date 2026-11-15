@@ -178,7 +178,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="bg-muted/50 min-h-screen pb-20">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6">
           <h1 className="text-2xl font-bold">{t.settingsTitle}</h1>
@@ -235,12 +235,7 @@ export default function SettingsPage() {
                     {t.accountCurrentlyActive}
                   </p>
                 </div>
-                <Badge
-                  className="border-green-200 bg-green-50 text-green-700"
-                  variant="outline"
-                >
-                  {t.active}
-                </Badge>
+                <Badge variant="success-outline">{t.active}</Badge>
               </div>
               <Separator />
               <div className="flex items-center justify-between">

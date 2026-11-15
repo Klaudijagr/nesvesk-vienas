@@ -44,13 +44,13 @@ export const Navbar = () => {
           <Link className="flex items-center gap-2" href="/">
             <div
               className={`flex h-9 w-9 items-center justify-center rounded-lg ${
-                isScrolled ? "bg-red-500" : "bg-white/20 backdrop-blur-sm"
+                isScrolled ? "bg-brand" : "bg-white/20 backdrop-blur-sm"
               }`}
             >
               <Gift className="h-5 w-5 text-white" />
             </div>
             <span
-              className={`text-lg font-bold ${isScrolled ? "text-gray-900" : "text-white"}`}
+              className={`text-lg font-bold ${isScrolled ? "text-foreground" : "text-white"}`}
             >
               Nešvęsk vienas
             </span>
@@ -60,7 +60,7 @@ export const Navbar = () => {
             <button
               className={`text-sm font-medium transition-colors ${
                 isScrolled
-                  ? "text-gray-600 hover:text-gray-900"
+                  ? "text-muted-foreground hover:text-foreground"
                   : "text-white/80 hover:text-white"
               }`}
               onClick={() => {
@@ -73,7 +73,7 @@ export const Navbar = () => {
             <button
               className={`text-sm font-medium transition-colors ${
                 isScrolled
-                  ? "text-gray-600 hover:text-gray-900"
+                  ? "text-muted-foreground hover:text-foreground"
                   : "text-white/80 hover:text-white"
               }`}
               onClick={() => {
@@ -89,38 +89,19 @@ export const Navbar = () => {
             <LanguageSelector />
             <Show when="signed-out">
               <Link href="/sign-in">
-                <Button
-                  className={
-                    isScrolled
-                      ? "border-gray-300 bg-transparent text-gray-700 hover:bg-gray-100"
-                      : "border-white/30 bg-transparent text-white hover:bg-white/10"
-                  }
-                  variant="outline"
-                >
+                <Button variant={isScrolled ? "outline" : "outline-night"}>
                   {t.signIn}
                 </Button>
               </Link>
               <Link href="/sign-up">
-                <Button
-                  className={
-                    isScrolled
-                      ? "bg-red-600 text-white hover:bg-red-700"
-                      : "bg-amber-400 text-green-800 hover:bg-yellow-400"
-                  }
-                >
+                <Button variant={isScrolled ? "brand" : "gold"}>
                   {t.signUp}
                 </Button>
               </Link>
             </Show>
             <Show when="signed-in">
               <Link href="/browse">
-                <Button
-                  className={
-                    isScrolled
-                      ? "bg-red-600 text-white hover:bg-red-700"
-                      : "bg-amber-400 text-green-800 hover:bg-yellow-400"
-                  }
-                >
+                <Button variant={isScrolled ? "brand" : "gold"}>
                   {t.goToApp}
                 </Button>
               </Link>
@@ -135,7 +116,7 @@ export const Navbar = () => {
           </div>
 
           <button
-            className={`md:hidden ${isScrolled ? "text-gray-900" : "text-white"}`}
+            className={`md:hidden ${isScrolled ? "text-foreground" : "text-white"}`}
             onClick={() => {
               setIsMobileMenuOpen(!isMobileMenuOpen);
             }}
@@ -153,7 +134,7 @@ export const Navbar = () => {
           <div className="border-t border-white/10 bg-white py-4 md:hidden">
             <div className="flex flex-col gap-4">
               <button
-                className="px-2 text-left text-sm font-medium text-gray-700"
+                className="text-foreground/80 px-2 text-left text-sm font-medium"
                 onClick={() => {
                   scrollToSection("how-it-works");
                 }}
@@ -162,7 +143,7 @@ export const Navbar = () => {
                 {t.howItWorks}
               </button>
               <button
-                className="px-2 text-left text-sm font-medium text-gray-700"
+                className="text-foreground/80 px-2 text-left text-sm font-medium"
                 onClick={() => {
                   scrollToSection("about");
                 }}
@@ -173,7 +154,7 @@ export const Navbar = () => {
               <div className="px-2">
                 <LanguageSelector />
               </div>
-              <div className="flex gap-2 border-t border-gray-100 pt-4">
+              <div className="border-border/60 flex gap-2 border-t pt-4">
                 <Show when="signed-out">
                   <Link className="flex-1" href="/sign-in">
                     <Button className="w-full" variant="outline">
@@ -181,14 +162,14 @@ export const Navbar = () => {
                     </Button>
                   </Link>
                   <Link className="flex-1" href="/sign-up">
-                    <Button className="w-full bg-red-600 text-white hover:bg-red-700">
+                    <Button className="w-full" variant="brand">
                       {t.signUp}
                     </Button>
                   </Link>
                 </Show>
                 <Show when="signed-in">
                   <Link className="flex-1" href="/browse">
-                    <Button className="w-full bg-red-600 text-white hover:bg-red-700">
+                    <Button className="w-full" variant="brand">
                       {t.goToApp}
                     </Button>
                   </Link>

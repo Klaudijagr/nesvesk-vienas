@@ -36,12 +36,12 @@ export const DashboardNavbar = () => {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm">
+    <nav className="border-border sticky top-0 z-50 border-b bg-white shadow-sm">
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Left: Logo */}
           <Link className="flex items-center gap-3" href="/browse">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500">
+            <div className="bg-brand flex h-10 w-10 items-center justify-center rounded-xl">
               <Gift className="h-6 w-6 text-white" />
             </div>
             <div className="hidden flex-col sm:flex">
@@ -60,8 +60,8 @@ export const DashboardNavbar = () => {
               <Link
                 className={`flex h-16 flex-col items-center justify-center gap-1 px-5 text-xs font-medium transition-colors ${
                   isActive(item.url)
-                    ? "border-b-2 border-red-500 text-red-600"
-                    : "border-b-2 border-transparent text-gray-600 hover:bg-gray-50 hover:text-red-500"
+                    ? "border-brand text-brand border-b-2"
+                    : "text-muted-foreground hover:bg-muted hover:text-brand border-b-2 border-transparent"
                 }`}
                 href={item.url}
                 key={item.url}
@@ -69,7 +69,7 @@ export const DashboardNavbar = () => {
                 <div className="relative">
                   <item.icon className="h-5 w-5" />
                   {item.badge !== undefined && item.badge !== 0 ? (
-                    <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-medium text-white">
+                    <span className="bg-brand text-2xs absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-medium text-white">
                       {item.badge > 9 ? "9+" : item.badge}
                     </span>
                   ) : null}
@@ -93,7 +93,7 @@ export const DashboardNavbar = () => {
             />
             {/* Mobile menu button */}
             <button
-              className="text-gray-600 md:hidden"
+              className="text-muted-foreground md:hidden"
               onClick={() => {
                 setIsMobileMenuOpen(!isMobileMenuOpen);
               }}
@@ -111,14 +111,14 @@ export const DashboardNavbar = () => {
 
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
-        <div className="border-t border-gray-100 bg-white md:hidden">
+        <div className="border-border/60 border-t bg-white md:hidden">
           <div className="space-y-1 px-4 py-3">
             {navItems.map((item) => (
               <Link
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${
                   isActive(item.url)
-                    ? "bg-red-50 text-red-600"
-                    : "text-gray-700 hover:bg-gray-50"
+                    ? "bg-brand/5 text-brand"
+                    : "text-foreground/80 hover:bg-muted"
                 }`}
                 href={item.url}
                 key={item.url}
@@ -129,7 +129,7 @@ export const DashboardNavbar = () => {
                 <div className="relative">
                   <item.icon className="h-5 w-5" />
                   {item.badge !== undefined && item.badge !== 0 ? (
-                    <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-medium text-white">
+                    <span className="bg-brand text-2xs absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-medium text-white">
                       {item.badge > 9 ? "9+" : item.badge}
                     </span>
                   ) : null}
@@ -137,7 +137,7 @@ export const DashboardNavbar = () => {
                 <span>{item.title}</span>
               </Link>
             ))}
-            <div className="border-t border-gray-100 pt-3 sm:hidden">
+            <div className="border-border/60 border-t pt-3 sm:hidden">
               <LanguageSelector />
             </div>
           </div>

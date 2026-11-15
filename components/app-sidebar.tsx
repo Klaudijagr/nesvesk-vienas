@@ -45,7 +45,7 @@ export const AppSidebar = () => {
           posthog.capture("sidebar_logo_clicked", { target_url: "/" });
         }}
       >
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500">
+        <div className="bg-brand flex h-10 w-10 items-center justify-center rounded-xl">
           <Gift className="h-6 w-6 text-white" />
         </div>
         <div className="flex flex-col">
@@ -75,7 +75,7 @@ export const AppSidebar = () => {
               <item.icon className="h-5 w-5" />
               <span className="flex-1 text-left">{item.title}</span>
               {item.badge !== undefined && item.badge !== 0 ? (
-                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-medium text-white">
+                <span className="bg-brand flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium text-white">
                   {item.badge}
                 </span>
               ) : null}

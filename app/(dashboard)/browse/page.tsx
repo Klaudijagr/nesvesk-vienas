@@ -75,7 +75,7 @@ const ResultsHeader = ({
   t: ReturnType<typeof useLocale>["t"];
 }) => (
   <div className="mb-6 flex items-center justify-between">
-    <h2 className="text-xl font-bold text-gray-900">
+    <h2 className="text-foreground text-xl font-bold">
       {isLoading
         ? t.loading
         : `${count} ${activeTab === "host" ? t.hostsFound : t.guestsFound}`}
@@ -84,7 +84,7 @@ const ResultsHeader = ({
     <div className="flex items-center gap-3">
       <div className="group relative">
         <button
-          className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-black"
+          className="text-foreground/80 flex items-center gap-2 text-sm font-medium hover:text-black"
           type="button"
         >
           {t.sortBy}{" "}
@@ -93,9 +93,9 @@ const ResultsHeader = ({
           </span>
           <ChevronDown className="h-4 w-4" />
         </button>
-        <div className="absolute right-0 z-50 mt-2 hidden w-40 overflow-hidden rounded-lg border border-gray-100 bg-white shadow-lg group-hover:block">
+        <div className="border-border/60 absolute right-0 z-50 mt-2 hidden w-40 overflow-hidden rounded-lg border bg-white shadow-lg group-hover:block">
           <button
-            className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+            className="text-foreground/80 hover:bg-muted block w-full px-4 py-2 text-left text-sm"
             onClick={() => {
               onSortChange("recommended");
             }}
@@ -104,7 +104,7 @@ const ResultsHeader = ({
             {t.recommended}
           </button>
           <button
-            className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+            className="text-foreground/80 hover:bg-muted block w-full px-4 py-2 text-left text-sm"
             onClick={() => {
               onSortChange("newest");
             }}
@@ -115,14 +115,14 @@ const ResultsHeader = ({
         </div>
       </div>
 
-      <div className="mx-2 h-6 w-px bg-gray-300" />
+      <div className="bg-border mx-2 h-6 w-px" />
 
-      <div className="flex rounded-lg bg-gray-100 p-0.5">
+      <div className="bg-muted flex rounded-lg p-0.5">
         <button
           className={`rounded-md p-2 ${
             viewMode === "grid"
               ? "bg-white text-black shadow-sm"
-              : "text-gray-400 hover:text-gray-600"
+              : "text-muted-foreground/70 hover:text-muted-foreground"
           }`}
           onClick={() => {
             onViewModeChange("grid");
@@ -135,7 +135,7 @@ const ResultsHeader = ({
           className={`rounded-md p-2 ${
             viewMode === "list"
               ? "bg-white text-black shadow-sm"
-              : "text-gray-400 hover:text-gray-600"
+              : "text-muted-foreground/70 hover:text-muted-foreground"
           }`}
           onClick={() => {
             onViewModeChange("list");
@@ -233,22 +233,22 @@ const FilterBar = ({
         open={citySelectOpen}
         value={selectedCity || "__all__"}
       >
-        <SelectTrigger className="h-12 w-full flex-1 rounded-lg border-gray-200 bg-white shadow-sm hover:border-gray-300">
-          <MapPin className="mr-2 h-4 w-4 text-gray-400" />
+        <SelectTrigger className="w-full flex-1" size="lg">
+          <MapPin className="text-muted-foreground/70 mr-2 h-4 w-4" />
           <SelectValue placeholder={t.anywhereInLithuania} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="__all__">
             {t.anywhereInLithuania}
             {filterCounts && (
-              <span className="ml-auto pl-2 text-gray-400">
+              <span className="text-muted-foreground/70 ml-auto pl-2">
                 {filterCounts.totalProfiles}
               </span>
             )}
           </SelectItem>
           {citiesWithProfiles.map(({ name, count }) => (
             <SelectItem
-              className={count === 0 ? "text-gray-400" : ""}
+              className={count === 0 ? "text-muted-foreground" : ""}
               disabled={count === 0}
               key={name}
               value={name}
@@ -256,7 +256,7 @@ const FilterBar = ({
               <span className="flex w-full items-center justify-between">
                 <span>{name}</span>
                 <span
-                  className={`ml-auto pl-2 ${count === 0 ? "text-gray-300" : "text-gray-400"}`}
+                  className={`ml-auto pl-2 ${count === 0 ? "text-muted-foreground/50" : "text-muted-foreground/70"}`}
                 >
                   {count}
                 </span>
@@ -274,15 +274,15 @@ const FilterBar = ({
         open={dateSelectOpen}
         value={selectedDate || "__all__"}
       >
-        <SelectTrigger className="h-12 w-full flex-1 rounded-lg border-gray-200 bg-white shadow-sm hover:border-gray-300">
-          <Calendar className="mr-2 h-4 w-4 text-gray-400" />
+        <SelectTrigger className="w-full flex-1" size="lg">
+          <Calendar className="text-muted-foreground/70 mr-2 h-4 w-4" />
           <SelectValue placeholder={t.anyDates} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="__all__">{t.anyDates}</SelectItem>
           {datesWithProfiles.map(({ name, count }) => (
             <SelectItem
-              className={count === 0 ? "text-gray-400" : ""}
+              className={count === 0 ? "text-muted-foreground" : ""}
               disabled={count === 0}
               key={name}
               value={name}
@@ -290,7 +290,7 @@ const FilterBar = ({
               <span className="flex w-full items-center justify-between">
                 <span>{name}</span>
                 <span
-                  className={`ml-auto pl-2 ${count === 0 ? "text-gray-300" : "text-gray-400"}`}
+                  className={`ml-auto pl-2 ${count === 0 ? "text-muted-foreground/50" : "text-muted-foreground/70"}`}
                 >
                   {count}
                 </span>
@@ -308,15 +308,15 @@ const FilterBar = ({
         open={languageSelectOpen}
         value={selectedLanguage || "__all__"}
       >
-        <SelectTrigger className="h-12 w-full flex-1 rounded-lg border-gray-200 bg-white shadow-sm hover:border-gray-300">
-          <Globe className="mr-2 h-4 w-4 text-gray-400" />
+        <SelectTrigger className="w-full flex-1" size="lg">
+          <Globe className="text-muted-foreground/70 mr-2 h-4 w-4" />
           <SelectValue placeholder={t.anyLanguage} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="__all__">{t.anyLanguage}</SelectItem>
           {languagesWithProfiles.map(({ name, count }) => (
             <SelectItem
-              className={count === 0 ? "text-gray-400" : ""}
+              className={count === 0 ? "text-muted-foreground" : ""}
               disabled={count === 0}
               key={name}
               value={name}
@@ -324,7 +324,7 @@ const FilterBar = ({
               <span className="flex w-full items-center justify-between">
                 <span>{name}</span>
                 <span
-                  className={`ml-auto pl-2 ${count === 0 ? "text-gray-300" : "text-gray-400"}`}
+                  className={`ml-auto pl-2 ${count === 0 ? "text-muted-foreground/50" : "text-muted-foreground/70"}`}
                 >
                   {count}
                 </span>
@@ -336,7 +336,7 @@ const FilterBar = ({
 
       {hasFilters && (
         <button
-          className="flex h-12 items-center justify-center rounded-lg border border-transparent px-4 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
+          className="text-muted-foreground hover:bg-muted hover:text-foreground flex h-12 items-center justify-center rounded-lg border border-transparent px-4 transition-colors"
           onClick={onClear}
           title={t.clearFilters}
           type="button"
@@ -365,7 +365,7 @@ const ConnectionActions = ({
   if (profile.connectionStatus === "matched") {
     return (
       <Link
-        className="block w-full rounded-lg bg-green-600 px-3 py-2 text-center text-xs font-medium text-white transition-colors hover:bg-green-700"
+        className="bg-success hover:bg-success-strong block w-full rounded-lg px-3 py-2 text-center text-xs font-medium text-white transition-colors"
         href="/messages"
       >
         {t.message}
@@ -374,7 +374,7 @@ const ConnectionActions = ({
   }
   if (profile.connectionStatus === "pending_sent") {
     return (
-      <span className="block w-full rounded-lg border border-amber-500 bg-amber-50 px-3 py-2 text-center text-xs font-medium text-amber-600">
+      <span className="border-gold-rich bg-gold-soft/50 text-gold-strong block w-full rounded-lg border px-3 py-2 text-center text-xs font-medium">
         {t.pending}
       </span>
     );
@@ -382,7 +382,7 @@ const ConnectionActions = ({
   if (profile.connectionStatus === "pending_received") {
     return (
       <button
-        className="block w-full rounded-lg bg-blue-600 px-3 py-2 text-center text-xs font-medium text-white transition-colors hover:bg-blue-700"
+        className="bg-info hover:bg-info-strong block w-full rounded-lg px-3 py-2 text-center text-xs font-medium text-white transition-colors"
         onClick={onAccept}
         type="button"
       >
@@ -392,7 +392,7 @@ const ConnectionActions = ({
   }
   return (
     <button
-      className="block w-full rounded-lg bg-red-600 px-3 py-2 text-center text-xs font-medium text-white transition-colors hover:bg-red-700"
+      className="bg-brand hover:bg-brand-strong block w-full rounded-lg px-3 py-2 text-center text-xs font-medium text-white transition-colors"
       onClick={onInvite}
       type="button"
     >
@@ -415,8 +415,8 @@ const ListViewItem = ({
   onInvite: () => void;
   t: ReturnType<typeof useLocale>["t"];
 }) => (
-  <div className="group flex flex-col gap-6 rounded-xl border border-gray-200 bg-white p-4 transition-all hover:shadow-md md:flex-row">
-    <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+  <div className="group border-border flex flex-col gap-6 rounded-xl border bg-white p-4 transition-all hover:shadow-md md:flex-row">
+    <div className="bg-muted relative h-32 w-32 shrink-0 overflow-hidden rounded-lg">
       <Image
         alt={profile.firstName}
         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -432,29 +432,31 @@ const ListViewItem = ({
     <div className="flex-1 py-1">
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="text-lg font-bold text-gray-900">
+          <h3 className="text-foreground text-lg font-bold">
             {profile.firstName}
             {profile.role !== "host" && profile.age && `, ${profile.age}`}
           </h3>
-          <p className="mt-1 flex items-center gap-1 text-xs text-gray-500">
+          <p className="text-muted-foreground mt-1 flex items-center gap-1 text-xs">
             <MapPin className="h-3 w-3" /> {profile.city}
           </p>
         </div>
         <span
           className={`inline-block rounded-md border px-2 py-1 text-xs font-bold tracking-wide uppercase ${
             profile.verified
-              ? "border-green-100 bg-green-50 text-green-700"
-              : "border-gray-100 bg-gray-50 text-gray-500"
+              ? "border-success/10 bg-success/5 text-success-strong"
+              : "border-border/60 bg-muted/50 text-muted-foreground"
           }`}
         >
           {profile.verified ? t.verified : t.unverified}
         </span>
       </div>
-      <p className="mt-2 line-clamp-2 text-sm text-gray-600">{profile.bio}</p>
+      <p className="text-muted-foreground mt-2 line-clamp-2 text-sm">
+        {profile.bio}
+      </p>
       <div className="mt-3 flex flex-wrap gap-2">
         {profile.languages.map((l) => (
           <span
-            className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600"
+            className="bg-muted text-muted-foreground rounded-full px-2 py-1 text-xs"
             key={l}
           >
             {l}
@@ -462,15 +464,15 @@ const ListViewItem = ({
         ))}
       </div>
     </div>
-    <div className="flex w-full flex-col justify-between gap-3 border-t border-gray-100 py-1 pl-0 md:w-48 md:border-t-0 md:border-l md:pl-6">
+    <div className="border-border/60 flex w-full flex-col justify-between gap-3 border-t py-1 pl-0 md:w-48 md:border-t-0 md:border-l md:pl-6">
       <div>
-        <p className="text-xs font-semibold tracking-wide text-gray-900 uppercase">
+        <p className="text-foreground text-xs font-semibold tracking-wide uppercase">
           {t.availability}
         </p>
         <div className="mt-1 flex flex-wrap gap-1">
           {profile.availableDates.map((d) => (
             <span
-              className="rounded bg-red-50 px-1.5 py-0.5 text-xs text-red-600"
+              className="bg-brand/5 text-brand rounded px-1.5 py-0.5 text-xs"
               key={d}
             >
               {d}
@@ -480,7 +482,7 @@ const ListViewItem = ({
       </div>
       <div className="mt-auto space-y-2">
         <Link
-          className="block w-full rounded-lg bg-gray-100 px-3 py-2 text-center text-xs font-medium text-gray-900 transition-colors hover:bg-gray-200"
+          className="bg-muted text-foreground hover:bg-border block w-full rounded-lg px-3 py-2 text-center text-xs font-medium transition-colors"
           href={
             profile.username === undefined || profile.username === ""
               ? `/profile/${profile.userId}`
@@ -506,15 +508,15 @@ const LoadingSkeleton = () => (
   <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
       <div
-        className="animate-pulse rounded-lg border border-gray-200 bg-white"
+        className="border-border animate-pulse rounded-lg border bg-white"
         key={i}
       >
-        <div className="h-32 rounded-t-lg bg-gray-200" />
+        <div className="bg-border h-32 rounded-t-lg" />
         <div className="space-y-2 p-3">
-          <div className="h-2 w-1/2 rounded bg-gray-200" />
-          <div className="h-2 w-3/4 rounded bg-gray-200" />
-          <div className="mt-3 border-t border-gray-100 pt-2">
-            <div className="h-2 w-1/3 rounded bg-gray-200" />
+          <div className="bg-border h-2 w-1/2 rounded" />
+          <div className="bg-border h-2 w-3/4 rounded" />
+          <div className="border-border/60 mt-3 border-t pt-2">
+            <div className="bg-border h-2 w-1/3 rounded" />
           </div>
         </div>
       </div>
@@ -530,14 +532,16 @@ const EmptyState = ({
   onClear: () => void;
   t: ReturnType<typeof useLocale>["t"];
 }) => (
-  <div className="rounded-xl border border-dashed border-gray-300 bg-white py-20 text-center">
-    <SlidersHorizontal className="mx-auto h-12 w-12 text-gray-300" />
-    <h3 className="mt-2 text-sm font-medium text-gray-900">
+  <div className="border-border rounded-xl border border-dashed bg-white py-20 text-center">
+    <SlidersHorizontal className="text-muted-foreground/50 mx-auto h-12 w-12" />
+    <h3 className="text-foreground mt-2 text-sm font-medium">
       {t.noMatchesFound}
     </h3>
-    <p className="mt-1 text-sm text-gray-500">{t.tryAdjustingFilters}</p>
+    <p className="text-muted-foreground mt-1 text-sm">
+      {t.tryAdjustingFilters}
+    </p>
     <button
-      className="mt-4 text-sm font-medium text-red-600 hover:underline"
+      className="text-brand mt-4 text-sm font-medium hover:underline"
       onClick={onClear}
       type="button"
     >
@@ -770,18 +774,18 @@ export default function BrowsePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="bg-muted/50 min-h-screen pb-20">
       {/* Top Bar / Search Widget */}
-      <div className="sticky top-0 z-40 border-b border-gray-200 bg-white shadow-sm">
+      <div className="border-border sticky top-0 z-40 border-b bg-white shadow-sm">
         <div className="mx-auto max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
             {/* Mode Toggle */}
-            <div className="flex shrink-0 rounded-lg bg-gray-100 p-1">
+            <div className="bg-muted flex shrink-0 rounded-lg p-1">
               <button
                 className={`rounded-md px-4 py-2 text-sm font-medium transition-all ${
                   activeTab === "host"
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-500 hover:text-gray-900"
+                    ? "text-foreground bg-white shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
                 onClick={() => {
                   setActiveTab("host");
@@ -796,8 +800,8 @@ export default function BrowsePage() {
               <button
                 className={`rounded-md px-4 py-2 text-sm font-medium transition-all ${
                   activeTab === "guest"
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-500 hover:text-gray-900"
+                    ? "text-foreground bg-white shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
                 onClick={() => {
                   setActiveTab("guest");

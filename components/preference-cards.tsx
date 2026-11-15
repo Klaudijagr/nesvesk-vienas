@@ -75,34 +75,34 @@ const GUEST_OPTIONS: PreferenceOption[] = [
 
 const COLOR_SCHEMES = {
   green: {
-    border: "border-green-500",
-    bg: "bg-green-50",
-    iconBg: "bg-green-600",
-    title: "text-green-900",
-    desc: "text-green-700",
-    dateSelected: "bg-green-600 text-white border-green-600",
+    border: "border-success",
+    bg: "bg-success/5",
+    iconBg: "bg-success",
+    title: "text-success-strong",
+    desc: "text-success-strong",
+    dateSelected: "bg-success text-white border-success",
     dateUnselected:
-      "bg-white border-green-300 text-green-700 hover:bg-green-50 hover:border-green-400",
+      "bg-white border-success/40 text-success-strong hover:bg-success/5 hover:border-success/70",
   },
   amber: {
-    border: "border-amber-500",
-    bg: "bg-amber-50",
-    iconBg: "bg-amber-500",
-    title: "text-amber-900",
-    desc: "text-amber-700",
-    dateSelected: "bg-amber-500 text-white border-amber-500",
+    border: "border-gold-rich",
+    bg: "bg-gold-soft/50",
+    iconBg: "bg-gold-rich",
+    title: "text-gold-deep",
+    desc: "text-gold-deep",
+    dateSelected: "bg-gold-rich text-white border-gold-rich",
     dateUnselected:
-      "bg-white border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400",
+      "bg-white border-gold/80 text-gold-deep hover:bg-gold-soft/50 hover:border-gold",
   },
   red: {
-    border: "border-red-500",
-    bg: "bg-red-50",
-    iconBg: "bg-red-600",
-    title: "text-red-900",
-    desc: "text-red-700",
-    dateSelected: "bg-red-600 text-white border-red-600",
+    border: "border-destructive",
+    bg: "bg-destructive/5",
+    iconBg: "bg-destructive",
+    title: "text-destructive-strong",
+    desc: "text-destructive-strong",
+    dateSelected: "bg-destructive text-white border-destructive",
     dateUnselected:
-      "bg-white border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400",
+      "bg-white border-destructive/40 text-destructive-strong hover:bg-destructive/5 hover:border-destructive/70",
   },
 } as const;
 
@@ -115,7 +115,9 @@ const IconBadgeInner = ({
   colorType: ColorType;
   isSelected: boolean;
 }) => {
-  const bgColor = isSelected ? COLOR_SCHEMES[colorType].iconBg : "bg-gray-400";
+  const bgColor = isSelected
+    ? COLOR_SCHEMES[colorType].iconBg
+    : "bg-muted-foreground/60";
 
   return (
     <div className={`rounded-full p-2 ${bgColor} transition-colors`}>
@@ -192,7 +194,7 @@ const PreferenceCardInner = ({
       className={`relative overflow-hidden rounded-xl border-2 transition-colors duration-200 ${
         isSelected
           ? `${c.border} ${c.bg} shadow-md`
-          : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+          : "border-border hover:border-muted-foreground/30 bg-white hover:shadow-sm"
       }`}
     >
       <button
@@ -209,12 +211,14 @@ const PreferenceCardInner = ({
         </div>
         <h3
           className={`mb-0.5 text-sm font-bold ${
-            isSelected ? c.title : "text-gray-800"
+            isSelected ? c.title : "text-foreground"
           }`}
         >
           {option.title}
         </h3>
-        <p className={`text-xs ${isSelected ? c.desc : "text-gray-500"}`}>
+        <p
+          className={`text-xs ${isSelected ? c.desc : "text-muted-foreground"}`}
+        >
           {option.description}
         </p>
       </button>

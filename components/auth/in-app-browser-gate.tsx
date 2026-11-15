@@ -91,7 +91,7 @@ export const InAppBrowserGate = ({
   // want to gate those browsers before mounting Clerk.
   if (isInApp === null || currentUrl === null) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+      <div className="bg-muted/50 flex min-h-screen items-center justify-center px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Checking your browser…</CardTitle>
@@ -109,7 +109,7 @@ export const InAppBrowserGate = ({
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <div className="bg-muted/50 flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Open in your browser</CardTitle>
@@ -131,7 +131,7 @@ export const InAppBrowserGate = ({
             <Input readOnly value={currentUrl} />
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button
-                className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                className="w-full"
                 onClick={() => {
                   const ua = navigator.userAgent || navigator.vendor || "";
 
@@ -149,6 +149,7 @@ export const InAppBrowserGate = ({
                   window.open(currentUrl, "_blank", "noopener,noreferrer");
                 }}
                 type="button"
+                variant="info"
               >
                 <ExternalLink className="h-4 w-4" />
                 Open in browser

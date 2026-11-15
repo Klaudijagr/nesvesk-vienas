@@ -62,7 +62,7 @@ export default function DashboardLayout({
   if (isAuthLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+        <Loader2 className="text-brand h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -71,7 +71,7 @@ export default function DashboardLayout({
   if (!isAuthenticated || profile === undefined) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+        <Loader2 className="text-brand h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -85,7 +85,7 @@ export default function DashboardLayout({
   ) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+        <Loader2 className="text-brand h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -97,7 +97,7 @@ export default function DashboardLayout({
       <VerifyBanner />
 
       {/* Main content area - scrollable, centered */}
-      <main className="flex min-h-0 flex-1 flex-col bg-gray-50">
+      <main className="bg-muted/50 flex min-h-0 flex-1 flex-col">
         {children}
       </main>
 

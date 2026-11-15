@@ -19,12 +19,12 @@ export const LanguageSelector = () => {
     <div className="border-border bg-background flex gap-1 rounded-lg border p-1">
       {languages.map((lang) => (
         <Button
-          className="min-w-[2.5rem] text-xs font-medium"
+          className="min-w-[2.5rem]"
           key={lang.code}
           onClick={() => {
             setLocale(lang.code);
           }}
-          size="sm"
+          size="compact"
           variant={locale === lang.code ? "default" : "ghost"}
         >
           {lang.label}

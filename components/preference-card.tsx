@@ -22,7 +22,7 @@ const IconWrapper = ({
   type: IconType;
   isSelected: boolean;
 }) => {
-  const bgColorClass = isSelected ? "bg-red-600" : "bg-gray-400";
+  const bgColorClass = isSelected ? "bg-brand" : "bg-muted-foreground/60";
 
   return (
     <div
@@ -47,8 +47,8 @@ export const PreferenceCard = ({
   <button
     className={`relative flex h-full min-h-[180px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 p-6 text-center transition-all duration-200 ${
       isSelected
-        ? "border-red-500 bg-red-50 shadow-md"
-        : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm"
+        ? "border-brand bg-brand/5 shadow-md"
+        : "border-border hover:border-muted-foreground/30 hover:bg-muted bg-white hover:shadow-sm"
     }`}
     onClick={() => {
       onSelect(option.id);
@@ -61,13 +61,15 @@ export const PreferenceCard = ({
 
     <h3
       className={`mb-2 text-lg font-bold ${
-        isSelected ? "text-red-900" : "text-gray-800"
+        isSelected ? "text-brand-strong" : "text-foreground"
       }`}
     >
       {option.title}
     </h3>
 
-    <p className={`text-sm ${isSelected ? "text-red-700" : "text-gray-500"}`}>
+    <p
+      className={`text-sm ${isSelected ? "text-brand-strong" : "text-muted-foreground"}`}
+    >
       {option.description}
     </p>
   </button>

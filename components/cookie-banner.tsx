@@ -29,13 +29,13 @@ export const CookieBanner = () => {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 p-4">
-      <div className="mx-auto max-w-4xl rounded-xl border border-slate-200 bg-white p-4 shadow-lg sm:p-6">
+      <div className="border-border mx-auto max-w-4xl rounded-xl border bg-white p-4 shadow-lg sm:p-6">
         {showSettings ? (
           <div>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold">Cookie Settings</h3>
               <button
-                className="p-1 text-slate-500 hover:text-slate-700"
+                className="text-muted-foreground hover:text-foreground/80 p-1"
                 onClick={() => {
                   setShowSettings(false);
                 }}
@@ -45,7 +45,7 @@ export const CookieBanner = () => {
               </button>
             </div>
             <div className="space-y-4">
-              <div className="flex items-center justify-between rounded-lg bg-slate-50 p-3">
+              <div className="bg-muted/50 flex items-center justify-between rounded-lg p-3">
                 <div>
                   <p className="font-medium">Necessary</p>
                   <p className="text-muted-foreground text-sm">
@@ -56,7 +56,7 @@ export const CookieBanner = () => {
                   Always active
                 </span>
               </div>
-              <label className="flex cursor-pointer items-center justify-between rounded-lg bg-slate-50 p-3">
+              <label className="bg-muted/50 flex cursor-pointer items-center justify-between rounded-lg p-3">
                 <div>
                   <p className="font-medium">Analytics</p>
                   <p className="text-muted-foreground text-sm">
@@ -65,14 +65,14 @@ export const CookieBanner = () => {
                 </div>
                 <input
                   checked={analytics}
-                  className="h-5 w-5 rounded text-amber-500 focus:ring-amber-500"
+                  className="text-gold-strong focus:ring-gold-rich h-5 w-5 rounded"
                   onChange={(e) => {
                     setAnalytics(e.target.checked);
                   }}
                   type="checkbox"
                 />
               </label>
-              <label className="flex cursor-pointer items-center justify-between rounded-lg bg-slate-50 p-3">
+              <label className="bg-muted/50 flex cursor-pointer items-center justify-between rounded-lg p-3">
                 <div>
                   <p className="font-medium">Marketing</p>
                   <p className="text-muted-foreground text-sm">
@@ -81,7 +81,7 @@ export const CookieBanner = () => {
                 </div>
                 <input
                   checked={marketing}
-                  className="h-5 w-5 rounded text-amber-500 focus:ring-amber-500"
+                  className="text-gold-strong focus:ring-gold-rich h-5 w-5 rounded"
                   onChange={(e) => {
                     setMarketing(e.target.checked);
                   }}
@@ -97,10 +97,7 @@ export const CookieBanner = () => {
               >
                 Save Preferences
               </Button>
-              <Button
-                className="flex-1 bg-amber-500 hover:bg-amber-600"
-                onClick={acceptAll}
-              >
+              <Button className="flex-1" onClick={acceptAll} variant="warning">
                 Accept All
               </Button>
             </div>
@@ -108,15 +105,15 @@ export const CookieBanner = () => {
         ) : (
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="flex items-start gap-3 sm:flex-1">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100">
-                <Cookie className="h-5 w-5 text-amber-600" />
+              <div className="bg-gold-soft flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                <Cookie className="text-gold-strong h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm">
                   We use cookies to enhance your experience. By continuing to
                   visit this site you agree to our use of cookies.{" "}
                   <Link
-                    className="text-amber-600 underline hover:text-amber-700"
+                    className="text-gold-strong hover:text-gold-deep underline"
                     href="/cookies"
                   >
                     Learn more
@@ -137,11 +134,7 @@ export const CookieBanner = () => {
               <Button onClick={acceptNecessary} size="sm" variant="outline">
                 Necessary Only
               </Button>
-              <Button
-                className="bg-amber-500 hover:bg-amber-600"
-                onClick={acceptAll}
-                size="sm"
-              >
+              <Button onClick={acceptAll} size="sm" variant="warning">
                 Accept All
               </Button>
             </div>

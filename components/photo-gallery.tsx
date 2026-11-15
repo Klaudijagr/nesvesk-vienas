@@ -168,14 +168,14 @@ export const PhotoGallery = ({ fallbackPhotoUrl }: PhotoGalleryProps) => {
           >
             {slot.type === "empty" ? (
               <button
-                className="flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 transition-colors hover:border-gray-400 hover:bg-gray-100"
+                className="border-border bg-muted/50 hover:border-muted-foreground/40 hover:bg-muted flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors"
                 onClick={() => {
                   handleSlotClick(index);
                 }}
                 type="button"
               >
-                <Camera className="h-5 w-5 text-gray-400" />
-                <span className="mt-1 text-xs text-gray-500">
+                <Camera className="text-muted-foreground/70 h-5 w-5" />
+                <span className="text-muted-foreground mt-1 text-xs">
                   {index === 0 ? "Main" : "Add"}
                 </span>
               </button>
@@ -192,7 +192,7 @@ export const PhotoGallery = ({ fallbackPhotoUrl }: PhotoGalleryProps) => {
                 />
 
                 {slot.type === "photo" && slot.url === mainPhoto && (
-                  <div className="absolute top-1 left-1 rounded bg-amber-500 px-1.5 py-0.5 text-xs font-medium text-white shadow-sm">
+                  <div className="bg-gold-rich absolute top-1 left-1 rounded px-1.5 py-0.5 text-xs font-medium text-white shadow-sm">
                     Main
                   </div>
                 )}
@@ -207,7 +207,7 @@ export const PhotoGallery = ({ fallbackPhotoUrl }: PhotoGalleryProps) => {
                   <div className="absolute inset-0 flex items-center justify-center gap-1 rounded-lg bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100">
                     {slot.url !== mainPhoto && slot.url && (
                       <button
-                        className="rounded-full bg-white/90 p-1.5 text-amber-600 shadow-sm transition-colors hover:bg-white"
+                        className="text-gold-strong rounded-full bg-white/90 p-1.5 shadow-sm transition-colors hover:bg-white"
                         onClick={() => {
                           void handleSetMain(slot.url);
                         }}
@@ -219,7 +219,7 @@ export const PhotoGallery = ({ fallbackPhotoUrl }: PhotoGalleryProps) => {
                     )}
                     {slot.url && (
                       <button
-                        className="rounded-full bg-white/90 p-1.5 text-red-600 shadow-sm transition-colors hover:bg-white"
+                        className="text-destructive rounded-full bg-white/90 p-1.5 shadow-sm transition-colors hover:bg-white"
                         onClick={() => {
                           void handleRemovePhoto(slot.url);
                         }}

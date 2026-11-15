@@ -25,7 +25,7 @@ const badgeVariants = cva(
         muted: "bg-muted text-muted-foreground",
         plum: "bg-plum/10 text-plum",
         "info-solid": "bg-info [a&]:hover:bg-info-strong text-white",
-        "warning-solid": "bg-gold-strong [a&]:hover:bg-gold-deep text-white",
+        "warning-solid": "bg-gold-rich [a&]:hover:bg-gold-strong text-white",
       },
     },
     defaultVariants: {

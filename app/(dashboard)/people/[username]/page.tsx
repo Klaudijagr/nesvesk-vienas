@@ -80,7 +80,7 @@ export default function UsernamePage() {
   if (profile === undefined) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+        <Loader2 className="text-brand h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -88,8 +88,10 @@ export default function UsernamePage() {
   if (profile === null) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Profile not found</h1>
-        <p className="text-gray-600">
+        <h1 className="text-foreground text-2xl font-bold">
+          Profile not found
+        </h1>
+        <p className="text-muted-foreground">
           No user found with username &quot;{username}&quot;
         </p>
         <Button
@@ -128,8 +130,8 @@ export default function UsernamePage() {
 
       {/* Sign in prompt for non-authenticated users */}
       {!isAuthenticated && (
-        <div className="mb-4 rounded-xl border border-gray-200 bg-white p-4 text-center shadow-sm">
-          <p className="mb-3 text-gray-600">
+        <div className="border-border mb-4 rounded-xl border bg-white p-4 text-center shadow-sm">
+          <p className="text-muted-foreground mb-3">
             Sign in to connect with {profile.firstName}
           </p>
           <Link href={`/sign-in?redirect=/people/${username}`}>
@@ -140,14 +142,12 @@ export default function UsernamePage() {
 
       {/* Connection Status Banner */}
       {!isOwnProfile && connectionStatus?.status === "pending_received" && (
-        <div className="mb-4 rounded-lg bg-blue-50 p-4 text-center">
-          <Users className="mx-auto mb-2 h-6 w-6 text-blue-600" />
-          <p className="font-medium text-blue-700">
+        <div className="bg-info/5 mb-4 rounded-lg p-4 text-center">
+          <Users className="text-info mx-auto mb-2 h-6 w-6" />
+          <p className="text-info-strong font-medium">
             {profile.firstName} wants to connect!
           </p>
-          <p className="mt-1 text-sm text-blue-600">
-            For {connectionStatus.date}
-          </p>
+          <p className="text-info mt-1 text-sm">For {connectionStatus.date}</p>
         </div>
       )}
 

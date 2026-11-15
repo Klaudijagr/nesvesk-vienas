@@ -505,11 +505,11 @@ export default function PrivacyPage() {
   const c = privacyContent[locale];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-muted/50 min-h-screen">
       <Navbar />
       <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
         <Link
-          className="mb-8 inline-flex items-center text-green-700 transition-colors hover:text-green-800 active:scale-95"
+          className="text-success-strong hover:text-success-strong mb-8 inline-flex items-center transition-colors active:scale-95"
           href="/"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -518,26 +518,26 @@ export default function PrivacyPage() {
 
         <div className="rounded-lg bg-white p-8 shadow-sm">
           <div className="mb-6 flex items-center gap-3">
-            <Lock className="h-8 w-8 text-green-600" />
+            <Lock className="text-success h-8 w-8" />
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{c.title}</h1>
-              <p className="text-sm text-gray-500">{c.lastUpdated}</p>
+              <h1 className="text-foreground text-3xl font-bold">{c.title}</h1>
+              <p className="text-muted-foreground text-sm">{c.lastUpdated}</p>
             </div>
           </div>
 
-          <p className="mb-8 text-lg text-gray-600">{c.intro}</p>
+          <p className="text-muted-foreground mb-8 text-lg">{c.intro}</p>
 
           <div className="space-y-8">
             {c.sections.map((section) => (
               <div key={section.title}>
-                <h2 className="mb-3 text-xl font-semibold text-gray-900">
+                <h2 className="text-foreground mb-3 text-xl font-semibold">
                   {section.title}
                 </h2>
                 {Array.isArray(section.content) ? (
                   <ul className="list-inside list-disc space-y-2">
                     {section.content.map((item, index) => (
                       <li
-                        className="leading-relaxed text-gray-600"
+                        className="text-muted-foreground leading-relaxed"
                         key={`${section.title}-${index}`}
                       >
                         {item}
@@ -545,7 +545,7 @@ export default function PrivacyPage() {
                     ))}
                   </ul>
                 ) : (
-                  <p className="leading-relaxed text-gray-600">
+                  <p className="text-muted-foreground leading-relaxed">
                     {section.content}
                   </p>
                 )}

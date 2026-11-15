@@ -62,7 +62,7 @@ export const PhotoUpload = ({
           />
           {!isUploading && (
             <button
-              className="absolute -top-1 -right-1 rounded-full bg-red-600 p-1 text-white hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive-strong absolute -top-1 -right-1 rounded-full p-1 text-white"
               onClick={handleRemovePhoto}
               type="button"
             >
@@ -77,12 +77,12 @@ export const PhotoUpload = ({
         </div>
       ) : (
         <button
-          className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 transition-colors hover:border-gray-400 hover:bg-gray-100"
+          className="border-border bg-muted/50 hover:border-muted-foreground/40 hover:bg-muted flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors"
           onClick={triggerFileSelect}
           type="button"
         >
-          <Camera className="h-6 w-6 text-gray-400" />
-          <span className="mt-1 text-xs text-gray-500">Add photo</span>
+          <Camera className="text-muted-foreground/70 h-6 w-6" />
+          <span className="text-muted-foreground mt-1 text-xs">Add photo</span>
         </button>
       )}
 

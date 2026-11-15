@@ -59,7 +59,7 @@ export default defineConfig({
             pattern: "^(SheetContent|SheetHeader|SheetFooter)$",
           },
           {
-            allow: ["layout", "spacing", "border-destructive/*"],
+            allow: ["layout", "spacing", "border-destructive"],
             pattern: "^(Card|CardHeader|CardContent|CardFooter)$",
           },
           { allow: ["layout", "gap-*"], pattern: "^Button$" },

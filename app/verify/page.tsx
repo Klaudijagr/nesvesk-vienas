@@ -60,23 +60,23 @@ const getCameraErrorMessage = (err: unknown): string => {
 // Loading state component
 const LoadingState = () => (
   <div className="flex min-h-screen items-center justify-center">
-    <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+    <Loader2 className="text-brand h-8 w-8 animate-spin" />
   </div>
 );
 
 // Already verified state
 const AlreadyVerifiedState = () => (
-  <div className="min-h-screen bg-gray-50 py-12">
+  <div className="bg-muted/50 min-h-screen py-12">
     <div className="mx-auto max-w-lg px-4">
       <Card>
         <CardContent className="py-12 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-            <ShieldCheck className="h-8 w-8 text-green-600" />
+          <div className="bg-success/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+            <ShieldCheck className="text-success h-8 w-8" />
           </div>
-          <h2 className="mb-2 text-2xl font-bold text-gray-900">
+          <h2 className="text-foreground mb-2 text-2xl font-bold">
             Already Verified
           </h2>
-          <p className="mb-6 text-gray-600">
+          <p className="text-muted-foreground mb-6">
             Your identity has been verified. You can now fully participate in
             the platform.
           </p>
@@ -93,18 +93,18 @@ const AlreadyVerifiedState = () => (
 const SuccessState = ({ confidence }: { confidence?: number }) => (
   <Card>
     <CardContent className="py-12 text-center">
-      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-        <CheckCircle className="h-8 w-8 text-green-600" />
+      <div className="bg-success/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+        <CheckCircle className="text-success h-8 w-8" />
       </div>
-      <h2 className="mb-2 text-2xl font-bold text-green-700">
+      <h2 className="text-success-strong mb-2 text-2xl font-bold">
         Verification Successful!
       </h2>
-      <p className="mb-2 text-gray-600">
+      <p className="text-muted-foreground mb-2">
         Your identity has been verified. You now have a verified badge on your
         profile.
       </p>
       {confidence !== undefined && (
-        <p className="mb-6 text-sm text-gray-500">
+        <p className="text-muted-foreground mb-6 text-sm">
           Face match confidence: {(confidence * 100).toFixed(1)}%
         </p>
       )}
@@ -152,7 +152,7 @@ const IdPhotoCard = ({
             width={320}
           />
           <button
-            className="absolute top-2 right-2 rounded-full bg-white p-1 shadow-md hover:bg-gray-100"
+            className="hover:bg-muted absolute top-2 right-2 rounded-full bg-white p-1 shadow-md"
             onClick={onClear}
             type="button"
           >
@@ -161,13 +161,15 @@ const IdPhotoCard = ({
         </div>
       ) : (
         <button
-          className="flex h-48 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-red-400 hover:bg-red-50"
+          className="border-border hover:border-brand/70 hover:bg-brand/5 flex h-48 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors"
           onClick={() => inputRef.current?.click()}
           type="button"
         >
-          <Upload className="mb-2 h-8 w-8 text-gray-400" />
-          <span className="text-sm text-gray-600">Upload ID photo</span>
-          <span className="text-xs text-gray-400">JPG, PNG up to 10MB</span>
+          <Upload className="text-muted-foreground/70 mb-2 h-8 w-8" />
+          <span className="text-muted-foreground text-sm">Upload ID photo</span>
+          <span className="text-muted-foreground/70 text-xs">
+            JPG, PNG up to 10MB
+          </span>
         </button>
       )}
     </CardContent>
@@ -226,7 +228,7 @@ const SelfieCard = ({
             width={320}
           />
           <button
-            className="absolute top-2 right-2 rounded-full bg-white p-1 shadow-md hover:bg-gray-100"
+            className="hover:bg-muted absolute top-2 right-2 rounded-full bg-white p-1 shadow-md"
             onClick={onClear}
             type="button"
           >
@@ -237,13 +239,15 @@ const SelfieCard = ({
     }
     return (
       <button
-        className="flex h-48 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-red-400 hover:bg-red-50"
+        className="border-border hover:border-brand/70 hover:bg-brand/5 flex h-48 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors"
         onClick={onStartCamera}
         type="button"
       >
-        <Camera className="mb-2 h-8 w-8 text-gray-400" />
-        <span className="text-sm text-gray-600">Take a selfie</span>
-        <span className="text-xs text-gray-400">Click to open camera</span>
+        <Camera className="text-muted-foreground/70 mb-2 h-8 w-8" />
+        <span className="text-muted-foreground text-sm">Take a selfie</span>
+        <span className="text-muted-foreground/70 text-xs">
+          Click to open camera
+        </span>
       </button>
     );
   };
@@ -485,7 +489,7 @@ const VerifyPage = () => {
 
   if (state === "success") {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="bg-muted/50 min-h-screen py-8">
         <div className="mx-auto max-w-2xl px-4">
           <SuccessState confidence={verificationResult?.confidence} />
         </div>
@@ -494,12 +498,12 @@ const VerifyPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="bg-muted/50 min-h-screen py-8">
       <div className="mx-auto max-w-2xl px-4">
         {/* Back/Skip link at top */}
         <div className="mb-6">
           <Link
-            className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
+            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
             href="/browse"
           >
             <svg
@@ -521,18 +525,18 @@ const VerifyPage = () => {
         </div>
 
         <div className="mb-8 text-center">
-          <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-            <ShieldCheck className="h-8 w-8 text-blue-600" />
+          <div className="bg-info/10 mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full">
+            <ShieldCheck className="text-info h-8 w-8" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-foreground text-3xl font-bold">
             Verify Your Identity
           </h1>
-          <p className="mx-auto mt-2 max-w-md text-gray-600">
+          <p className="text-muted-foreground mx-auto mt-2 max-w-md">
             Help build trust in our community by verifying your identity. This
             is optional but highly recommended.
           </p>
           {!modelsLoaded && (
-            <p className="mt-2 text-sm text-amber-600">
+            <p className="text-gold-strong mt-2 text-sm">
               <Loader2 className="mr-1 inline h-4 w-4 animate-spin" />
               Loading face detection models...
             </p>
@@ -544,9 +548,9 @@ const VerifyPage = () => {
             <CardTitle className="text-lg">How it works</CardTitle>
           </CardHeader>
           <CardContent>
-            <ol className="space-y-3 text-sm text-gray-600">
+            <ol className="text-muted-foreground space-y-3 text-sm">
               <li className="flex items-start gap-3">
-                <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-red-100 text-xs font-medium text-red-600">
+                <span className="bg-brand/10 text-brand flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-medium">
                   1
                 </span>
                 <span>
@@ -555,13 +559,13 @@ const VerifyPage = () => {
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-red-100 text-xs font-medium text-red-600">
+                <span className="bg-brand/10 text-brand flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-medium">
                   2
                 </span>
                 <span>Take a live selfie using your camera</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-red-100 text-xs font-medium text-red-600">
+                <span className="bg-brand/10 text-brand flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-medium">
                   3
                 </span>
                 <span>
@@ -599,9 +603,9 @@ const VerifyPage = () => {
         </div>
 
         {displayError !== null && displayError !== "" && (
-          <div className="mt-6 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
-            <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
-            <p className="text-sm whitespace-pre-line text-red-700">
+          <div className="border-destructive/20 bg-destructive/5 mt-6 flex items-start gap-3 rounded-lg border p-4">
+            <AlertCircle className="text-destructive mt-0.5 h-5 w-5 flex-shrink-0" />
+            <p className="text-destructive-strong text-sm whitespace-pre-line">
               {displayError}
             </p>
           </div>
@@ -624,13 +628,11 @@ const VerifyPage = () => {
             />
           </div>
           <Link href="/browse">
-            <Button className="text-gray-500" variant="ghost">
-              Skip for now
-            </Button>
+            <Button variant="ghost-muted">Skip for now</Button>
           </Link>
         </div>
 
-        <p className="mt-6 text-center text-xs text-gray-500">
+        <p className="text-muted-foreground mt-6 text-center text-xs">
           Your photos are processed locally in your browser and are not uploaded
           to any server. We only save whether verification was successful.
         </p>

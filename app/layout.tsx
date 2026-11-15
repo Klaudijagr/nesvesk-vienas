@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import {
   Courier_Prime,
-  Geist,
-  Geist_Mono,
   Pinyon_Script,
   Playfair_Display,
 } from "next/font/google";
@@ -15,16 +13,6 @@ import { CookieConsentProvider } from "@/contexts/cookie-consent-context";
 import { LocaleProvider } from "@/contexts/locale-context";
 
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -132,7 +120,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${courierPrime.variable} ${pinyonScript.variable} antialiased`}
+        className={`${playfair.variable} ${courierPrime.variable} ${pinyonScript.variable} antialiased`}
       >
         <ConvexClientProvider>
           <CookieConsentProvider>

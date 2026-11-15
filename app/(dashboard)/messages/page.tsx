@@ -50,14 +50,14 @@ const REPORT_REASONS = [
 ];
 
 // Role styling helpers
-const getRoleBadgeClass = (role: string): string => {
+const getRoleBadgeVariant = (role: string): "success" | "info" | "plum" => {
   if (role === "host") {
-    return "bg-green-100 text-green-700";
+    return "success";
   }
   if (role === "guest") {
-    return "bg-blue-100 text-blue-700";
+    return "info";
   }
-  return "bg-purple-100 text-purple-700";
+  return "plum";
 };
 
 const getRoleLabel = (role: string): string => {
@@ -190,20 +190,14 @@ const SidebarItemComponent = ({
   const renderTimestamp = () => {
     if (item.type === "request") {
       return (
-        <Badge
-          className="shrink-0 bg-amber-500 text-white hover:bg-amber-600"
-          variant="secondary"
-        >
+        <Badge className="shrink-0" variant="warning-solid">
           Request
         </Badge>
       );
     }
     if (item.type === "sent_request") {
       return (
-        <Badge
-          className="shrink-0 bg-blue-500 text-white hover:bg-blue-600"
-          variant="secondary"
-        >
+        <Badge className="shrink-0" variant="info-solid">
           Sent
         </Badge>
       );
@@ -253,12 +247,12 @@ const SidebarItemComponent = ({
           </AvatarFallback>
         </Avatar>
         {item.type === "request" && (
-          <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500">
+          <div className="bg-gold-rich absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full">
             <UserPlus className="h-3 w-3 text-white" />
           </div>
         )}
         {item.type === "sent_request" && (
-          <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500">
+          <div className="bg-info absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full">
             <ArrowRight className="h-3 w-3 text-white" />
           </div>
         )}
@@ -273,7 +267,7 @@ const SidebarItemComponent = ({
         <div className="text-muted-foreground flex items-center justify-between text-sm">
           {renderSubtext()}
           {item.type === "conversation" && item.unreadCount > 0 && (
-            <span className="ml-2 flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-medium text-white">
+            <span className="bg-brand ml-2 flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-xs font-medium text-white">
               {item.unreadCount}
             </span>
           )}
@@ -296,7 +290,7 @@ const MessageBubble = ({
     <div
       className={cn(
         "max-w-[70%] rounded-2xl px-4 py-2",
-        isOwn ? "rounded-br-sm bg-red-500 text-white" : "bg-muted rounded-bl-sm"
+        isOwn ? "bg-brand rounded-br-sm text-white" : "bg-muted rounded-bl-sm"
       )}
     >
       <p className="text-sm">{content}</p>
@@ -361,8 +355,8 @@ const RequestView = ({
     </div>
 
     <div className="flex flex-1 flex-col items-center justify-center p-8">
-      <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-amber-100">
-        <UserPlus className="h-12 w-12 text-amber-600" />
+      <div className="bg-gold-soft mb-6 flex h-24 w-24 items-center justify-center rounded-full">
+        <UserPlus className="text-gold-strong h-12 w-12" />
       </div>
       <h2 className="mb-2 text-2xl font-semibold">Connection Request</h2>
       <p className="text-muted-foreground mb-2 max-w-md text-center">
@@ -378,7 +372,6 @@ const RequestView = ({
       </p>
       <div className="flex gap-3">
         <Button
-          className="gap-2"
           disabled={isResponding}
           onClick={() => {
             onRespond(false);
@@ -390,12 +383,12 @@ const RequestView = ({
           Decline
         </Button>
         <Button
-          className="gap-2 bg-red-500 hover:bg-red-600"
           disabled={isResponding}
           onClick={() => {
             onRespond(true);
           }}
           size="lg"
+          variant="brand"
         >
           <Check className="h-4 w-4" />
           Accept
@@ -439,8 +432,8 @@ const SentRequestView = ({
     </div>
 
     <div className="flex flex-1 flex-col items-center justify-center p-8">
-      <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-blue-100">
-        <ArrowRight className="h-12 w-12 text-blue-600" />
+      <div className="bg-info/10 mb-6 flex h-24 w-24 items-center justify-center rounded-full">
+        <ArrowRight className="text-info h-12 w-12" />
       </div>
       <h2 className="mb-2 text-2xl font-semibold">Request Sent</h2>
       <p className="text-muted-foreground mb-2 max-w-md text-center">
@@ -455,7 +448,6 @@ const SentRequestView = ({
         You&apos;ll be able to message once they accept.
       </p>
       <Button
-        className="gap-2"
         disabled={isCancelling}
         onClick={onCancel}
         size="lg"
@@ -563,9 +555,10 @@ const ShareDetailsModal = ({
             Cancel
           </Button>
           <Button
-            className="flex-1 bg-gradient-to-r from-red-500 to-amber-500"
+            className="flex-1"
             disabled={!date || isSending}
             onClick={handleSubmit}
+            variant="festive"
           >
             {isSending ? "Sending..." : "Send Details"}
           </Button>
@@ -618,7 +611,7 @@ const ArchiveView = ({
   if (isLoading) {
     return (
       <div className="flex h-full w-full items-center justify-center">
-        <div className="border-muted h-8 w-8 animate-spin rounded-full border-4 border-t-red-500" />
+        <div className="border-muted border-t-brand h-8 w-8 animate-spin rounded-full border-4" />
       </div>
     );
   }
@@ -657,16 +650,23 @@ const ArchiveView = ({
                 className="flex items-center gap-3 rounded-lg border bg-white p-3"
                 key={`${item.type}-${item.oderId}`}
               >
-                <Avatar className={item.type === "blocked" ? "opacity-50" : ""}>
-                  <AvatarImage src={item.profile?.photoUrl} />
-                  <AvatarFallback>
-                    {item.profile?.firstName?.charAt(0) ?? "?"}
-                  </AvatarFallback>
-                </Avatar>
+                <div
+                  className={cn(
+                    "shrink-0",
+                    item.type === "blocked" && "opacity-50"
+                  )}
+                >
+                  <Avatar>
+                    <AvatarImage src={item.profile?.photoUrl} />
+                    <AvatarFallback>
+                      {item.profile?.firstName?.charAt(0) ?? "?"}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     {item.type === "blocked" && (
-                      <Ban className="h-4 w-4 shrink-0 text-red-500" />
+                      <Ban className="text-destructive h-4 w-4 shrink-0" />
                     )}
                     <span
                       className={cn(
@@ -772,8 +772,8 @@ const ReportModal = ({
       <div className="flex min-h-full items-center justify-center">
         <div className="relative w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
-              <Flag className="h-5 w-5 text-red-600" />
+            <div className="bg-destructive/10 flex h-10 w-10 items-center justify-center rounded-full">
+              <Flag className="text-destructive h-5 w-5" />
             </div>
             <div>
               <h3 className="text-lg font-semibold">Report {userName}</h3>
@@ -791,14 +791,14 @@ const ReportModal = ({
                     className={cn(
                       "flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors",
                       reason === r.value
-                        ? "border-red-500 bg-red-50"
-                        : "hover:bg-gray-50"
+                        ? "border-destructive bg-destructive/5"
+                        : "hover:bg-muted"
                     )}
                     key={r.value}
                   >
                     <input
                       checked={reason === r.value}
-                      className="h-4 w-4 text-red-500"
+                      className="text-destructive h-4 w-4"
                       name="report-reason"
                       onChange={() => {
                         setReason(r.value);
@@ -830,13 +830,14 @@ const ReportModal = ({
               Cancel
             </Button>
             <Button
-              className="flex-1 bg-red-500 hover:bg-red-600"
+              className="flex-1"
               disabled={!reason || isSubmitting}
               onClick={() => {
                 if (reason !== "") {
                   onSubmit(reason, details || undefined);
                 }
               }}
+              variant="destructive"
             >
               {isSubmitting ? "Reporting..." : "Submit Report"}
             </Button>
@@ -863,16 +864,16 @@ const ProfileSidebar = ({
 
   if (!profile) {
     return (
-      <div className="hidden w-80 shrink-0 border-l bg-gray-50 p-4 xl:block">
+      <div className="bg-muted/50 hidden w-80 shrink-0 border-l p-4 xl:block">
         <div className="flex h-full items-center justify-center">
-          <div className="border-muted h-6 w-6 animate-spin rounded-full border-2 border-t-red-500" />
+          <div className="border-muted border-t-brand h-6 w-6 animate-spin rounded-full border-2" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="hidden w-80 shrink-0 flex-col border-l bg-gray-50 xl:flex">
+    <div className="bg-muted/50 hidden w-80 shrink-0 flex-col border-l xl:flex">
       {/* Profile Header */}
       <div className="border-b bg-white p-4">
         <div className="flex flex-col items-center text-center">
@@ -888,10 +889,7 @@ const ProfileSidebar = ({
             {profile.city}
           </div>
           {profile.verified && (
-            <Badge
-              className="mt-2 bg-green-100 text-green-700"
-              variant="secondary"
-            >
+            <Badge className="mt-2" variant="success">
               <CheckCircle className="mr-1 h-3 w-3" />
               Verified
             </Badge>
@@ -904,7 +902,9 @@ const ProfileSidebar = ({
         {/* Bio */}
         {profile.bio && (
           <div className="mb-4">
-            <h4 className="mb-2 text-sm font-medium text-gray-500">About</h4>
+            <h4 className="text-muted-foreground mb-2 text-sm font-medium">
+              About
+            </h4>
             <p className="text-sm">{profile.bio}</p>
           </div>
         )}
@@ -912,16 +912,12 @@ const ProfileSidebar = ({
         {/* Languages */}
         {profile.languages.length > 0 && (
           <div className="mb-4">
-            <h4 className="mb-2 text-sm font-medium text-gray-500">
+            <h4 className="text-muted-foreground mb-2 text-sm font-medium">
               Languages
             </h4>
             <div className="flex flex-wrap gap-1">
               {profile.languages.map((lang) => (
-                <Badge
-                  className="bg-blue-100 text-blue-700"
-                  key={lang}
-                  variant="secondary"
-                >
+                <Badge key={lang} variant="info">
                   {lang}
                 </Badge>
               ))}
@@ -931,11 +927,10 @@ const ProfileSidebar = ({
 
         {/* Role / Status */}
         <div className="mb-4">
-          <h4 className="mb-2 text-sm font-medium text-gray-500">Status</h4>
-          <Badge
-            className={cn(getRoleBadgeClass(profile.role))}
-            variant="secondary"
-          >
+          <h4 className="text-muted-foreground mb-2 text-sm font-medium">
+            Status
+          </h4>
+          <Badge variant={getRoleBadgeVariant(profile.role)}>
             {getRoleLabel(profile.role)}
           </Badge>
         </div>
@@ -943,24 +938,17 @@ const ProfileSidebar = ({
         {/* Available Dates */}
         {profile.availableDates.length > 0 && (
           <div className="mb-4">
-            <h4 className="mb-2 text-sm font-medium text-gray-500">
+            <h4 className="text-muted-foreground mb-2 text-sm font-medium">
               Available
             </h4>
             <div className="flex flex-wrap gap-1">
               {profile.availableDates.slice(0, 5).map((date) => (
-                <Badge
-                  className="bg-amber-100 text-amber-700"
-                  key={date}
-                  variant="secondary"
-                >
+                <Badge key={date} variant="warning">
                   {date}
                 </Badge>
               ))}
               {profile.availableDates.length > 5 && (
-                <Badge
-                  className="bg-gray-100 text-gray-600"
-                  variant="secondary"
-                >
+                <Badge variant="muted">
                   +{profile.availableDates.length - 5} more
                 </Badge>
               )}
@@ -971,7 +959,7 @@ const ProfileSidebar = ({
         {/* View Full Profile Link */}
         {hasText(profile.username) && (
           <Link
-            className="mb-4 block w-full rounded-lg border bg-white px-4 py-2 text-center text-sm font-medium transition-colors hover:bg-gray-50"
+            className="hover:bg-muted mb-4 block w-full rounded-lg border bg-white px-4 py-2 text-center text-sm font-medium transition-colors"
             href={`/people/${profile.username}`}
           >
             View Full Profile
@@ -983,19 +971,19 @@ const ProfileSidebar = ({
       <div className="border-t bg-white p-4">
         <div className="space-y-2">
           <Button
-            className="w-full justify-start text-amber-600 hover:bg-amber-50 hover:text-amber-700"
+            className="w-full justify-start"
             onClick={onBlock}
             size="sm"
-            variant="ghost"
+            variant="ghost-warning"
           >
             <Ban className="mr-2 h-4 w-4" />
             {isBlocked ? "Unblock User" : "Block User"}
           </Button>
           <Button
-            className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700"
+            className="w-full justify-start"
             onClick={onReport}
             size="sm"
-            variant="ghost"
+            variant="ghost-destructive"
           >
             <Flag className="mr-2 h-4 w-4" />
             Report User
@@ -1033,7 +1021,7 @@ const MessagesSidebar = ({
     if (isLoading) {
       return (
         <div className="flex h-full items-center justify-center">
-          <div className="border-muted h-8 w-8 animate-spin rounded-full border-4 border-t-red-500" />
+          <div className="border-muted border-t-brand h-8 w-8 animate-spin rounded-full border-4" />
         </div>
       );
     }
@@ -1171,7 +1159,7 @@ const ConversationView = ({
         <div className="flex items-center gap-2">
           <h2 className="font-semibold">{conversation.profile?.firstName}</h2>
           {otherUserVerified === true && (
-            <Badge className="bg-green-100 text-green-700" variant="secondary">
+            <Badge variant="success">
               <CheckCircle className="mr-1 h-3 w-3" />
               Verified
             </Badge>
@@ -1233,17 +1221,11 @@ const ConversationView = ({
             )}
             <DropdownMenuSeparator className="sm:hidden" />
             {/* Always visible items */}
-            <DropdownMenuItem
-              className="text-amber-600 focus:text-amber-600"
-              onClick={onBlock}
-            >
+            <DropdownMenuItem onClick={onBlock} variant="warning">
               <Ban className="mr-2 h-4 w-4" />
               {isBlocked ? "Unblock User" : "Block User"}
             </DropdownMenuItem>
-            <DropdownMenuItem
-              className="text-red-600 focus:text-red-600"
-              onClick={onReport}
-            >
+            <DropdownMenuItem onClick={onReport} variant="destructive">
               <Flag className="mr-2 h-4 w-4" />
               Report User
             </DropdownMenuItem>
@@ -1270,7 +1252,7 @@ const ConversationView = ({
     {/* Input */}
     <div className="border-t p-4">
       {isBlocked ? (
-        <div className="text-muted-foreground flex items-center justify-center gap-2 rounded-lg bg-gray-100 py-3">
+        <div className="text-muted-foreground bg-muted flex items-center justify-center gap-2 rounded-lg py-3">
           <Ban className="h-4 w-4" />
           <span className="text-sm">Messaging is disabled</span>
         </div>
@@ -1291,9 +1273,9 @@ const ConversationView = ({
             value={messageInput}
           />
           <Button
-            className="bg-red-500 hover:bg-red-600"
             disabled={!messageInput.trim()}
             onClick={onSend}
+            variant="brand"
           >
             <ArrowRight className="h-4 w-4" />
           </Button>
@@ -1964,7 +1946,7 @@ export default function MessagesPage() {
     <Suspense
       fallback={
         <div className="flex min-h-0 flex-1 items-center justify-center">
-          <div className="border-muted h-8 w-8 animate-spin rounded-full border-4 border-t-red-500" />
+          <div className="border-muted border-t-brand h-8 w-8 animate-spin rounded-full border-4" />
         </div>
       }
     >

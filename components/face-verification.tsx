@@ -100,11 +100,11 @@ export const FaceVerification = ({
     <div className="space-y-6 p-4">
       <div className="text-center">
         <h2 className="text-xl font-semibold">Face Verification</h2>
-        <p className="text-sm text-gray-600">
+        <p className="text-muted-foreground text-sm">
           Upload two photos to verify they are the same person
         </p>
         {!modelsLoaded && (
-          <p className="text-sm text-amber-600">
+          <p className="text-gold-strong text-sm">
             Loading face detection models...
           </p>
         )}
@@ -114,10 +114,12 @@ export const FaceVerification = ({
         {/* Image 1 */}
         <div className="space-y-2">
           <span className="block text-sm font-medium">ID Document</span>
-          <div className="relative h-48 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50">
+          <div className="border-border bg-muted/50 relative h-48 rounded-lg border-2 border-dashed">
             {image1Preview === null ? (
               <div className="flex h-full items-center justify-center">
-                <span className="text-gray-400">Click to upload</span>
+                <span className="text-muted-foreground/70">
+                  Click to upload
+                </span>
               </div>
             ) : (
               <Image
@@ -144,10 +146,12 @@ export const FaceVerification = ({
         {/* Image 2 */}
         <div className="space-y-2">
           <span className="block text-sm font-medium">Selfie</span>
-          <div className="relative h-48 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50">
+          <div className="border-border bg-muted/50 relative h-48 rounded-lg border-2 border-dashed">
             {image2Preview === null ? (
               <div className="flex h-full items-center justify-center">
-                <span className="text-gray-400">Click to upload</span>
+                <span className="text-muted-foreground/70">
+                  Click to upload
+                </span>
               </div>
             ) : (
               <Image
@@ -174,7 +178,7 @@ export const FaceVerification = ({
 
       {/* Error display */}
       {error !== null && error !== "" && (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">
+        <div className="bg-destructive/5 text-destructive-strong rounded-md p-3 text-sm">
           {error}
         </div>
       )}
@@ -184,8 +188,8 @@ export const FaceVerification = ({
         <div
           className={`rounded-md p-4 ${
             verificationResult.verified
-              ? "bg-green-50 text-green-800"
-              : "bg-red-50 text-red-800"
+              ? "bg-success/5 text-success-strong"
+              : "bg-destructive/5 text-destructive-strong"
           }`}
         >
           <div className="font-semibold">
@@ -204,7 +208,7 @@ export const FaceVerification = ({
       {/* Actions */}
       <div className="flex gap-3">
         <button
-          className="flex-1 rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+          className="bg-info hover:bg-info-strong disabled:bg-border flex-1 rounded-md px-4 py-2 font-medium text-white transition-colors disabled:cursor-not-allowed"
           disabled={!(image1 && image2) || isLoading || !modelsLoaded}
           onClick={() => {
             void handleVerify();
@@ -214,7 +218,7 @@ export const FaceVerification = ({
           {isLoading ? "Verifying..." : "Verify Faces"}
         </button>
         <button
-          className="rounded-md border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50"
+          className="border-border text-foreground/80 hover:bg-muted rounded-md border px-4 py-2 transition-colors"
           onClick={handleReset}
           type="button"
         >

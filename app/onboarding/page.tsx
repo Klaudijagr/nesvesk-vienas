@@ -92,29 +92,29 @@ const Step0Consent = ({
   setMarketingConsent: (v: boolean) => void;
 }) => (
   <div className="space-y-6">
-    <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-      <p className="text-sm text-amber-800">
+    <div className="border-gold/50 bg-gold-soft/50 rounded-lg border p-4">
+      <p className="text-gold-deep text-sm">
         Before you continue, please review and accept our Terms of Service and
         Privacy Policy. This is required to use our platform.
       </p>
     </div>
 
     <div className="space-y-4">
-      <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors hover:bg-gray-50">
+      <label className="hover:bg-muted flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors">
         <input
           checked={termsAccepted}
-          className="mt-0.5 h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
+          className="border-border text-brand focus:ring-brand mt-0.5 h-5 w-5 rounded"
           onChange={(e) => {
             setTermsAccepted(e.target.checked);
           }}
           type="checkbox"
         />
         <div className="flex-1">
-          <p className="font-medium text-gray-900">Terms of Service</p>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="text-foreground font-medium">Terms of Service</p>
+          <p className="text-muted-foreground mt-1 text-sm">
             I have read and agree to the{" "}
             <Link
-              className="font-medium text-red-600 underline hover:text-red-700"
+              className="text-brand hover:text-brand-strong font-medium underline"
               href="/terms"
               target="_blank"
             >
@@ -125,21 +125,21 @@ const Step0Consent = ({
         </div>
       </label>
 
-      <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors hover:bg-gray-50">
+      <label className="hover:bg-muted flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors">
         <input
           checked={privacyAccepted}
-          className="mt-0.5 h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
+          className="border-border text-brand focus:ring-brand mt-0.5 h-5 w-5 rounded"
           onChange={(e) => {
             setPrivacyAccepted(e.target.checked);
           }}
           type="checkbox"
         />
         <div className="flex-1">
-          <p className="font-medium text-gray-900">Privacy Policy</p>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="text-foreground font-medium">Privacy Policy</p>
+          <p className="text-muted-foreground mt-1 text-sm">
             I have read and agree to the{" "}
             <Link
-              className="font-medium text-red-600 underline hover:text-red-700"
+              className="text-brand hover:text-brand-strong font-medium underline"
               href="/privacy"
               target="_blank"
             >
@@ -151,20 +151,20 @@ const Step0Consent = ({
         </div>
       </label>
 
-      <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors hover:bg-gray-50">
+      <label className="hover:bg-muted flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors">
         <input
           checked={termsAccepted && privacyAccepted}
-          className="mt-0.5 h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
+          className="border-border text-brand focus:ring-brand mt-0.5 h-5 w-5 rounded"
           disabled
           readOnly
           type="checkbox"
         />
         <div className="flex-1">
-          <p className="font-medium text-gray-900">Safety Guidelines</p>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="text-foreground font-medium">Safety Guidelines</p>
+          <p className="text-muted-foreground mt-1 text-sm">
             I understand and agree to follow the{" "}
             <Link
-              className="font-medium text-red-600 underline hover:text-red-700"
+              className="text-brand hover:text-brand-strong font-medium underline"
               href="/safety"
               target="_blank"
             >
@@ -176,21 +176,23 @@ const Step0Consent = ({
       </label>
 
       <div className="mt-6 border-t pt-4">
-        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-dashed border-gray-300 p-4 transition-colors hover:bg-gray-50">
+        <label className="border-border hover:bg-muted flex cursor-pointer items-start gap-3 rounded-lg border border-dashed p-4 transition-colors">
           <input
             checked={marketingConsent}
-            className="mt-0.5 h-5 w-5 rounded border-gray-300 text-amber-500 focus:ring-amber-500"
+            className="border-border text-gold-strong focus:ring-gold-rich mt-0.5 h-5 w-5 rounded"
             onChange={(e) => {
               setMarketingConsent(e.target.checked);
             }}
             type="checkbox"
           />
           <div className="flex-1">
-            <p className="font-medium text-gray-900">
+            <p className="text-foreground font-medium">
               Marketing Communications{" "}
-              <span className="font-normal text-gray-500">(optional)</span>
+              <span className="text-muted-foreground font-normal">
+                (optional)
+              </span>
             </p>
-            <p className="mt-1 text-sm text-gray-600">
+            <p className="text-muted-foreground mt-1 text-sm">
               I would like to receive occasional updates about new features,
               community events, and holiday celebration tips. You can
               unsubscribe at any time.
@@ -200,7 +202,7 @@ const Step0Consent = ({
       </div>
     </div>
 
-    <p className="text-center text-xs text-gray-500">
+    <p className="text-muted-foreground text-center text-xs">
       By continuing, you confirm you are at least 18 years old.
     </p>
   </div>
@@ -262,34 +264,34 @@ const GUEST_OPTIONS: PreferenceOption[] = [
 
 const COLOR_SCHEMES = {
   green: {
-    border: "border-green-500",
-    bg: "bg-green-50",
-    iconBg: "bg-green-600",
-    title: "text-green-900",
-    desc: "text-green-700",
-    dateSelected: "bg-green-600 text-white border-green-600",
+    border: "border-success",
+    bg: "bg-success/5",
+    iconBg: "bg-success",
+    title: "text-success-strong",
+    desc: "text-success-strong",
+    dateSelected: "bg-success text-white border-success",
     dateUnselected:
-      "bg-white border-green-300 text-green-700 hover:bg-green-50 hover:border-green-400",
+      "bg-white border-success/40 text-success-strong hover:bg-success/5 hover:border-success/70",
   },
   amber: {
-    border: "border-amber-500",
-    bg: "bg-amber-50",
-    iconBg: "bg-amber-500",
-    title: "text-amber-900",
-    desc: "text-amber-700",
-    dateSelected: "bg-amber-500 text-white border-amber-500",
+    border: "border-gold-rich",
+    bg: "bg-gold-soft/50",
+    iconBg: "bg-gold-rich",
+    title: "text-gold-deep",
+    desc: "text-gold-deep",
+    dateSelected: "bg-gold-rich text-white border-gold-rich",
     dateUnselected:
-      "bg-white border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400",
+      "bg-white border-gold/80 text-gold-deep hover:bg-gold-soft/50 hover:border-gold",
   },
   red: {
-    border: "border-red-500",
-    bg: "bg-red-50",
-    iconBg: "bg-red-600",
-    title: "text-red-900",
-    desc: "text-red-700",
-    dateSelected: "bg-red-600 text-white border-red-600",
+    border: "border-destructive",
+    bg: "bg-destructive/5",
+    iconBg: "bg-destructive",
+    title: "text-destructive-strong",
+    desc: "text-destructive-strong",
+    dateSelected: "bg-destructive text-white border-destructive",
     dateUnselected:
-      "bg-white border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400",
+      "bg-white border-destructive/40 text-destructive-strong hover:bg-destructive/5 hover:border-destructive/70",
   },
 } as const;
 
@@ -306,7 +308,7 @@ const IconBadge = memo(
   }) => {
     const bgColor = isSelected
       ? COLOR_SCHEMES[colorType].iconBg
-      : "bg-gray-400";
+      : "bg-muted-foreground/60";
 
     return (
       <div className={`rounded-full p-2.5 ${bgColor} transition-colors`}>
@@ -389,7 +391,7 @@ const PreferenceCardWithDates = memo(
         className={`relative overflow-hidden rounded-xl border-2 transition-colors duration-200 ${
           isSelected
             ? `${c.border} ${c.bg} shadow-md`
-            : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+            : "border-border hover:border-muted-foreground/30 bg-white hover:shadow-sm"
         }`}
       >
         <button
@@ -406,12 +408,14 @@ const PreferenceCardWithDates = memo(
           </div>
           <h3
             className={`mb-1 text-sm font-bold ${
-              isSelected ? c.title : "text-gray-800"
+              isSelected ? c.title : "text-foreground"
             }`}
           >
             {option.title}
           </h3>
-          <p className={`text-xs ${isSelected ? c.desc : "text-gray-500"}`}>
+          <p
+            className={`text-xs ${isSelected ? c.desc : "text-muted-foreground"}`}
+          >
             {option.description}
           </p>
         </button>
@@ -591,7 +595,7 @@ const Step2BasicInfo = ({
         <div className="space-y-1">
           <Label htmlFor="firstName">First Name *</Label>
           <Input
-            className={firstNameError ? "border-red-500" : ""}
+            aria-invalid={firstNameError}
             id="firstName"
             onBlur={() => {
               setTouched((prev) => ({ ...prev, firstName: true }));
@@ -603,7 +607,7 @@ const Step2BasicInfo = ({
             value={formData.firstName}
           />
           {firstNameError && (
-            <p className="text-xs text-red-500">First name is required</p>
+            <p className="text-destructive text-xs">First name is required</p>
           )}
         </div>
         <div className="space-y-1">
@@ -622,7 +626,7 @@ const Step2BasicInfo = ({
         <div className="space-y-1">
           <Label htmlFor="age">Age *</Label>
           <Input
-            className={ageError ? "border-red-500" : ""}
+            aria-invalid={ageError}
             id="age"
             max={120}
             min={18}
@@ -637,7 +641,7 @@ const Step2BasicInfo = ({
             value={formData.age}
           />
           {ageError && (
-            <p className="text-xs text-red-500">{ageErrorMessage}</p>
+            <p className="text-destructive text-xs">{ageErrorMessage}</p>
           )}
         </div>
         <div className="space-y-1">
@@ -1329,7 +1333,7 @@ const OnboardingPage = () => {
   if (isAuthLoading || profile === undefined) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+        <Loader2 className="text-brand h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -1338,7 +1342,7 @@ const OnboardingPage = () => {
   if (shouldRedirectToBrowse) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+        <Loader2 className="text-brand h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -1352,7 +1356,7 @@ const OnboardingPage = () => {
           {STEPS.map((s) => (
             <div
               className={`h-2 w-6 rounded-full transition-colors ${
-                s <= step ? "bg-red-500" : "bg-gray-200"
+                s <= step ? "bg-brand" : "bg-border"
               }`}
               key={s}
             />
@@ -1397,7 +1401,7 @@ const OnboardingPage = () => {
             )}
           </div>
           {!isCurrentStepValid && step < 6 && (
-            <p className="text-center text-sm text-amber-600">
+            <p className="text-gold-strong text-center text-sm">
               {STEP_INVALID_MESSAGES[step]}
             </p>
           )}

@@ -333,11 +333,11 @@ export default function TermsPage() {
   const c = termsContent[locale];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-muted/50 min-h-screen">
       <Navbar />
       <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
         <Link
-          className="mb-8 inline-flex items-center text-green-700 transition-colors hover:text-green-800 active:scale-95"
+          className="text-success-strong hover:text-success-strong mb-8 inline-flex items-center transition-colors active:scale-95"
           href="/"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -345,24 +345,24 @@ export default function TermsPage() {
         </Link>
 
         <div className="rounded-lg bg-white p-8 shadow-sm">
-          <h1 className="mb-2 text-3xl font-bold text-gray-900">{c.title}</h1>
-          <p className="mb-6 text-sm text-gray-500">{c.lastUpdated}</p>
+          <h1 className="text-foreground mb-2 text-3xl font-bold">{c.title}</h1>
+          <p className="text-muted-foreground mb-6 text-sm">{c.lastUpdated}</p>
 
-          <div className="mb-8 rounded-md bg-amber-50 p-4">
-            <p className="text-sm font-medium text-amber-800">{c.intro}</p>
+          <div className="bg-gold-soft/50 mb-8 rounded-md p-4">
+            <p className="text-gold-deep text-sm font-medium">{c.intro}</p>
           </div>
 
           <div className="space-y-8">
             {c.sections.map((section) => (
               <div key={section.title}>
-                <h2 className="mb-3 text-xl font-semibold text-gray-900">
+                <h2 className="text-foreground mb-3 text-xl font-semibold">
                   {section.title}
                 </h2>
                 {Array.isArray(section.content) ? (
                   <div className="space-y-3">
                     {section.content.map((paragraph, index) => (
                       <p
-                        className="leading-relaxed text-gray-600"
+                        className="text-muted-foreground leading-relaxed"
                         key={`${section.title}-${index}`}
                       >
                         {paragraph}
@@ -370,7 +370,7 @@ export default function TermsPage() {
                     ))}
                   </div>
                 ) : (
-                  <p className="leading-relaxed text-gray-600">
+                  <p className="text-muted-foreground leading-relaxed">
                     {section.content}
                   </p>
                 )}

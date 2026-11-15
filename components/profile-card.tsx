@@ -26,25 +26,25 @@ import type { SlimProfile } from "@/lib/types";
 const getStatusStyles = (type: "host" | "guest", isDefinite: boolean) => {
   if (!isDefinite) {
     return {
-      colorClass: "border-amber-200 bg-amber-50",
-      textColorClass: "text-amber-700",
-      iconColorClass: "text-amber-600",
-      pillColorClass: "bg-amber-100 text-amber-700",
+      colorClass: "border-gold/50 bg-gold-soft/50",
+      textColorClass: "text-gold-deep",
+      iconColorClass: "text-gold-strong",
+      pillColorClass: "bg-gold-soft text-gold-deep",
     };
   }
   if (type === "host") {
     return {
-      colorClass: "border-green-200 bg-green-50",
-      textColorClass: "text-green-700",
-      iconColorClass: "text-green-600",
-      pillColorClass: "bg-green-100 text-green-700",
+      colorClass: "border-success/20 bg-success/5",
+      textColorClass: "text-success-strong",
+      iconColorClass: "text-success",
+      pillColorClass: "bg-success/10 text-success-strong",
     };
   }
   return {
-    colorClass: "border-blue-200 bg-blue-50",
-    textColorClass: "text-blue-700",
-    iconColorClass: "text-blue-600",
-    pillColorClass: "bg-blue-100 text-blue-700",
+    colorClass: "border-info/20 bg-info/5",
+    textColorClass: "text-info-strong",
+    iconColorClass: "text-info",
+    pillColorClass: "bg-info/10 text-info-strong",
   };
 };
 
@@ -109,7 +109,7 @@ const CompactStatusBadge = ({
   return (
     <div className="flex-1">
       <span
-        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${styles.pillColorClass}`}
+        className={`text-2xs inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold ${styles.pillColorClass}`}
       >
         <Icon className={styles.iconColorClass} size={10} />
         {label}
@@ -117,7 +117,7 @@ const CompactStatusBadge = ({
       <div className="mt-1 flex flex-wrap gap-1">
         {dates.slice(0, 3).map((date) => (
           <span
-            className={`inline-flex items-center gap-0.5 text-[9px] ${styles.textColorClass}`}
+            className={`text-3xs inline-flex items-center gap-0.5 ${styles.textColorClass}`}
             key={date}
           >
             <Calendar size={8} />
@@ -125,7 +125,7 @@ const CompactStatusBadge = ({
           </span>
         ))}
         {dates.length > 3 && (
-          <span className={`text-[9px] ${styles.textColorClass}`}>
+          <span className={`text-3xs ${styles.textColorClass}`}>
             +{dates.length - 3}
           </span>
         )}
@@ -139,14 +139,14 @@ const CompactLanguagesPills = ({ languages }: { languages: string[] }) => (
     <div className="flex flex-wrap gap-1">
       {languages.slice(0, 3).map((lang) => (
         <span
-          className="rounded-full bg-blue-50 px-1.5 py-0.5 text-[9px] font-medium text-blue-700"
+          className="bg-info/5 text-3xs text-info-strong rounded-full px-1.5 py-0.5 font-medium"
           key={lang}
         >
           {lang}
         </span>
       ))}
       {languages.length > 3 && (
-        <span className="text-[9px] text-gray-400">
+        <span className="text-3xs text-muted-foreground/70">
           +{languages.length - 3}
         </span>
       )}
@@ -163,14 +163,16 @@ const CompactVibesPills = ({ vibes }: { vibes: string[] }) => {
       <div className="flex flex-wrap gap-1">
         {vibes.slice(0, 2).map((vibe) => (
           <span
-            className="rounded-full border border-purple-200 bg-purple-50 px-1.5 py-0.5 text-[9px] font-medium text-purple-700"
+            className="border-plum/20 bg-plum/5 text-3xs text-plum rounded-full border px-1.5 py-0.5 font-medium"
             key={vibe}
           >
             {vibe}
           </span>
         ))}
         {vibes.length > 2 && (
-          <span className="text-[9px] text-gray-400">+{vibes.length - 2}</span>
+          <span className="text-3xs text-muted-foreground/70">
+            +{vibes.length - 2}
+          </span>
         )}
       </div>
     </div>
@@ -185,7 +187,7 @@ const CompactLifestyleIndicator = ({
   label: string;
 }) => (
   <span
-    className={`flex items-center gap-0.5 ${allowed ? "text-green-600" : "text-red-500"}`}
+    className={`flex items-center gap-0.5 ${allowed ? "text-success" : "text-destructive"}`}
   >
     {allowed ? <Check size={10} /> : <X size={10} />}
     {label}
@@ -201,7 +203,7 @@ const CompactLifestylePreferences = ({
   smokingAllowed: boolean;
   petsAllowed: boolean;
 }) => (
-  <div className="mt-auto flex items-center justify-between border-t border-gray-100 pt-2 text-[9px]">
+  <div className="border-border/60 text-3xs mt-auto flex items-center justify-between border-t pt-2">
     <CompactLifestyleIndicator allowed={drinkingAllowed} label="Alcohol" />
     <CompactLifestyleIndicator allowed={smokingAllowed} label="Smoke" />
     <CompactLifestyleIndicator allowed={petsAllowed} label="Pets" />
@@ -220,7 +222,7 @@ const CompactStatusSection = ({ profile }: { profile: SlimProfile }) => {
   if (!(canHost || isGuest)) {
     return (
       <div className="mb-2">
-        <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500">
+        <span className="bg-muted text-2xs text-muted-foreground inline-flex items-center rounded-full px-2 py-0.5 font-medium">
           Not available
         </span>
       </div>
@@ -256,14 +258,14 @@ const CompactImageHeader = ({ profile }: { profile: SlimProfile }) => (
       sizes="200px"
       src={getPhotoUrl(profile)}
     />
-    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+    <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent" />
 
     <div className="absolute bottom-2 left-2.5 text-white">
       <h3 className="text-sm font-bold drop-shadow-md">
         {profile.firstName}
         {profile.age ? `, ${profile.age}` : ""}
       </h3>
-      <p className="flex items-center gap-1 text-[10px] opacity-90">
+      <p className="text-2xs flex items-center gap-1 opacity-90">
         <MapPin size={10} /> {profile.city}
       </p>
     </div>
@@ -271,7 +273,7 @@ const CompactImageHeader = ({ profile }: { profile: SlimProfile }) => (
     {profile.verified && (
       <div className="absolute top-2 right-2">
         <div className="rounded-full bg-white p-0.5">
-          <CheckCircle className="text-green-600" size={12} />
+          <CheckCircle className="text-success" size={12} />
         </div>
       </div>
     )}
@@ -291,7 +293,7 @@ const CompactCard = ({
       : `/people/${profile.username}`;
 
   const card = (
-    <div className="group flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-xl border border-gray-200 bg-white text-left shadow-sm transition-all hover:shadow-md">
+    <div className="group border-border flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-xl border bg-white text-left shadow-sm transition-all hover:shadow-md">
       <CompactImageHeader profile={profile} />
 
       <div className="flex flex-1 flex-col p-2.5">
@@ -335,7 +337,7 @@ const FullProfileHeader = ({ profile }: { profile: SlimProfile }) => {
   const isOnline = lastActive === "Online now";
 
   return (
-    <div className="relative bg-gradient-to-br from-red-50 to-orange-50 p-5 pb-4">
+    <div className="from-brand/5 to-ember/5 relative bg-linear-to-br p-5 pb-4">
       <div className="flex items-start gap-3">
         <div className="relative shrink-0">
           <div className="relative h-20 w-20">
@@ -347,32 +349,34 @@ const FullProfileHeader = ({ profile }: { profile: SlimProfile }) => {
             />
           </div>
           {isOnline && (
-            <div className="absolute right-0 bottom-0 h-4 w-4 rounded-full border-2 border-white bg-green-500" />
+            <div className="bg-success absolute right-0 bottom-0 h-4 w-4 rounded-full border-2 border-white" />
           )}
         </div>
 
         <div className="flex-1 pt-0.5">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-gray-900">
+            <h2 className="text-foreground text-lg font-bold">
               {profile.firstName}
               {profile.age && (
-                <span className="font-normal text-gray-500">
+                <span className="text-muted-foreground font-normal">
                   , {profile.age}
                 </span>
               )}
             </h2>
             {profile.verified && (
-              <ShieldCheck className="text-green-600" size={16} />
+              <ShieldCheck className="text-success" size={16} />
             )}
           </div>
 
-          <div className="mt-0.5 flex items-center gap-1 text-sm text-gray-600">
+          <div className="text-muted-foreground mt-0.5 flex items-center gap-1 text-sm">
             <MapPin size={13} />
             <span>{profile.city}</span>
           </div>
 
           {lastActive !== null && !isOnline && (
-            <p className="mt-1 text-xs text-gray-400">{lastActive}</p>
+            <p className="text-muted-foreground/70 mt-1 text-xs">
+              {lastActive}
+            </p>
           )}
         </div>
       </div>
@@ -417,7 +421,7 @@ const FullStatusBadge = ({
       <div className="mt-2 grid grid-cols-2 gap-1.5">
         {dates.map((date) => (
           <span
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium whitespace-nowrap ${styles.pillColorClass}`}
+            className={`text-2xs inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium whitespace-nowrap ${styles.pillColorClass}`}
             key={date}
           >
             <Calendar size={9} />
@@ -433,14 +437,14 @@ const FullAboutSection = ({ profile }: { profile: SlimProfile }) => (
   <div className="space-y-4 px-5 py-4">
     <div className="flex gap-6">
       <div className="flex-1">
-        <p className="mb-2 flex items-center gap-1.5 text-xs font-medium tracking-wider text-gray-400 uppercase">
+        <p className="text-muted-foreground/70 mb-2 flex items-center gap-1.5 text-xs font-medium tracking-wider uppercase">
           <Globe size={12} />
           Languages
         </p>
         <div className="flex flex-wrap gap-1.5">
           {profile.languages.map((lang) => (
             <span
-              className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700"
+              className="bg-info/5 text-info-strong rounded-full px-2.5 py-1 text-xs font-medium"
               key={lang}
             >
               {lang}
@@ -451,14 +455,14 @@ const FullAboutSection = ({ profile }: { profile: SlimProfile }) => (
 
       {(profile.vibes?.length ?? 0) > 0 && (
         <div className="flex-1">
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-medium tracking-wider text-gray-400 uppercase">
+          <p className="text-muted-foreground/70 mb-2 flex items-center gap-1.5 text-xs font-medium tracking-wider uppercase">
             <Sparkles size={12} />
             Vibes
           </p>
           <div className="flex flex-wrap gap-1.5">
             {(profile.vibes ?? []).map((vibe) => (
               <span
-                className="rounded-full border border-purple-200 bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-700"
+                className="border-plum/20 bg-plum/5 text-plum rounded-full border px-2.5 py-1 text-xs font-medium"
                 key={vibe}
               >
                 {vibe}
@@ -471,14 +475,14 @@ const FullAboutSection = ({ profile }: { profile: SlimProfile }) => (
 
     {(profile.dietaryInfo?.length ?? 0) > 0 && (
       <div>
-        <p className="mb-2 flex items-center gap-1.5 text-xs font-medium tracking-wider text-gray-400 uppercase">
+        <p className="text-muted-foreground/70 mb-2 flex items-center gap-1.5 text-xs font-medium tracking-wider uppercase">
           <UtensilsCrossed size={12} />
           Dietary
         </p>
         <div className="flex flex-wrap gap-1.5">
           {(profile.dietaryInfo ?? []).map((diet) => (
             <span
-              className="rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-700"
+              className="border-ember/20 bg-ember/5 text-ember rounded-full border px-2.5 py-1 text-xs font-medium"
               key={diet}
             >
               {diet}
@@ -488,27 +492,27 @@ const FullAboutSection = ({ profile }: { profile: SlimProfile }) => (
       </div>
     )}
 
-    <div className="flex items-center justify-between border-t border-gray-100 pt-3 text-sm">
+    <div className="border-border/60 flex items-center justify-between border-t pt-3 text-sm">
       <span
-        className={`flex items-center gap-1 ${profile.drinkingAllowed ? "text-green-600" : "text-gray-400"}`}
+        className={`flex items-center gap-1 ${profile.drinkingAllowed ? "text-success" : "text-muted-foreground/70"}`}
       >
         {profile.drinkingAllowed ? <Check size={14} /> : <X size={14} />}
         Alcohol
       </span>
       <span
-        className={`flex items-center gap-1 ${profile.smokingAllowed ? "text-green-600" : "text-gray-400"}`}
+        className={`flex items-center gap-1 ${profile.smokingAllowed ? "text-success" : "text-muted-foreground/70"}`}
       >
         {profile.smokingAllowed ? <Check size={14} /> : <X size={14} />}
         Smoking
       </span>
       <span
-        className={`flex items-center gap-1 ${profile.petsAllowed ? "text-green-600" : "text-gray-400"}`}
+        className={`flex items-center gap-1 ${profile.petsAllowed ? "text-success" : "text-muted-foreground/70"}`}
       >
         {profile.petsAllowed ? <Check size={14} /> : <X size={14} />}
         Pets OK
       </span>
       {profile.hasPets && (
-        <span className="flex items-center gap-1 text-amber-600">
+        <span className="text-gold-strong flex items-center gap-1">
           <Dog size={14} />
           Has pets
         </span>
@@ -526,9 +530,11 @@ const VerificationDot = ({
 }) => (
   <div className="flex items-center gap-1">
     <div
-      className={`h-2 w-2 rounded-full ${verified ? "bg-green-500" : "bg-gray-300"}`}
+      className={`h-2 w-2 rounded-full ${verified ? "bg-success" : "bg-border"}`}
     />
-    <span className={`text-xs ${verified ? "text-gray-600" : "text-gray-400"}`}>
+    <span
+      className={`text-xs ${verified ? "text-muted-foreground" : "text-muted-foreground/70"}`}
+    >
       {label}
     </span>
   </div>
@@ -553,11 +559,11 @@ const FullCard = ({
 
   return (
     <div
-      className={`w-96 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm ${className}`}
+      className={`border-border w-96 overflow-hidden rounded-2xl border bg-white shadow-sm ${className}`}
     >
       <FullProfileHeader profile={profile} />
 
-      <div className="border-b border-gray-100 px-5 py-3">
+      <div className="border-border/60 border-b px-5 py-3">
         <div className="flex justify-center gap-2">
           {canHost && (
             <FullStatusBadge
@@ -578,14 +584,16 @@ const FullCard = ({
       </div>
 
       {profile.bio && (
-        <div className="border-b border-gray-100 px-5 py-3">
-          <p className="text-sm leading-relaxed text-gray-700">{profile.bio}</p>
+        <div className="border-border/60 border-b px-5 py-3">
+          <p className="text-foreground/80 text-sm leading-relaxed">
+            {profile.bio}
+          </p>
         </div>
       )}
 
       <FullAboutSection profile={profile} />
 
-      <div className="border-t border-gray-100 bg-gray-50 px-5 py-3">
+      <div className="border-border/60 bg-muted/50 border-t px-5 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <VerificationDot label="Email" verified />
@@ -595,7 +603,9 @@ const FullCard = ({
       </div>
 
       {Boolean(actionButton) && (
-        <div className="border-t border-gray-100 px-5 py-3">{actionButton}</div>
+        <div className="border-border/60 border-t px-5 py-3">
+          {actionButton}
+        </div>
       )}
     </div>
   );

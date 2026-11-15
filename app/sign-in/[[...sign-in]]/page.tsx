@@ -7,19 +7,19 @@ import { InAppBrowserGate } from "@/components/auth/in-app-browser-gate";
 export default function SignInPage() {
   return (
     <InAppBrowserGate mode="sign-in">
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+      <div className="bg-muted/50 flex min-h-screen items-center justify-center px-4">
         <SignIn
           appearance={{
             elements: {
               rootBox: "mx-auto",
-              card: "shadow-xl border border-gray-100",
-              headerTitle: "text-red-700",
-              headerSubtitle: "text-gray-600",
+              card: "shadow-xl border border-border/60",
+              headerTitle: "text-brand-strong",
+              headerSubtitle: "text-muted-foreground",
               socialButtonsBlockButton:
-                "border-gray-200 hover:bg-gray-50 text-gray-700",
+                "border-border hover:bg-muted text-foreground/80",
               formButtonPrimary:
-                "bg-red-600 hover:bg-red-700 text-white shadow-md",
-              footerActionLink: "text-red-700 hover:text-red-800",
+                "bg-brand hover:bg-brand-strong text-white shadow-md",
+              footerActionLink: "text-brand-strong hover:text-brand-strong",
             },
           }}
           signUpUrl="/sign-up"

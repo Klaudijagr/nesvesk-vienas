@@ -22,7 +22,7 @@ const buttonVariants = cva(
         brand: "bg-brand text-brand-foreground hover:bg-brand-strong",
         success: "bg-success hover:bg-success-strong text-white",
         info: "bg-info hover:bg-info-strong text-white",
-        warning: "bg-gold-strong hover:bg-gold-deep text-white",
+        warning: "bg-gold-rich hover:bg-gold-strong text-white",
         gold: "bg-gold text-gold-foreground hover:bg-gold/90",
         festive:
           "from-brand to-gold-strong bg-linear-to-r text-white hover:opacity-95",
@@ -39,6 +39,7 @@ const buttonVariants = cva(
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
         sm: "h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5",
+        compact: "h-8 gap-1.5 rounded-md px-3 text-xs has-[>svg]:px-2.5",
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
         icon: "size-9",
         "icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
