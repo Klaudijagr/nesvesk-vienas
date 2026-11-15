@@ -2,22 +2,24 @@
 
 import { ArrowLeft, Cookie } from "lucide-react";
 import Link from "next/link";
+
 import { Navbar } from "@/components/navbar";
 import { useLocale } from "@/contexts/locale-context";
+import type { Locale } from "@/lib/i18n";
 
-type Section = {
+interface Section {
   title: string;
   content: string | string[];
-};
+}
 
-type CookieContentItem = {
+interface CookieContentItem {
   title: string;
   lastUpdated: string;
   intro: string;
   sections: Section[];
-};
+}
 
-type CookieContent = Record<string, CookieContentItem>;
+type CookieContent = Record<Locale, CookieContentItem>;
 
 const cookieContent: CookieContent = {
   lt: {
@@ -248,54 +250,56 @@ const cookieContent: CookieContent = {
 
 export default function CookiesPage() {
   const { locale } = useLocale();
-  const content = cookieContent[locale] || cookieContent.en;
+  const content = cookieContent[locale];
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#0F172A]">
+    <div className="bg-night flex min-h-screen flex-col">
       <Navbar />
       <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
           <Link
-            className="mb-6 inline-flex items-center gap-2 text-amber-400 transition-colors hover:text-amber-300"
+            className="text-gold hover:text-gold-bright mb-6 inline-flex items-center gap-2 transition-colors"
             href="/"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to home</span>
           </Link>
 
-          <div className="rounded-2xl border border-slate-700/50 bg-slate-800/50 p-6 backdrop-blur-sm sm:p-8">
+          <div className="border-night-border/50 bg-night-raised/50 rounded-2xl border p-6 backdrop-blur-sm sm:p-8">
             <div className="mb-8 flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10">
-                <Cookie className="h-6 w-6 text-amber-400" />
+              <div className="bg-gold-rich/10 flex h-12 w-12 items-center justify-center rounded-xl">
+                <Cookie className="text-gold h-6 w-6" />
               </div>
               <div>
-                <h1 className="font-bold font-serif text-2xl text-amber-100 sm:text-3xl">
+                <h1 className="text-gold-soft font-serif text-2xl font-bold sm:text-3xl">
                   {content.title}
                 </h1>
-                <p className="text-slate-400 text-sm">{content.lastUpdated}</p>
+                <p className="text-night-muted text-sm">
+                  {content.lastUpdated}
+                </p>
               </div>
             </div>
 
-            <p className="mb-8 text-slate-300">{content.intro}</p>
+            <p className="text-night-foreground/80 mb-8">{content.intro}</p>
 
             <div className="space-y-8">
               {content.sections.map((section) => (
                 <section key={section.title}>
-                  <h2 className="mb-3 font-semibold text-amber-100 text-lg">
+                  <h2 className="text-gold-soft mb-3 text-lg font-semibold">
                     {section.title}
                   </h2>
                   {typeof section.content === "string" ? (
-                    <p className="text-slate-300 leading-relaxed">
+                    <p className="text-night-foreground/80 leading-relaxed">
                       {section.content}
                     </p>
                   ) : (
                     <ul className="space-y-3">
                       {section.content.map((item) => (
                         <li
-                          className="flex gap-3 text-slate-300 leading-relaxed"
+                          className="text-night-foreground/80 flex gap-3 leading-relaxed"
                           key={item.slice(0, 50)}
                         >
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />
+                          <span className="bg-gold mt-2 h-1.5 w-1.5 shrink-0 rounded-full" />
                           <span>{item}</span>
                         </li>
                       ))}

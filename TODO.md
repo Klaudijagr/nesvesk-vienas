@@ -85,6 +85,8 @@ Holiday hosting/guest matching platform for Lithuania.
 - [ ] Compatibility score
 - [ ] Save/favorite profiles
 - [ ] PWA support
+- [ ] Date picker for list-view invites on Browse (`handleInvite` in `app/(dashboard)/browse/page.tsx` always sends "24 Dec")
+- [ ] Add profile URLs to `app/sitemap.ts` if `/people/[username]` pages ever become public (they require sign-in today)
 
 ---
 
@@ -103,14 +105,14 @@ Holiday hosting/guest matching platform for Lithuania.
 Current lint complexity limit is 15. These are flagged but work fine:
 
 | File | Score | Notes |
-|------|-------|-------|
+| --- | --- | --- |
 | `OnboardingPage` | 24/15 | 7-step wizard with 15+ fields. Hook created but not integrated yet |
 | `usePhotoUpload` | 21/15 | Centralized upload logic - complexity trade-off for reusability |
 | `profiles.ts` handler | 17/15 | Complex server query - legitimately complex |
 | `profiles.ts` filter | 17/15 | Many filter conditions - idiomatic |
 | `login-form` | 16/15 | Clean code, barely over |
 
-**Decision**: Consider raising biome complexity limit to 20 (would pass login-form & profiles.ts, still flag OnboardingPage and usePhotoUpload for future refactoring).
+**Decision**: Superseded by the move to Ultracite on Oxlint; the codebase now lints clean under its default complexity limit.
 
 ### Future Considerations
 
@@ -122,12 +124,14 @@ Current lint complexity limit is 15. These are flagged but work fine:
 ## Environment Variables Checklist
 
 **Convex Dashboard:**
+
 - `CLERK_WEBHOOK_SECRET`
 - `CLERK_SECRET_KEY`
 - `MAILEROO_API_KEY`
 - `ADMIN_CLERK_USER_IDS` (comma-separated Clerk user IDs for admin functions)
 
 **Vercel:**
+
 - `NEXT_PUBLIC_CONVEX_URL`
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 - `NEXT_PUBLIC_SENTRY_DSN`

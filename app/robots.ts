@@ -1,6 +1,12 @@
 import type { MetadataRoute } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nesveskvienas.lt";
+const DEFAULT_SITE_URL = "https://nesveskvienas.lt";
+const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+// An unset or empty variable falls back to the production URL.
+const siteUrl =
+  configuredSiteUrl === undefined || configuredSiteUrl === ""
+    ? DEFAULT_SITE_URL
+    : configuredSiteUrl;
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -14,8 +20,10 @@ export default function robots(): MetadataRoute.Robots {
           "/settings",
           "/messages",
           "/verify",
-          "/profile", // User's own profile page (protected)
-          "/(experiments)/", // Experimental pages
+          // User's own profile page (protected)
+          "/profile",
+          // Experimental pages
+          "/(experiments)/",
         ],
       },
     ],

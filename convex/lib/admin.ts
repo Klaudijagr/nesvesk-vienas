@@ -1,11 +1,11 @@
 import { extractClerkUserId } from "./auth";
 
-type Identity = {
+interface Identity {
   tokenIdentifier: string;
-};
+}
 
-function parseAdminList(value: string | undefined): Set<string> {
-  if (!value) {
+const parseAdminList = (value: string | undefined): Set<string> => {
+  if (value === undefined || value === "") {
     return new Set();
   }
   return new Set(
@@ -14,7 +14,7 @@ function parseAdminList(value: string | undefined): Set<string> {
       .map((s) => s.trim())
       .filter(Boolean)
   );
-}
+};
 
 /**
  * Guard for admin-only Convex functions.
@@ -24,9 +24,9 @@ function parseAdminList(value: string | undefined): Set<string> {
  * - Requires ADMIN_CLERK_USER_IDS to be set
  * - Requires current Clerk user id to be in that list
  */
-export async function assertAdmin(ctx: {
+export const assertAdmin = async (ctx: {
   auth: { getUserIdentity: () => Promise<Identity | null> };
-}) {
+}) => {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {
     throw new Error("Not authenticated");
@@ -47,4 +47,4 @@ export async function assertAdmin(ctx: {
   if (!admins.has(clerkUserId)) {
     throw new Error("Not authorized");
   }
-}
+};

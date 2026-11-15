@@ -2,6 +2,7 @@
 
 import { Check, Clock, Loader2, MessageCircle, Send, X } from "lucide-react";
 import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 
 type ConnectionStatus =
@@ -13,7 +14,7 @@ type ConnectionStatus =
   | "none"
   | "not_authenticated";
 
-type ProfileActionButtonProps = {
+interface ProfileActionButtonProps {
   status: ConnectionStatus | undefined;
   userId: string;
   hasAvailableDates: boolean;
@@ -21,9 +22,9 @@ type ProfileActionButtonProps = {
   onConnect: () => void;
   onAccept: () => void;
   onDecline: () => void;
-};
+}
 
-export function ProfileActionButton({
+export const ProfileActionButton = ({
   status,
   userId,
   hasAvailableDates,
@@ -31,14 +32,14 @@ export function ProfileActionButton({
   onConnect,
   onAccept,
   onDecline,
-}: ProfileActionButtonProps) {
+}: ProfileActionButtonProps) => {
   if (status === "matched") {
     return (
       <Link
         className="w-full"
         href={`/messages?chat=${userId}&type=conversation`}
       >
-        <Button className="w-full gap-2 bg-green-600 hover:bg-green-700">
+        <Button className="w-full" variant="success">
           <MessageCircle size={18} />
           Message
         </Button>
@@ -48,7 +49,7 @@ export function ProfileActionButton({
 
   if (status === "pending_sent") {
     return (
-      <Button className="w-full gap-2" disabled variant="secondary">
+      <Button className="w-full" disabled variant="secondary">
         <Clock size={18} />
         Request Sent
       </Button>
@@ -68,9 +69,10 @@ export function ProfileActionButton({
           Decline
         </Button>
         <Button
-          className="flex-1 gap-1 bg-green-600 hover:bg-green-700"
+          className="flex-1 gap-1"
           disabled={isSending}
           onClick={onAccept}
+          variant="success"
         >
           {isSending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -87,7 +89,7 @@ export function ProfileActionButton({
 
   if (status === "declined_by_them") {
     return (
-      <Button className="w-full gap-2" disabled variant="secondary">
+      <Button className="w-full" disabled variant="secondary">
         <X size={18} />
         Request Declined
       </Button>
@@ -96,7 +98,7 @@ export function ProfileActionButton({
 
   if (status === "declined_by_me") {
     return (
-      <Button className="w-full gap-2" disabled variant="secondary">
+      <Button className="w-full" disabled variant="secondary">
         <X size={18} />
         You Declined
       </Button>
@@ -105,7 +107,7 @@ export function ProfileActionButton({
 
   if (!hasAvailableDates) {
     return (
-      <Button className="w-full gap-2" disabled variant="secondary">
+      <Button className="w-full" disabled variant="secondary">
         No dates available
       </Button>
     );
@@ -113,9 +115,10 @@ export function ProfileActionButton({
 
   return (
     <Button
-      className="w-full gap-2 bg-red-500 hover:bg-red-600"
+      className="w-full"
       disabled={isSending}
       onClick={onConnect}
+      variant="brand"
     >
       {isSending ? (
         <Loader2 className="h-4 w-4 animate-spin" />
@@ -127,4 +130,4 @@ export function ProfileActionButton({
       )}
     </Button>
   );
-}
+};

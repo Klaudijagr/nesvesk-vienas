@@ -1,27 +1,18 @@
 import type { Metadata } from "next";
 import {
   Courier_Prime,
-  Geist,
-  Geist_Mono,
+  Pinyon_Script,
   Playfair_Display,
 } from "next/font/google";
+
 import { AnalyticsGate } from "@/components/analytics-gate";
 import { CookieBanner } from "@/components/cookie-banner";
 import { ConvexClientProvider } from "@/components/providers/convex-client-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { CookieConsentProvider } from "@/contexts/cookie-consent-context";
 import { LocaleProvider } from "@/contexts/locale-context";
+
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -36,7 +27,23 @@ const courierPrime = Courier_Prime({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nesveskvienas.lt";
+const DEFAULT_SITE_URL = "https://nesveskvienas.lt";
+const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+// An unset or empty variable falls back to the production URL.
+// Pinyon Script for vintage accent text
+const pinyonScript = Pinyon_Script({
+  variable: "--font-pinyon",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  // Only the .font-pinyon accent class uses it, so it is fetched on demand.
+  preload: false,
+});
+
+const siteUrl =
+  configuredSiteUrl === undefined || configuredSiteUrl === ""
+    ? DEFAULT_SITE_URL
+    : configuredSiteUrl;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -112,21 +119,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        {/* Pinyon Script for vintage accent text */}
-        <link href="https://fonts.googleapis.com" rel="preconnect" />
-        <link
-          crossOrigin="anonymous"
-          href="https://fonts.gstatic.com"
-          rel="preconnect"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap"
-          rel="stylesheet"
-        />
-      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${courierPrime.variable} antialiased`}
+        className={`${playfair.variable} ${courierPrime.variable} ${pinyonScript.variable} antialiased`}
       >
         <ConvexClientProvider>
           <CookieConsentProvider>

@@ -1,6 +1,8 @@
 "use client";
 
+import { cn } from "cn";
 import { useMutation, useQuery } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import {
   Archive,
   ArrowLeft,
@@ -21,6 +23,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,7 +39,6 @@ import { Label } from "@/components/ui/label";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { HOLIDAY_DATES } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 // Report reasons
 const REPORT_REASONS = [
@@ -48,17 +50,17 @@ const REPORT_REASONS = [
 ];
 
 // Role styling helpers
-function getRoleBadgeClass(role: string): string {
+const getRoleBadgeVariant = (role: string): "success" | "info" | "plum" => {
   if (role === "host") {
-    return "bg-green-100 text-green-700";
+    return "success";
   }
   if (role === "guest") {
-    return "bg-blue-100 text-blue-700";
+    return "info";
   }
-  return "bg-purple-100 text-purple-700";
-}
+  return "plum";
+};
 
-function getRoleLabel(role: string): string {
+const getRoleLabel = (role: string): string => {
   if (role === "host") {
     return "Hosting";
   }
@@ -66,27 +68,27 @@ function getRoleLabel(role: string): string {
     return "Looking for host";
   }
   return "Host & Guest";
-}
+};
 
 // Types
-type ProfileInfo = {
+interface ProfileInfo {
   firstName: string;
   photoUrl?: string;
   city: string;
   username?: string;
-};
+}
 
 type SidebarItem =
   | {
       type: "conversation";
-      oderId: string;
+      oderId: Id<"users">;
       profile: ProfileInfo | null;
       lastMessage?: { content: string; createdAt: number };
       unreadCount: number;
     }
   | {
       type: "request";
-      oderId: string;
+      oderId: Id<"users">;
       invitationId: Id<"invitations">;
       profile: ProfileInfo | null;
       date: string;
@@ -94,7 +96,7 @@ type SidebarItem =
     }
   | {
       type: "sent_request";
-      oderId: string;
+      oderId: Id<"users">;
       invitationId: Id<"invitations">;
       profile: ProfileInfo | null;
       date: string;
@@ -102,16 +104,22 @@ type SidebarItem =
     };
 
 // Type for conversation from getConversations query
-type ConversationsResult = typeof api.messages.getConversations._returnType;
+type ConversationsResult = FunctionReturnType<
+  typeof api.messages.getConversations
+>;
 type ConversationSummary = NonNullable<ConversationsResult>[number];
 
+// True for a string that is present and not empty
+const hasText = (value: string | null | undefined): value is string =>
+  value !== undefined && value !== null && value !== "";
+
 // Helper to resolve active items from URL params
-function resolveActiveItems(
+const resolveActiveItems = (
   activeId: string | null,
   activeType: "conversation" | "request" | null,
   sidebarItems: SidebarItem[],
   conversations: ConversationSummary[]
-) {
+) => {
   const activeItem = sidebarItems.find((item) => item.oderId === activeId);
 
   const activeConversation =
@@ -119,31 +127,33 @@ function resolveActiveItems(
       ? (conversations.find((c) => c.oderId === activeId) ?? null)
       : null;
 
-  const activeRequest =
-    activeItem?.type === "request"
-      ? (activeItem as Extract<SidebarItem, { type: "request" }>)
-      : null;
+  const activeRequest = activeItem?.type === "request" ? activeItem : null;
 
   const activeSentRequest =
-    activeItem?.type === "sent_request"
-      ? (activeItem as Extract<SidebarItem, { type: "sent_request" }>)
-      : null;
+    activeItem?.type === "sent_request" ? activeItem : null;
 
-  const otherUserId = (activeConversation?.otherUserId ||
-    activeRequest?.oderId ||
-    activeSentRequest?.oderId) as Id<"users"> | undefined;
+  const otherUserId =
+    activeConversation?.otherUserId ??
+    activeRequest?.oderId ??
+    activeSentRequest?.oderId;
 
   return {
     activeItem,
     activeConversation,
+    activeConversationId: activeConversation?.conversation?._id,
     activeRequest,
     activeSentRequest,
     otherUserId,
   };
-}
+};
+
+// Name shown for the other person, with a fallback when it is missing or empty
+const getDisplayName = (
+  profile: { firstName?: string } | null | undefined
+): string => (hasText(profile?.firstName) ? profile.firstName : "User");
 
 // Utility functions
-function formatTime(timestamp: number): string {
+const formatTime = (timestamp: number): string => {
   const date = new Date(timestamp);
   const now = new Date();
   const diff = now.getTime() - date.getTime();
@@ -159,17 +169,16 @@ function formatTime(timestamp: number): string {
     return date.toLocaleDateString("en-US", { weekday: "short" });
   }
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
+};
 
-function formatShortTime(ts: number): string {
-  return new Date(ts).toLocaleTimeString("en-US", {
+const formatShortTime = (ts: number): string =>
+  new Date(ts).toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
 
 // Sub-components
-function SidebarItemComponent({
+const SidebarItemComponent = ({
   item,
   isActive,
   onClick,
@@ -177,24 +186,18 @@ function SidebarItemComponent({
   item: SidebarItem;
   isActive: boolean;
   onClick: () => void;
-}) {
+}) => {
   const renderTimestamp = () => {
     if (item.type === "request") {
       return (
-        <Badge
-          className="shrink-0 bg-amber-500 text-white hover:bg-amber-600"
-          variant="secondary"
-        >
+        <Badge className="shrink-0" variant="warning-solid">
           Request
         </Badge>
       );
     }
     if (item.type === "sent_request") {
       return (
-        <Badge
-          className="shrink-0 bg-blue-500 text-white hover:bg-blue-600"
-          variant="secondary"
-        >
+        <Badge className="shrink-0" variant="info-solid">
           Sent
         </Badge>
       );
@@ -202,7 +205,7 @@ function SidebarItemComponent({
     // Explicitly check for conversation type for TypeScript narrowing
     if (item.type === "conversation" && item.lastMessage) {
       return (
-        <span className="shrink-0 text-muted-foreground text-xs">
+        <span className="text-muted-foreground shrink-0 text-xs">
           {formatTime(item.lastMessage.createdAt)}
         </span>
       );
@@ -227,7 +230,7 @@ function SidebarItemComponent({
   return (
     <button
       className={cn(
-        "flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-left transition-colors hover:bg-muted",
+        "hover:bg-muted flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-left transition-colors",
         isActive && "bg-muted"
       )}
       onClick={onClick}
@@ -244,12 +247,12 @@ function SidebarItemComponent({
           </AvatarFallback>
         </Avatar>
         {item.type === "request" && (
-          <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500">
+          <div className="bg-gold-rich absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full">
             <UserPlus className="h-3 w-3 text-white" />
           </div>
         )}
         {item.type === "sent_request" && (
-          <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500">
+          <div className="bg-info absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full">
             <ArrowRight className="h-3 w-3 text-white" />
           </div>
         )}
@@ -261,10 +264,10 @@ function SidebarItemComponent({
           </span>
           {renderTimestamp()}
         </div>
-        <div className="flex items-center justify-between text-muted-foreground text-sm">
+        <div className="text-muted-foreground flex items-center justify-between text-sm">
           {renderSubtext()}
           {item.type === "conversation" && item.unreadCount > 0 && (
-            <span className="ml-2 flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-red-500 px-1.5 font-medium text-white text-xs">
+            <span className="bg-brand ml-2 flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-xs font-medium text-white">
               {item.unreadCount}
             </span>
           )}
@@ -272,9 +275,9 @@ function SidebarItemComponent({
       </div>
     </button>
   );
-}
+};
 
-function MessageBubble({
+const MessageBubble = ({
   content,
   isOwn,
   timestamp,
@@ -282,50 +285,44 @@ function MessageBubble({
   content: string;
   isOwn: boolean;
   timestamp: number;
-}) {
-  return (
-    <div className={cn("flex", isOwn ? "justify-end" : "justify-start")}>
-      <div
+}) => (
+  <div className={cn("flex", isOwn ? "justify-end" : "justify-start")}>
+    <div
+      className={cn(
+        "max-w-[70%] rounded-2xl px-4 py-2",
+        isOwn ? "bg-brand rounded-br-sm text-white" : "bg-muted rounded-bl-sm"
+      )}
+    >
+      <p className="text-sm">{content}</p>
+      <p
         className={cn(
-          "max-w-[70%] rounded-2xl px-4 py-2",
-          isOwn
-            ? "rounded-br-sm bg-red-500 text-white"
-            : "rounded-bl-sm bg-muted"
+          "mt-1 text-xs",
+          isOwn ? "text-white/70" : "text-muted-foreground"
         )}
       >
-        <p className="text-sm">{content}</p>
-        <p
-          className={cn(
-            "mt-1 text-xs",
-            isOwn ? "text-white/70" : "text-muted-foreground"
-          )}
-        >
-          {formatShortTime(timestamp)}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function EmptyConversationsList() {
-  return (
-    <div className="flex h-full flex-col items-center justify-center p-4 text-center">
-      <MessageCircle className="mb-4 h-12 w-12 text-muted-foreground/50" />
-      <p className="text-muted-foreground">No messages yet</p>
-      <p className="mt-1 text-muted-foreground text-sm">
-        Connect with hosts or guests to start chatting
+        {formatShortTime(timestamp)}
       </p>
-      <Link href="/browse">
-        <Button className="mt-4" size="sm" variant="outline">
-          <UserPlus className="mr-2 h-4 w-4" />
-          Browse People
-        </Button>
-      </Link>
     </div>
-  );
-}
+  </div>
+);
 
-function RequestView({
+const EmptyConversationsList = () => (
+  <div className="flex h-full flex-col items-center justify-center p-4 text-center">
+    <MessageCircle className="text-muted-foreground/50 mb-4 h-12 w-12" />
+    <p className="text-muted-foreground">No messages yet</p>
+    <p className="text-muted-foreground mt-1 text-sm">
+      Connect with hosts or guests to start chatting
+    </p>
+    <Link href="/browse">
+      <Button className="mt-4" size="sm" variant="outline">
+        <UserPlus className="mr-2 h-4 w-4" />
+        Browse People
+      </Button>
+    </Link>
+  </div>
+);
+
+const RequestView = ({
   request,
   profileUsername,
   isResponding,
@@ -335,75 +332,74 @@ function RequestView({
   profileUsername: string | undefined;
   isResponding: boolean;
   onRespond: (accept: boolean) => void;
-}) {
-  return (
-    <>
-      <div className="flex h-[72px] items-center gap-3 border-b px-4">
-        <Avatar className="h-12 w-12">
-          <AvatarImage src={request.profile?.photoUrl} />
-          <AvatarFallback>
-            {request.profile?.firstName?.charAt(0) ?? "?"}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <h2 className="font-semibold">{request.profile?.firstName}</h2>
-          <p className="text-muted-foreground text-sm">
-            {request.profile?.city}
-          </p>
-        </div>
-        {profileUsername && (
-          <Link href={`/people/${profileUsername}`}>
-            <Button size="sm" variant="outline">
-              View Profile
-            </Button>
-          </Link>
-        )}
+}) => (
+  <>
+    <div className="flex h-[72px] items-center gap-3 border-b px-4">
+      <Avatar className="h-12 w-12">
+        <AvatarImage src={request.profile?.photoUrl} />
+        <AvatarFallback>
+          {request.profile?.firstName?.charAt(0) ?? "?"}
+        </AvatarFallback>
+      </Avatar>
+      <div className="flex-1">
+        <h2 className="font-semibold">{request.profile?.firstName}</h2>
+        <p className="text-muted-foreground text-sm">{request.profile?.city}</p>
       </div>
+      {hasText(profileUsername) && (
+        <Link href={`/people/${profileUsername}`}>
+          <Button size="sm" variant="outline">
+            View Profile
+          </Button>
+        </Link>
+      )}
+    </div>
 
-      <div className="flex flex-1 flex-col items-center justify-center p-8">
-        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-amber-100">
-          <UserPlus className="h-12 w-12 text-amber-600" />
-        </div>
-        <h2 className="mb-2 font-semibold text-2xl">Connection Request</h2>
-        <p className="mb-2 max-w-md text-center text-muted-foreground">
-          <span className="font-medium text-foreground">
-            {request.profile?.firstName}
-          </span>{" "}
-          wants to connect with you for{" "}
-          <span className="font-medium text-foreground">{request.date}</span>.
-        </p>
-        <p className="mb-8 max-w-md text-center text-muted-foreground text-sm">
-          If you accept, you'll be able to message each other and share contact
-          information.
-        </p>
-        <div className="flex gap-3">
-          <Button
-            className="gap-2"
-            disabled={isResponding}
-            onClick={() => onRespond(false)}
-            size="lg"
-            variant="outline"
-          >
-            <X className="h-4 w-4" />
-            Decline
-          </Button>
-          <Button
-            className="gap-2 bg-red-500 hover:bg-red-600"
-            disabled={isResponding}
-            onClick={() => onRespond(true)}
-            size="lg"
-          >
-            <Check className="h-4 w-4" />
-            Accept
-          </Button>
-        </div>
+    <div className="flex flex-1 flex-col items-center justify-center p-8">
+      <div className="bg-gold-soft mb-6 flex h-24 w-24 items-center justify-center rounded-full">
+        <UserPlus className="text-gold-strong h-12 w-12" />
       </div>
-    </>
-  );
-}
+      <h2 className="mb-2 text-2xl font-semibold">Connection Request</h2>
+      <p className="text-muted-foreground mb-2 max-w-md text-center">
+        <span className="text-foreground font-medium">
+          {request.profile?.firstName}
+        </span>{" "}
+        wants to connect with you for{" "}
+        <span className="text-foreground font-medium">{request.date}</span>.
+      </p>
+      <p className="text-muted-foreground mb-8 max-w-md text-center text-sm">
+        If you accept, you&apos;ll be able to message each other and share
+        contact information.
+      </p>
+      <div className="flex gap-3">
+        <Button
+          disabled={isResponding}
+          onClick={() => {
+            onRespond(false);
+          }}
+          size="lg"
+          variant="outline"
+        >
+          <X className="h-4 w-4" />
+          Decline
+        </Button>
+        <Button
+          disabled={isResponding}
+          onClick={() => {
+            onRespond(true);
+          }}
+          size="lg"
+          variant="brand"
+        >
+          <Check className="h-4 w-4" />
+          Accept
+        </Button>
+      </div>
+    </div>
+  </>
+);
 
 // Sent request view - shows status of your outgoing request
-function SentRequestView({
+const SentRequestView = ({
   request,
   profileUsername,
   onCancel,
@@ -413,64 +409,58 @@ function SentRequestView({
   profileUsername: string | undefined;
   onCancel: () => void;
   isCancelling: boolean;
-}) {
-  return (
-    <>
-      <div className="flex h-[72px] items-center gap-3 border-b px-4">
-        <Avatar className="h-12 w-12">
-          <AvatarImage src={request.profile?.photoUrl} />
-          <AvatarFallback>
-            {request.profile?.firstName?.charAt(0) ?? "?"}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <h2 className="font-semibold">{request.profile?.firstName}</h2>
-          <p className="text-muted-foreground text-sm">
-            {request.profile?.city}
-          </p>
-        </div>
-        {profileUsername && (
-          <Link href={`/people/${profileUsername}`}>
-            <Button size="sm" variant="outline">
-              View Profile
-            </Button>
-          </Link>
-        )}
+}) => (
+  <>
+    <div className="flex h-[72px] items-center gap-3 border-b px-4">
+      <Avatar className="h-12 w-12">
+        <AvatarImage src={request.profile?.photoUrl} />
+        <AvatarFallback>
+          {request.profile?.firstName?.charAt(0) ?? "?"}
+        </AvatarFallback>
+      </Avatar>
+      <div className="flex-1">
+        <h2 className="font-semibold">{request.profile?.firstName}</h2>
+        <p className="text-muted-foreground text-sm">{request.profile?.city}</p>
       </div>
+      {hasText(profileUsername) && (
+        <Link href={`/people/${profileUsername}`}>
+          <Button size="sm" variant="outline">
+            View Profile
+          </Button>
+        </Link>
+      )}
+    </div>
 
-      <div className="flex flex-1 flex-col items-center justify-center p-8">
-        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-blue-100">
-          <ArrowRight className="h-12 w-12 text-blue-600" />
-        </div>
-        <h2 className="mb-2 font-semibold text-2xl">Request Sent</h2>
-        <p className="mb-2 max-w-md text-center text-muted-foreground">
-          You sent a connection request to{" "}
-          <span className="font-medium text-foreground">
-            {request.profile?.firstName}
-          </span>{" "}
-          for{" "}
-          <span className="font-medium text-foreground">{request.date}</span>.
-        </p>
-        <p className="mb-8 max-w-md text-center text-muted-foreground text-sm">
-          They'll be notified and can accept or decline your request. You'll be
-          able to message once they accept.
-        </p>
-        <Button
-          className="gap-2"
-          disabled={isCancelling}
-          onClick={onCancel}
-          size="lg"
-          variant="outline"
-        >
-          <X className="h-4 w-4" />
-          {isCancelling ? "Cancelling..." : "Cancel Request"}
-        </Button>
+    <div className="flex flex-1 flex-col items-center justify-center p-8">
+      <div className="bg-info/10 mb-6 flex h-24 w-24 items-center justify-center rounded-full">
+        <ArrowRight className="text-info h-12 w-12" />
       </div>
-    </>
-  );
-}
+      <h2 className="mb-2 text-2xl font-semibold">Request Sent</h2>
+      <p className="text-muted-foreground mb-2 max-w-md text-center">
+        You sent a connection request to{" "}
+        <span className="text-foreground font-medium">
+          {request.profile?.firstName}
+        </span>{" "}
+        for <span className="text-foreground font-medium">{request.date}</span>.
+      </p>
+      <p className="text-muted-foreground mb-8 max-w-md text-center text-sm">
+        They&apos;ll be notified and can accept or decline your request.
+        You&apos;ll be able to message once they accept.
+      </p>
+      <Button
+        disabled={isCancelling}
+        onClick={onCancel}
+        size="lg"
+        variant="outline"
+      >
+        <X className="h-4 w-4" />
+        {isCancelling ? "Cancelling..." : "Cancel Request"}
+      </Button>
+    </div>
+  </>
+);
 
-function ShareDetailsModal({
+const ShareDetailsModal = ({
   isOpen,
   onClose,
   onSubmit,
@@ -485,7 +475,7 @@ function ShareDetailsModal({
     note: string;
   }) => void;
   isSending: boolean;
-}) {
+}) => {
   const [date, setDate] = useState("");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
@@ -506,14 +496,16 @@ function ShareDetailsModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-        <h3 className="mb-4 font-semibold text-lg">Share Event Details</h3>
+        <h3 className="mb-4 text-lg font-semibold">Share Event Details</h3>
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="shareDate">Date *</Label>
             <select
-              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
               id="shareDate"
-              onChange={(e) => setDate(e.target.value)}
+              onChange={(e) => {
+                setDate(e.target.value);
+              }}
               value={date}
             >
               <option value="">Select a date...</option>
@@ -528,7 +520,9 @@ function ShareDetailsModal({
             <Label htmlFor="shareAddress">Address</Label>
             <Input
               id="shareAddress"
-              onChange={(e) => setAddress(e.target.value)}
+              onChange={(e) => {
+                setAddress(e.target.value);
+              }}
               placeholder="Where should they come?"
               value={address}
             />
@@ -537,7 +531,9 @@ function ShareDetailsModal({
             <Label htmlFor="sharePhone">Phone</Label>
             <Input
               id="sharePhone"
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => {
+                setPhone(e.target.value);
+              }}
               placeholder="Your contact number"
               value={phone}
             />
@@ -546,7 +542,9 @@ function ShareDetailsModal({
             <Label htmlFor="shareNote">Note</Label>
             <Input
               id="shareNote"
-              onChange={(e) => setNote(e.target.value)}
+              onChange={(e) => {
+                setNote(e.target.value);
+              }}
               placeholder="Any additional info..."
               value={note}
             />
@@ -557,9 +555,10 @@ function ShareDetailsModal({
             Cancel
           </Button>
           <Button
-            className="flex-1 bg-gradient-to-r from-red-500 to-amber-500"
+            className="flex-1"
             disabled={!date || isSending}
             onClick={handleSubmit}
+            variant="festive"
           >
             {isSending ? "Sending..." : "Send Details"}
           </Button>
@@ -567,25 +566,23 @@ function ShareDetailsModal({
       </div>
     </div>
   );
-}
+};
 
-function EmptyState() {
-  return (
-    <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-      <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-        <MessageCircle className="h-10 w-10 text-muted-foreground" />
-      </div>
-      <h2 className="mb-2 font-semibold text-xl">Your Messages</h2>
-      <p className="max-w-sm text-muted-foreground">
-        Select a conversation to start chatting, or respond to connection
-        requests from hosts and guests.
-      </p>
+const EmptyState = () => (
+  <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
+    <div className="bg-muted mb-4 flex h-20 w-20 items-center justify-center rounded-full">
+      <MessageCircle className="text-muted-foreground h-10 w-10" />
     </div>
-  );
-}
+    <h2 className="mb-2 text-xl font-semibold">Your Messages</h2>
+    <p className="text-muted-foreground max-w-sm">
+      Select a conversation to start chatting, or respond to connection requests
+      from hosts and guests.
+    </p>
+  </div>
+);
 
 // Archive View - displays archived conversations and blocked users
-type ArchivedItem = {
+interface ArchivedItem {
   type: "archived" | "blocked";
   oderId: Id<"users">;
   conversationId?: Id<"conversations">;
@@ -596,9 +593,9 @@ type ArchivedItem = {
     city: string;
   } | null;
   sortDate: number;
-};
+}
 
-function ArchiveView({
+const ArchiveView = ({
   items,
   isLoading,
   onBack,
@@ -610,11 +607,11 @@ function ArchiveView({
   onBack: () => void;
   onUnarchive: (conversationId: Id<"conversations">) => void;
   onUnblock: (userId: Id<"users">) => void;
-}) {
+}) => {
   if (isLoading) {
     return (
       <div className="flex h-full w-full items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
+        <div className="border-muted border-t-brand h-8 w-8 animate-spin rounded-full border-4" />
       </div>
     );
   }
@@ -627,7 +624,7 @@ function ArchiveView({
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1">
-          <h2 className="font-semibold text-lg">Archived</h2>
+          <h2 className="text-lg font-semibold">Archived</h2>
           <p className="text-muted-foreground text-sm">
             {items.length} {items.length === 1 ? "item" : "items"}
           </p>
@@ -637,11 +634,11 @@ function ArchiveView({
       {/* Content */}
       {items.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-          <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-            <Archive className="h-10 w-10 text-muted-foreground" />
+          <div className="bg-muted mb-4 flex h-20 w-20 items-center justify-center rounded-full">
+            <Archive className="text-muted-foreground h-10 w-10" />
           </div>
-          <h2 className="mb-2 font-semibold text-xl">No archived items</h2>
-          <p className="max-w-sm text-muted-foreground">
+          <h2 className="mb-2 text-xl font-semibold">No archived items</h2>
+          <p className="text-muted-foreground max-w-sm">
             Archived conversations and blocked users will appear here.
           </p>
         </div>
@@ -653,16 +650,23 @@ function ArchiveView({
                 className="flex items-center gap-3 rounded-lg border bg-white p-3"
                 key={`${item.type}-${item.oderId}`}
               >
-                <Avatar className={item.type === "blocked" ? "opacity-50" : ""}>
-                  <AvatarImage src={item.profile?.photoUrl} />
-                  <AvatarFallback>
-                    {item.profile?.firstName?.charAt(0) ?? "?"}
-                  </AvatarFallback>
-                </Avatar>
+                <div
+                  className={cn(
+                    "shrink-0",
+                    item.type === "blocked" && "opacity-50"
+                  )}
+                >
+                  <Avatar>
+                    <AvatarImage src={item.profile?.photoUrl} />
+                    <AvatarFallback>
+                      {item.profile?.firstName?.charAt(0) ?? "?"}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     {item.type === "blocked" && (
-                      <Ban className="h-4 w-4 shrink-0 text-red-500" />
+                      <Ban className="text-destructive h-4 w-4 shrink-0" />
                     )}
                     <span
                       className={cn(
@@ -694,7 +698,9 @@ function ArchiveView({
                 )}
                 {item.type === "blocked" && (
                   <Button
-                    onClick={() => onUnblock(item.oderId)}
+                    onClick={() => {
+                      onUnblock(item.oderId);
+                    }}
                     size="sm"
                     variant="outline"
                   >
@@ -708,10 +714,18 @@ function ArchiveView({
       )}
     </div>
   );
-}
+};
+
+// Heading for a group of controls. Looks like a form label, but renders a <span>
+// because it does not belong to a single control.
+const GroupLabel = ({ children }: { children: React.ReactNode }) => (
+  <Label asChild>
+    <span>{children}</span>
+  </Label>
+);
 
 // Report Modal
-function ReportModal({
+const ReportModal = ({
   isOpen,
   onClose,
   onSubmit,
@@ -726,7 +740,7 @@ function ReportModal({
   ) => void;
   isSubmitting: boolean;
   userName: string;
-}) {
+}) => {
   const [reason, setReason] = useState<
     (typeof REPORT_REASONS)[number]["value"] | ""
   >("");
@@ -737,11 +751,11 @@ function ReportModal({
   }
 
   return (
-    <div
+    <dialog
       aria-label="Report user modal"
       aria-modal="true"
-      className="fixed inset-0 z-50 m-0 h-full w-full max-w-none overflow-y-auto border-none bg-black/50 p-4"
-      role="dialog"
+      className="fixed inset-0 z-50 m-0 h-full max-h-none w-full max-w-none overflow-y-auto border-none bg-black/50 p-4 text-inherit"
+      open
     >
       {/* Backdrop button for closing */}
       <button
@@ -758,11 +772,11 @@ function ReportModal({
       <div className="flex min-h-full items-center justify-center">
         <div className="relative w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
-              <Flag className="h-5 w-5 text-red-600" />
+            <div className="bg-destructive/10 flex h-10 w-10 items-center justify-center rounded-full">
+              <Flag className="text-destructive h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-semibold text-lg">Report {userName}</h3>
+              <h3 className="text-lg font-semibold">Report {userName}</h3>
               <p className="text-muted-foreground text-sm">
                 Help us keep the community safe
               </p>
@@ -770,23 +784,25 @@ function ReportModal({
           </div>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Reason for report *</Label>
+              <GroupLabel>Reason for report *</GroupLabel>
               <div className="space-y-2">
                 {REPORT_REASONS.map((r) => (
                   <label
                     className={cn(
                       "flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors",
                       reason === r.value
-                        ? "border-red-500 bg-red-50"
-                        : "hover:bg-gray-50"
+                        ? "border-destructive bg-destructive/5"
+                        : "hover:bg-muted"
                     )}
                     key={r.value}
                   >
                     <input
                       checked={reason === r.value}
-                      className="h-4 w-4 text-red-500"
+                      className="text-destructive h-4 w-4"
                       name="report-reason"
-                      onChange={() => setReason(r.value)}
+                      onChange={() => {
+                        setReason(r.value);
+                      }}
                       type="radio"
                     />
                     <span className="text-sm">{r.label}</span>
@@ -799,9 +815,11 @@ function ReportModal({
                 Additional details (optional)
               </Label>
               <textarea
-                className="min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="border-input bg-background min-h-[80px] w-full rounded-md border px-3 py-2 text-sm"
                 id="reportDetails"
-                onChange={(e) => setDetails(e.target.value)}
+                onChange={(e) => {
+                  setDetails(e.target.value);
+                }}
                 placeholder="Provide any additional context..."
                 value={details}
               />
@@ -812,21 +830,26 @@ function ReportModal({
               Cancel
             </Button>
             <Button
-              className="flex-1 bg-red-500 hover:bg-red-600"
+              className="flex-1"
               disabled={!reason || isSubmitting}
-              onClick={() => reason && onSubmit(reason, details || undefined)}
+              onClick={() => {
+                if (reason !== "") {
+                  onSubmit(reason, details || undefined);
+                }
+              }}
+              variant="destructive"
             >
               {isSubmitting ? "Reporting..." : "Submit Report"}
             </Button>
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   );
-}
+};
 
 // Profile Sidebar Panel
-function ProfileSidebar({
+const ProfileSidebar = ({
   userId,
   onBlock,
   onReport,
@@ -836,21 +859,21 @@ function ProfileSidebar({
   onBlock: () => void;
   onReport: () => void;
   isBlocked: boolean;
-}) {
+}) => {
   const profile = useQuery(api.profiles.getProfile, { userId });
 
   if (!profile) {
     return (
-      <div className="hidden w-80 shrink-0 border-l bg-gray-50 p-4 xl:block">
+      <div className="bg-muted/50 hidden w-80 shrink-0 border-l p-4 xl:block">
         <div className="flex h-full items-center justify-center">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-red-500" />
+          <div className="border-muted border-t-brand h-6 w-6 animate-spin rounded-full border-2" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="hidden w-80 shrink-0 flex-col border-l bg-gray-50 xl:flex">
+    <div className="bg-muted/50 hidden w-80 shrink-0 flex-col border-l xl:flex">
       {/* Profile Header */}
       <div className="border-b bg-white p-4">
         <div className="flex flex-col items-center text-center">
@@ -860,16 +883,13 @@ function ProfileSidebar({
               {profile.firstName?.charAt(0)}
             </AvatarFallback>
           </Avatar>
-          <h3 className="font-semibold text-lg">{profile.firstName}</h3>
-          <div className="mt-1 flex items-center gap-1 text-muted-foreground text-sm">
+          <h3 className="text-lg font-semibold">{profile.firstName}</h3>
+          <div className="text-muted-foreground mt-1 flex items-center gap-1 text-sm">
             <MapPin className="h-3 w-3" />
             {profile.city}
           </div>
           {profile.verified && (
-            <Badge
-              className="mt-2 bg-green-100 text-green-700"
-              variant="secondary"
-            >
+            <Badge className="mt-2" variant="success">
               <CheckCircle className="mr-1 h-3 w-3" />
               Verified
             </Badge>
@@ -882,24 +902,22 @@ function ProfileSidebar({
         {/* Bio */}
         {profile.bio && (
           <div className="mb-4">
-            <h4 className="mb-2 font-medium text-gray-500 text-sm">About</h4>
+            <h4 className="text-muted-foreground mb-2 text-sm font-medium">
+              About
+            </h4>
             <p className="text-sm">{profile.bio}</p>
           </div>
         )}
 
         {/* Languages */}
-        {profile.languages && profile.languages.length > 0 && (
+        {profile.languages.length > 0 && (
           <div className="mb-4">
-            <h4 className="mb-2 font-medium text-gray-500 text-sm">
+            <h4 className="text-muted-foreground mb-2 text-sm font-medium">
               Languages
             </h4>
             <div className="flex flex-wrap gap-1">
               {profile.languages.map((lang) => (
-                <Badge
-                  className="bg-blue-100 text-blue-700"
-                  key={lang}
-                  variant="secondary"
-                >
+                <Badge key={lang} variant="info">
                   {lang}
                 </Badge>
               ))}
@@ -909,36 +927,28 @@ function ProfileSidebar({
 
         {/* Role / Status */}
         <div className="mb-4">
-          <h4 className="mb-2 font-medium text-gray-500 text-sm">Status</h4>
-          <Badge
-            className={cn(getRoleBadgeClass(profile.role))}
-            variant="secondary"
-          >
+          <h4 className="text-muted-foreground mb-2 text-sm font-medium">
+            Status
+          </h4>
+          <Badge variant={getRoleBadgeVariant(profile.role)}>
             {getRoleLabel(profile.role)}
           </Badge>
         </div>
 
         {/* Available Dates */}
-        {profile.availableDates && profile.availableDates.length > 0 && (
+        {profile.availableDates.length > 0 && (
           <div className="mb-4">
-            <h4 className="mb-2 font-medium text-gray-500 text-sm">
+            <h4 className="text-muted-foreground mb-2 text-sm font-medium">
               Available
             </h4>
             <div className="flex flex-wrap gap-1">
               {profile.availableDates.slice(0, 5).map((date) => (
-                <Badge
-                  className="bg-amber-100 text-amber-700"
-                  key={date}
-                  variant="secondary"
-                >
+                <Badge key={date} variant="warning">
                   {date}
                 </Badge>
               ))}
               {profile.availableDates.length > 5 && (
-                <Badge
-                  className="bg-gray-100 text-gray-600"
-                  variant="secondary"
-                >
+                <Badge variant="muted">
                   +{profile.availableDates.length - 5} more
                 </Badge>
               )}
@@ -947,9 +957,9 @@ function ProfileSidebar({
         )}
 
         {/* View Full Profile Link */}
-        {profile.username && (
+        {hasText(profile.username) && (
           <Link
-            className="mb-4 block w-full rounded-lg border bg-white px-4 py-2 text-center font-medium text-sm transition-colors hover:bg-gray-50"
+            className="hover:bg-muted mb-4 block w-full rounded-lg border bg-white px-4 py-2 text-center text-sm font-medium transition-colors"
             href={`/people/${profile.username}`}
           >
             View Full Profile
@@ -961,19 +971,19 @@ function ProfileSidebar({
       <div className="border-t bg-white p-4">
         <div className="space-y-2">
           <Button
-            className="w-full justify-start text-amber-600 hover:bg-amber-50 hover:text-amber-700"
+            className="w-full justify-start"
             onClick={onBlock}
             size="sm"
-            variant="ghost"
+            variant="ghost-warning"
           >
             <Ban className="mr-2 h-4 w-4" />
             {isBlocked ? "Unblock User" : "Block User"}
           </Button>
           <Button
-            className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700"
+            className="w-full justify-start"
             onClick={onReport}
             size="sm"
-            variant="ghost"
+            variant="ghost-destructive"
           >
             <Flag className="mr-2 h-4 w-4" />
             Report User
@@ -982,10 +992,10 @@ function ProfileSidebar({
       </div>
     </div>
   );
-}
+};
 
 // Sidebar component
-function MessagesSidebar({
+const MessagesSidebar = ({
   items,
   activeId,
   isLoading,
@@ -1006,12 +1016,12 @@ function MessagesSidebar({
     type: "conversation" | "request" | "sent_request"
   ) => void;
   onOpenArchive: () => void;
-}) {
+}) => {
   const renderContent = () => {
     if (isLoading) {
       return (
         <div className="flex h-full items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
+          <div className="border-muted border-t-brand h-8 w-8 animate-spin rounded-full border-4" />
         </div>
       );
     }
@@ -1025,7 +1035,9 @@ function MessagesSidebar({
             isActive={item.oderId === activeId}
             item={item}
             key={`${item.type}-${item.oderId}`}
-            onClick={() => onItemClick(item.oderId, item.type)}
+            onClick={() => {
+              onItemClick(item.oderId, item.type);
+            }}
           />
         ))}
       </div>
@@ -1037,17 +1049,19 @@ function MessagesSidebar({
   return (
     <div
       className={cn(
-        "flex w-full shrink-0 flex-col border-r bg-background md:w-80",
+        "bg-background flex w-full shrink-0 flex-col border-r md:w-80",
         // Hide on mobile when chat is active
         hasActiveChat && "hidden md:flex"
       )}
     >
       <div className="flex h-[72px] items-center border-b px-4">
         <div className="relative w-full">
-          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
             className="pl-9"
-            onChange={(e) => onSearchChange(e.target.value)}
+            onChange={(e) => {
+              onSearchChange(e.target.value);
+            }}
             placeholder="Search conversations..."
             value={searchQuery}
           />
@@ -1057,7 +1071,7 @@ function MessagesSidebar({
       {/* Archive button at bottom */}
       <div className="border-t p-2">
         <button
-          className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="text-muted-foreground hover:bg-muted hover:text-foreground flex w-full items-center justify-between rounded-lg px-3 py-2 transition-colors"
           onClick={onOpenArchive}
           type="button"
         >
@@ -1074,10 +1088,10 @@ function MessagesSidebar({
       </div>
     </div>
   );
-}
+};
 
 // Conversation view component
-function ConversationView({
+const ConversationView = ({
   conversation,
   messages,
   myProfile,
@@ -1122,173 +1136,164 @@ function ConversationView({
   onBlock: () => void;
   onReport: () => void;
   onBack: () => void;
-}) {
-  return (
-    <>
-      {/* Conversation header */}
-      <div className="flex h-[72px] items-center gap-2 border-b px-2 sm:gap-3 sm:px-4">
-        {/* Back button - mobile only */}
-        <Button
-          className="shrink-0 md:hidden"
-          onClick={onBack}
-          size="icon"
-          variant="ghost"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <Avatar className="h-10 w-10 shrink-0 sm:h-12 sm:w-12">
-          <AvatarImage src={conversation.profile?.photoUrl} />
-          <AvatarFallback>
-            {conversation.profile?.firstName?.charAt(0) ?? "?"}
-          </AvatarFallback>
-        </Avatar>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h2 className="font-semibold">{conversation.profile?.firstName}</h2>
-            {otherUserVerified && (
-              <Badge
-                className="bg-green-100 text-green-700"
-                variant="secondary"
-              >
-                <CheckCircle className="mr-1 h-3 w-3" />
-                Verified
-              </Badge>
-            )}
-          </div>
-          <p className="text-muted-foreground text-sm">
-            {conversation.profile?.city}
-          </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-          {/* Share Details - hide on small screens */}
-          {isHost && !isBlocked && (
-            <Button
-              className="hidden sm:inline-flex"
-              onClick={onShowShareModal}
-              size="sm"
-              variant="outline"
-            >
-              <Share2 className="mr-1 h-4 w-4" />
-              Share Details
-            </Button>
-          )}
-          {/* View Profile - hide on small screens */}
-          {conversation.profile?.username && (
-            <Link
-              className="hidden sm:inline-flex"
-              href={`/people/${conversation.profile.username}`}
-            >
-              <Button size="sm" variant="ghost">
-                View Profile
-              </Button>
-            </Link>
-          )}
-          {/* 3-dot menu - always visible */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="icon" variant="ghost">
-                <MoreVertical className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {/* Mobile-only items */}
-              {isHost && !isBlocked && (
-                <DropdownMenuItem
-                  className="sm:hidden"
-                  onClick={onShowShareModal}
-                >
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Share Details
-                </DropdownMenuItem>
-              )}
-              {conversation.profile?.username && (
-                <DropdownMenuItem asChild className="sm:hidden">
-                  <Link href={`/people/${conversation.profile.username}`}>
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    View Profile
-                  </Link>
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator className="sm:hidden" />
-              {/* Always visible items */}
-              <DropdownMenuItem
-                className="text-amber-600 focus:text-amber-600"
-                onClick={onBlock}
-              >
-                <Ban className="mr-2 h-4 w-4" />
-                {isBlocked ? "Unblock User" : "Block User"}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-red-600 focus:text-red-600"
-                onClick={onReport}
-              >
-                <Flag className="mr-2 h-4 w-4" />
-                Report User
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-
-      {/* Messages */}
-      <div
-        className="flex-1 space-y-4 overflow-y-auto p-4"
-        ref={messagesContainerRef}
+}) => (
+  <>
+    {/* Conversation header */}
+    <div className="flex h-[72px] items-center gap-2 border-b px-2 sm:gap-3 sm:px-4">
+      {/* Back button - mobile only */}
+      <Button
+        className="shrink-0 md:hidden"
+        onClick={onBack}
+        size="icon"
+        variant="ghost"
       >
-        {messages?.map((message) => (
-          <MessageBubble
-            content={message.content}
-            isOwn={message.senderId === myProfile?.userId}
-            key={message._id}
-            timestamp={message.createdAt}
-          />
-        ))}
+        <ArrowLeft className="h-5 w-5" />
+      </Button>
+      <Avatar className="h-10 w-10 shrink-0 sm:h-12 sm:w-12">
+        <AvatarImage src={conversation.profile?.photoUrl} />
+        <AvatarFallback>
+          {conversation.profile?.firstName?.charAt(0) ?? "?"}
+        </AvatarFallback>
+      </Avatar>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <h2 className="font-semibold">{conversation.profile?.firstName}</h2>
+          {otherUserVerified === true && (
+            <Badge variant="success">
+              <CheckCircle className="mr-1 h-3 w-3" />
+              Verified
+            </Badge>
+          )}
+        </div>
+        <p className="text-muted-foreground text-sm">
+          {conversation.profile?.city}
+        </p>
       </div>
-
-      {/* Input */}
-      <div className="border-t p-4">
-        {isBlocked ? (
-          <div className="flex items-center justify-center gap-2 rounded-lg bg-gray-100 py-3 text-muted-foreground">
-            <Ban className="h-4 w-4" />
-            <span className="text-sm">Messaging is disabled</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-3">
-            <Input
-              className="flex-1"
-              onChange={(e) => onMessageInputChange(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  onSend();
-                }
-              }}
-              placeholder="Type a message..."
-              value={messageInput}
-            />
-            <Button
-              className="bg-red-500 hover:bg-red-600"
-              disabled={!messageInput.trim()}
-              onClick={onSend}
-            >
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
+      <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+        {/* Share Details - hide on small screens */}
+        {isHost && !isBlocked && (
+          <Button
+            className="hidden sm:inline-flex"
+            onClick={onShowShareModal}
+            size="sm"
+            variant="outline"
+          >
+            <Share2 className="mr-1 h-4 w-4" />
+            Share Details
+          </Button>
         )}
+        {/* View Profile - hide on small screens */}
+        {hasText(conversation.profile?.username) && (
+          <Link
+            className="hidden sm:inline-flex"
+            href={`/people/${conversation.profile.username}`}
+          >
+            <Button size="sm" variant="ghost">
+              View Profile
+            </Button>
+          </Link>
+        )}
+        {/* 3-dot menu - always visible */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="icon" variant="ghost">
+              <MoreVertical className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {/* Mobile-only items */}
+            {isHost && !isBlocked && (
+              <DropdownMenuItem
+                className="sm:hidden"
+                onClick={onShowShareModal}
+              >
+                <Share2 className="mr-2 h-4 w-4" />
+                Share Details
+              </DropdownMenuItem>
+            )}
+            {hasText(conversation.profile?.username) && (
+              <DropdownMenuItem asChild className="sm:hidden">
+                <Link href={`/people/${conversation.profile.username}`}>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  View Profile
+                </Link>
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator className="sm:hidden" />
+            {/* Always visible items */}
+            <DropdownMenuItem onClick={onBlock} variant="warning">
+              <Ban className="mr-2 h-4 w-4" />
+              {isBlocked ? "Unblock User" : "Block User"}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onReport} variant="destructive">
+              <Flag className="mr-2 h-4 w-4" />
+              Report User
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
+    </div>
 
-      <ShareDetailsModal
-        isOpen={showShareModal}
-        isSending={isSendingCard}
-        onClose={onCloseShareModal}
-        onSubmit={onShareEventDetails}
-      />
-    </>
-  );
-}
+    {/* Messages */}
+    <div
+      className="flex-1 space-y-4 overflow-y-auto p-4"
+      ref={messagesContainerRef}
+    >
+      {messages?.map((message) => (
+        <MessageBubble
+          content={message.content}
+          isOwn={message.senderId === myProfile?.userId}
+          key={message._id}
+          timestamp={message.createdAt}
+        />
+      ))}
+    </div>
+
+    {/* Input */}
+    <div className="border-t p-4">
+      {isBlocked ? (
+        <div className="text-muted-foreground bg-muted flex items-center justify-center gap-2 rounded-lg py-3">
+          <Ban className="h-4 w-4" />
+          <span className="text-sm">Messaging is disabled</span>
+        </div>
+      ) : (
+        <div className="flex items-center gap-3">
+          <Input
+            className="flex-1"
+            onChange={(e) => {
+              onMessageInputChange(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                onSend();
+              }
+            }}
+            placeholder="Type a message..."
+            value={messageInput}
+          />
+          <Button
+            disabled={!messageInput.trim()}
+            onClick={onSend}
+            variant="brand"
+          >
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+    </div>
+
+    <ShareDetailsModal
+      isOpen={showShareModal}
+      isSending={isSendingCard}
+      onClose={onCloseShareModal}
+      onSubmit={onShareEventDetails}
+    />
+  </>
+);
 
 // Main content area component
-function MainContentArea({
+const MainContentArea = ({
   activeRequest,
   activeSentRequest,
   activeConversation,
@@ -1349,7 +1354,7 @@ function MainContentArea({
   onBlock: () => void;
   onReport: () => void;
   onBack: () => void;
-}) {
+}) => {
   if (activeRequest) {
     return (
       <RequestView
@@ -1398,25 +1403,25 @@ function MainContentArea({
   }
 
   return <EmptyState />;
-}
+};
 
 // Helper to get sort date from a sidebar item
-function getSortDate(item: SidebarItem): number {
+const getSortDate = (item: SidebarItem): number => {
   if (item.type === "conversation") {
     return item.lastMessage?.createdAt ?? 0;
   }
   return item.createdAt;
-}
+};
 
 // Helper to build sidebar items
-function buildSidebarItems(
+const buildSidebarItems = (
   invitations: ReturnType<
     typeof useQuery<typeof api.invitations.getMyInvitations>
   >,
   conversations: NonNullable<
     ReturnType<typeof useQuery<typeof api.messages.getConversations>>
   >
-): SidebarItem[] {
+): SidebarItem[] => {
   const items: SidebarItem[] = [];
   // Add received pending requests
   for (const inv of invitations?.received ?? []) {
@@ -1462,15 +1467,15 @@ function buildSidebarItems(
     });
   }
   // Sort all items by most recent activity
-  return items.sort((a, b) => getSortDate(b) - getSortDate(a));
-}
+  return items.toSorted((a, b) => getSortDate(b) - getSortDate(a));
+};
 
 // Custom hook for scroll management
-function useMessagesScroll(
+const useMessagesScroll = (
   containerRef: React.RefObject<HTMLDivElement | null>,
   conversationId: Id<"conversations"> | undefined,
   messages: unknown[] | undefined
-) {
+) => {
   const prevConversationId = useRef(conversationId);
   const prevMessagesLength = useRef(messages?.length ?? 0);
 
@@ -1500,25 +1505,82 @@ function useMessagesScroll(
     }
     prevMessagesLength.current = currentLength;
   }, [messages, conversationId, containerRef]);
-}
+};
 
 // Custom hook for mark as read
-function useMarkAsRead(
+const useMarkAsRead = (
   conversationId: Id<"conversations"> | undefined,
   unreadCount: number | undefined
-) {
+) => {
   const markAsRead = useMutation(api.messages.markAsRead);
   useEffect(() => {
-    if (conversationId && unreadCount) {
-      markAsRead({ conversationId });
+    if (conversationId && unreadCount !== undefined && unreadCount > 0) {
+      void markAsRead({ conversationId });
     }
   }, [conversationId, unreadCount, markAsRead]);
-}
+};
+
+// Active chat selection from the URL (?chat=<userId>&type=<kind>)
+const useChatSelection = (): {
+  activeId: string | null;
+  activeType: "conversation" | "request" | null;
+} => {
+  const searchParams = useSearchParams();
+  const typeParam = searchParams.get("type");
+  return {
+    activeId: searchParams.get("chat"),
+    activeType:
+      typeParam === "conversation" || typeParam === "request"
+        ? typeParam
+        : null,
+  };
+};
+
+// Queries that depend on the active chat
+const useActiveChatData = ({
+  conversationId,
+  request,
+  sentRequest,
+  otherUserId,
+}: {
+  conversationId: Id<"conversations"> | undefined;
+  request: Extract<SidebarItem, { type: "request" }> | null;
+  sentRequest: Extract<SidebarItem, { type: "sent_request" }> | null;
+  otherUserId: Id<"users"> | undefined;
+}) => {
+  const messages = useQuery(
+    api.messages.getConversationMessages,
+    conversationId ? { conversationId } : "skip"
+  );
+  const activeRequestProfile = useQuery(
+    api.profiles.getProfile,
+    request ? { userId: request.oderId } : "skip"
+  );
+  const activeSentRequestProfile = useQuery(
+    api.profiles.getProfile,
+    sentRequest ? { userId: sentRequest.oderId } : "skip"
+  );
+  const otherUserProfile = useQuery(
+    api.profiles.getProfile,
+    otherUserId ? { userId: otherUserId } : "skip"
+  );
+  const blockStatus = useQuery(
+    api.moderation.isBlocked,
+    otherUserId ? { userId: otherUserId } : "skip"
+  );
+  return {
+    messages,
+    activeRequestProfile,
+    activeSentRequestProfile,
+    otherUserProfile,
+    blockStatus,
+  };
+};
 
 // Main component
-function MessagesPageContent() {
+const MessagesPageContent = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const { activeId, activeType } = useChatSelection();
   const [searchQuery, setSearchQuery] = useState("");
   const [messageInput, setMessageInput] = useState("");
   const [isResponding, setIsResponding] = useState(false);
@@ -1542,44 +1604,28 @@ function MessagesPageContent() {
   const isLoading =
     conversationsQuery === undefined || invitations === undefined;
 
-  // URL params
-  const activeId = searchParams.get("chat");
-  const activeType = searchParams.get("type") as
-    | "conversation"
-    | "request"
-    | null;
-
   // Build sidebar items and resolve active items
   const sidebarItems = buildSidebarItems(invitations, conversations);
-  const { activeConversation, activeRequest, activeSentRequest, otherUserId } =
-    resolveActiveItems(activeId, activeType, sidebarItems, conversations);
-  const activeConversationId = activeConversation?.conversation?._id;
+  const {
+    activeConversation,
+    activeConversationId,
+    activeRequest,
+    activeSentRequest,
+    otherUserId,
+  } = resolveActiveItems(activeId, activeType, sidebarItems, conversations);
 
-  // More queries
-  const messages = useQuery(
-    api.messages.getConversationMessages,
-    activeConversationId ? { conversationId: activeConversationId } : "skip"
-  );
-  const activeRequestProfile = useQuery(
-    api.profiles.getProfile,
-    activeRequest?.oderId
-      ? { userId: activeRequest.oderId as Id<"users"> }
-      : "skip"
-  );
-  const activeSentRequestProfile = useQuery(
-    api.profiles.getProfile,
-    activeSentRequest?.oderId
-      ? { userId: activeSentRequest.oderId as Id<"users"> }
-      : "skip"
-  );
-  const otherUserProfile = useQuery(
-    api.profiles.getProfile,
-    otherUserId ? { userId: otherUserId } : "skip"
-  );
-  const blockStatus = useQuery(
-    api.moderation.isBlocked,
-    otherUserId ? { userId: otherUserId } : "skip"
-  );
+  const {
+    messages,
+    activeRequestProfile,
+    activeSentRequestProfile,
+    otherUserProfile,
+    blockStatus,
+  } = useActiveChatData({
+    conversationId: activeConversationId,
+    request: activeRequest,
+    sentRequest: activeSentRequest,
+    otherUserId,
+  });
 
   // Mutations
   const sendMessage = useMutation(api.messages.sendMessage);
@@ -1595,7 +1641,8 @@ function MessagesPageContent() {
   useMarkAsRead(activeConversationId, activeConversation?.unreadCount);
 
   // Derived state
-  const isBlocked = !!(blockStatus?.blockedByMe || blockStatus?.blockedMe);
+  const blockedByMe = blockStatus?.blockedByMe === true;
+  const isBlocked = blockedByMe || blockStatus?.blockedMe === true;
   const isHost = myProfile?.role === "host";
 
   // Handlers
@@ -1616,8 +1663,10 @@ function MessagesPageContent() {
         content: messageInput.trim(),
       });
       setMessageInput("");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to send message");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to send message"
+      );
     }
   };
 
@@ -1626,7 +1675,7 @@ function MessagesPageContent() {
       return;
     }
     setIsResponding(true);
-    try {
+    const respond = async () => {
       await respondToInvitation({
         invitationId: activeRequest.invitationId,
         accept,
@@ -1636,9 +1685,10 @@ function MessagesPageContent() {
       } else {
         router.push("/messages");
       }
-    } finally {
+    };
+    await respond().finally(() => {
       setIsResponding(false);
-    }
+    });
   };
 
   const handleCancelRequest = async () => {
@@ -1652,11 +1702,12 @@ function MessagesPageContent() {
       });
       toast.success("Request cancelled");
       router.push("/messages");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to cancel request");
-    } finally {
-      setIsCancelling(false);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to cancel request"
+      );
     }
+    setIsCancelling(false);
   };
 
   const handleShareEventDetails = async (data: {
@@ -1669,27 +1720,28 @@ function MessagesPageContent() {
       return;
     }
     setIsSendingCard(true);
-    try {
-      // Format event details as a message
-      const parts = [`Event Details for ${data.date}`];
-      if (data.address) {
-        parts.push(`Address: ${data.address}`);
-      }
-      if (data.phone) {
-        parts.push(`Phone: ${data.phone}`);
-      }
-      if (data.note) {
-        parts.push(`Note: ${data.note}`);
-      }
+    // Format event details as a message
+    const parts = [`Event Details for ${data.date}`];
+    if (data.address) {
+      parts.push(`Address: ${data.address}`);
+    }
+    if (data.phone) {
+      parts.push(`Phone: ${data.phone}`);
+    }
+    if (data.note) {
+      parts.push(`Note: ${data.note}`);
+    }
 
+    const send = async () => {
       await sendMessage({
         conversationId: activeConversationId,
         content: parts.join("\n"),
       });
       setShowShareModal(false);
-    } finally {
+    };
+    await send().finally(() => {
       setIsSendingCard(false);
-    }
+    });
   };
 
   const handleBlock = async () => {
@@ -1697,15 +1749,15 @@ function MessagesPageContent() {
       return;
     }
     try {
-      if (blockStatus?.blockedByMe) {
+      if (blockedByMe) {
         await unblockUser({ userId: otherUserId });
         toast.success("User unblocked");
       } else {
         await blockUser({ userId: otherUserId });
         toast.success("User blocked");
       }
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed");
     }
   };
 
@@ -1734,15 +1786,19 @@ function MessagesPageContent() {
         description: "Thank you for helping keep our community safe.",
       });
       setShowReportModal(false);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to submit report");
-    } finally {
-      setIsReporting(false);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to submit report"
+      );
     }
+    setIsReporting(false);
   };
 
-  const filteredItems = sidebarItems.filter((item) =>
-    item.profile?.firstName?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredItems = sidebarItems.filter(
+    (item) =>
+      item.profile?.firstName
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) === true
   );
   const archivedCount = archivedAndBlocked.length;
 
@@ -1751,8 +1807,10 @@ function MessagesPageContent() {
     try {
       await unarchiveConversation({ conversationId });
       toast.success("Conversation unarchived");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to unarchive");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to unarchive"
+      );
     }
   };
 
@@ -1760,8 +1818,8 @@ function MessagesPageContent() {
     try {
       await unblockUser({ userId });
       toast.success("User unblocked");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to unblock");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to unblock");
     }
   };
 
@@ -1771,10 +1829,16 @@ function MessagesPageContent() {
       <div className="flex min-h-0 flex-1">
         <ArchiveView
           isLoading={archivedAndBlockedQuery === undefined}
-          items={archivedAndBlocked as ArchivedItem[]}
-          onBack={() => setShowArchive(false)}
-          onUnarchive={handleUnarchive}
-          onUnblock={handleUnblockFromArchive}
+          items={archivedAndBlocked}
+          onBack={() => {
+            setShowArchive(false);
+          }}
+          onUnarchive={(conversationId) => {
+            void handleUnarchive(conversationId);
+          }}
+          onUnblock={(userId) => {
+            void handleUnblockFromArchive(userId);
+          }}
         />
       </div>
     );
@@ -1788,7 +1852,9 @@ function MessagesPageContent() {
         isLoading={isLoading}
         items={filteredItems}
         onItemClick={setActiveChat}
-        onOpenArchive={() => setShowArchive(true)}
+        onOpenArchive={() => {
+          setShowArchive(true);
+        }}
         onSearchChange={setSearchQuery}
         searchQuery={searchQuery}
       />
@@ -1796,7 +1862,7 @@ function MessagesPageContent() {
         className={cn(
           "flex flex-1 flex-col",
           // Hide on mobile when no chat is active
-          !activeId && "hidden md:flex"
+          !hasText(activeId) && "hidden md:flex"
         )}
       >
         <MainContentArea
@@ -1814,16 +1880,34 @@ function MessagesPageContent() {
           messages={messages}
           messagesContainerRef={messagesContainerRef}
           myProfile={myProfile}
-          onBack={() => router.push("/messages")}
-          onBlock={handleBlock}
-          onCancelRequest={handleCancelRequest}
-          onCloseShareModal={() => setShowShareModal(false)}
+          onBack={() => {
+            router.push("/messages");
+          }}
+          onBlock={() => {
+            void handleBlock();
+          }}
+          onCancelRequest={() => {
+            void handleCancelRequest();
+          }}
+          onCloseShareModal={() => {
+            setShowShareModal(false);
+          }}
           onMessageInputChange={setMessageInput}
-          onReport={() => setShowReportModal(true)}
-          onRespond={handleRespond}
-          onSend={handleSend}
-          onShareEventDetails={handleShareEventDetails}
-          onShowShareModal={() => setShowShareModal(true)}
+          onReport={() => {
+            setShowReportModal(true);
+          }}
+          onRespond={(accept) => {
+            void handleRespond(accept);
+          }}
+          onSend={() => {
+            void handleSend();
+          }}
+          onShareEventDetails={(data) => {
+            void handleShareEventDetails(data);
+          }}
+          onShowShareModal={() => {
+            setShowShareModal(true);
+          }}
           otherUserVerified={otherUserProfile?.verified}
           showShareModal={showShareModal}
         />
@@ -1831,9 +1915,13 @@ function MessagesPageContent() {
       {/* Profile Sidebar - only visible on xl screens when conversation active */}
       {activeConversation && otherUserId && (
         <ProfileSidebar
-          isBlocked={!!blockStatus?.blockedByMe}
-          onBlock={handleBlock}
-          onReport={() => setShowReportModal(true)}
+          isBlocked={blockedByMe}
+          onBlock={() => {
+            void handleBlock();
+          }}
+          onReport={() => {
+            setShowReportModal(true);
+          }}
           userId={otherUserId}
         />
       )}
@@ -1841,20 +1929,24 @@ function MessagesPageContent() {
       <ReportModal
         isOpen={showReportModal}
         isSubmitting={isReporting}
-        onClose={() => setShowReportModal(false)}
-        onSubmit={handleReport}
-        userName={activeConversation?.profile?.firstName || "User"}
+        onClose={() => {
+          setShowReportModal(false);
+        }}
+        onSubmit={(reason, details) => {
+          void handleReport(reason, details);
+        }}
+        userName={getDisplayName(activeConversation?.profile)}
       />
     </div>
   );
-}
+};
 
 export default function MessagesPage() {
   return (
     <Suspense
       fallback={
         <div className="flex min-h-0 flex-1 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
+          <div className="border-muted border-t-brand h-8 w-8 animate-spin rounded-full border-4" />
         </div>
       }
     >

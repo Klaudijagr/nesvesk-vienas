@@ -1,6 +1,8 @@
 import { v } from "convex/values";
+
 import { mutation, query } from "./_generated/server";
 import { getCurrentUserId, getOrCreateUser } from "./lib/auth";
+import { isNonEmptyString } from "./lib/helpers";
 
 // Generate upload URL for profile photos
 export const generateUploadUrl = mutation({
@@ -30,7 +32,7 @@ export const saveProfilePhoto = mutation({
 
     // Get the URL for the uploaded file
     const photoUrl = await ctx.storage.getUrl(args.storageId);
-    if (!photoUrl) {
+    if (!isNonEmptyString(photoUrl)) {
       throw new Error("Failed to get file URL");
     }
 
@@ -82,7 +84,7 @@ export const addProfilePhoto = mutation({
     }
 
     const photoUrl = await ctx.storage.getUrl(args.storageId);
-    if (!photoUrl) {
+    if (!isNonEmptyString(photoUrl)) {
       throw new Error("Failed to get file URL");
     }
 
@@ -97,7 +99,8 @@ export const addProfilePhoto = mutation({
         userId,
         role: "guest",
         firstName: "",
-        age: 18, // Placeholder - will be updated during onboarding
+        // Placeholder - will be updated during onboarding
+        age: 18,
         city: "Vilnius",
         bio: "",
         verified: false,
@@ -113,7 +116,8 @@ export const addProfilePhoto = mutation({
         drinkingAllowed: false,
         petsAllowed: false,
         hasPets: false,
-        photos: [photoUrl], // Add to photos array too!
+        // Add to photos array too!
+        photos: [photoUrl],
         photoUrl,
       });
       return { photoUrl, totalPhotos: 1 };
@@ -133,7 +137,7 @@ export const addProfilePhoto = mutation({
     const updates: { photos: string[]; photoUrl?: string } = {
       photos: updatedPhotos,
     };
-    if (args.setAsMain || !profile.photoUrl) {
+    if (args.setAsMain === true || !isNonEmptyString(profile.photoUrl)) {
       updates.photoUrl = photoUrl;
     }
 
@@ -233,7 +237,7 @@ export const syncGooglePhoto = mutation({
     if (
       profile &&
       (!profile.photos || profile.photos.length === 0) &&
-      !profile.photoUrl
+      !isNonEmptyString(profile.photoUrl)
     ) {
       await ctx.db.patch(profile._id, {
         photoUrl: args.googlePhotoUrl,
@@ -248,7 +252,8 @@ export const syncGooglePhoto = mutation({
         userId,
         role: "guest",
         firstName: "",
-        age: 18, // Placeholder - will be updated during onboarding
+        // Placeholder - will be updated during onboarding
+        age: 18,
         city: "Vilnius",
         bio: "",
         verified: false,

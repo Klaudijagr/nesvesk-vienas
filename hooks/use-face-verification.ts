@@ -1,14 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+
 import type { VerificationResult } from "@/lib/face-verification";
 
-export type UseFaceVerificationOptions = {
+export interface UseFaceVerificationOptions {
   modelPath?: string;
   autoLoadModels?: boolean;
-};
+}
 
-export type UseFaceVerificationReturn = {
+export interface UseFaceVerificationReturn {
   isLoading: boolean;
   modelsLoaded: boolean;
   error: string | null;
@@ -19,11 +20,18 @@ export type UseFaceVerificationReturn = {
     image2: File | Blob | string
   ) => Promise<VerificationResult | null>;
   reset: () => void;
-};
+}
 
-export function useFaceVerification(
+// Loaded on demand (outside the hook) so the face-api bundle never runs during SSR.
+const importFaceVerification = async () =>
+  await import("@/lib/face-verification");
+
+const describeError = (error: unknown): string =>
+  error instanceof Error ? error.message : "Unknown error";
+
+export const useFaceVerification = (
   options: UseFaceVerificationOptions = {}
-): UseFaceVerificationReturn {
+): UseFaceVerificationReturn => {
   const { modelPath = "/models", autoLoadModels = true } = options;
 
   const [isLoading, setIsLoading] = useState(false);
@@ -34,20 +42,25 @@ export function useFaceVerification(
 
   // Load models on mount if autoLoadModels is true
   useEffect(() => {
-    if (autoLoadModels && !modelsLoaded) {
-      // Dynamic import to avoid SSR issues
-      import("@/lib/face-verification").then(
-        ({ loadModels, areModelsLoaded }) => {
-          if (areModelsLoaded()) {
-            setModelsLoaded(true);
-            return;
-          }
-          loadModels(modelPath)
-            .then(() => setModelsLoaded(true))
-            .catch((err) => setError(`Failed to load models: ${err.message}`));
-        }
-      );
+    if (!autoLoadModels || modelsLoaded) {
+      return;
     }
+    const autoLoad = async () => {
+      const { loadModels, areModelsLoaded } = await importFaceVerification();
+      if (areModelsLoaded()) {
+        setModelsLoaded(true);
+        return;
+      }
+      try {
+        await loadModels(modelPath);
+        setModelsLoaded(true);
+      } catch (error_) {
+        const message =
+          error_ instanceof Error ? error_.message : String(error_);
+        setError(`Failed to load models: ${message}`);
+      }
+    };
+    void autoLoad();
   }, [autoLoadModels, modelPath, modelsLoaded]);
 
   const handleLoadModels = useCallback(async () => {
@@ -58,15 +71,13 @@ export function useFaceVerification(
     setError(null);
 
     try {
-      const { loadModels } = await import("@/lib/face-verification");
+      const { loadModels } = await importFaceVerification();
       await loadModels(modelPath);
       setModelsLoaded(true);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
-      setError(`Failed to load models: ${message}`);
-    } finally {
-      setIsLoading(false);
+    } catch (error_) {
+      setError(`Failed to load models: ${describeError(error_)}`);
     }
+    setIsLoading(false);
   }, [modelPath, modelsLoaded]);
 
   const verifyImages = useCallback(
@@ -78,13 +89,14 @@ export function useFaceVerification(
       setError(null);
       setVerificationResult(null);
 
+      let verified: VerificationResult | null = null;
       try {
         const {
           loadModels,
           createImageFromUrl,
           createImageFromBlob,
           verifyFaces,
-        } = await import("@/lib/face-verification");
+        } = await importFaceVerification();
 
         // Ensure models are loaded
         if (!modelsLoaded) {
@@ -106,20 +118,17 @@ export function useFaceVerification(
         // Perform verification
         const result = await verifyFaces(img1, img2);
 
-        if (!result.success) {
+        if (result.success) {
+          setVerificationResult(result.result);
+          verified = result.result;
+        } else {
           setError(result.error);
-          return null;
         }
-
-        setVerificationResult(result.result);
-        return result.result;
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Unknown error";
-        setError(`Verification failed: ${message}`);
-        return null;
-      } finally {
-        setIsLoading(false);
+      } catch (error_) {
+        setError(`Verification failed: ${describeError(error_)}`);
       }
+      setIsLoading(false);
+      return verified;
     },
     [modelPath, modelsLoaded]
   );
@@ -138,4 +147,4 @@ export function useFaceVerification(
     verifyImages,
     reset,
   };
-}
+};

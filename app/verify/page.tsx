@@ -13,8 +13,9 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import posthog from "posthog-js";
+import { posthog } from "posthog-js";
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
@@ -51,77 +52,71 @@ const DEFAULT_CAMERA_ERROR =
   "• Your device has a working camera";
 
 // Helper to get camera error message
-function getCameraErrorMessage(err: unknown): string {
+const getCameraErrorMessage = (err: unknown): string => {
   const errorName = err instanceof Error ? err.name : "";
   return CAMERA_ERROR_MESSAGES[errorName] ?? DEFAULT_CAMERA_ERROR;
-}
+};
 
 // Loading state component
-function LoadingState() {
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      <Loader2 className="h-8 w-8 animate-spin text-red-600" />
-    </div>
-  );
-}
+const LoadingState = () => (
+  <div className="flex min-h-screen items-center justify-center">
+    <Loader2 className="text-brand h-8 w-8 animate-spin" />
+  </div>
+);
 
 // Already verified state
-function AlreadyVerifiedState() {
-  return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="mx-auto max-w-lg px-4">
-        <Card>
-          <CardContent className="py-12 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-              <ShieldCheck className="h-8 w-8 text-green-600" />
-            </div>
-            <h2 className="mb-2 font-bold text-2xl text-gray-900">
-              Already Verified
-            </h2>
-            <p className="mb-6 text-gray-600">
-              Your identity has been verified. You can now fully participate in
-              the platform.
-            </p>
-            <Link href="/browse">
-              <Button>Go to Browse</Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
+const AlreadyVerifiedState = () => (
+  <div className="bg-muted/50 min-h-screen py-12">
+    <div className="mx-auto max-w-lg px-4">
+      <Card>
+        <CardContent className="py-12 text-center">
+          <div className="bg-success/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+            <ShieldCheck className="text-success h-8 w-8" />
+          </div>
+          <h2 className="text-foreground mb-2 text-2xl font-bold">
+            Already Verified
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            Your identity has been verified. You can now fully participate in
+            the platform.
+          </p>
+          <Link href="/browse">
+            <Button>Go to Browse</Button>
+          </Link>
+        </CardContent>
+      </Card>
     </div>
-  );
-}
+  </div>
+);
 
 // Success state
-function SuccessState({ confidence }: { confidence?: number }) {
-  return (
-    <Card>
-      <CardContent className="py-12 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-          <CheckCircle className="h-8 w-8 text-green-600" />
-        </div>
-        <h2 className="mb-2 font-bold text-2xl text-green-700">
-          Verification Successful!
-        </h2>
-        <p className="mb-2 text-gray-600">
-          Your identity has been verified. You now have a verified badge on your
-          profile.
+const SuccessState = ({ confidence }: { confidence?: number }) => (
+  <Card>
+    <CardContent className="py-12 text-center">
+      <div className="bg-success/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+        <CheckCircle className="text-success h-8 w-8" />
+      </div>
+      <h2 className="text-success-strong mb-2 text-2xl font-bold">
+        Verification Successful!
+      </h2>
+      <p className="text-muted-foreground mb-2">
+        Your identity has been verified. You now have a verified badge on your
+        profile.
+      </p>
+      {confidence !== undefined && (
+        <p className="text-muted-foreground mb-6 text-sm">
+          Face match confidence: {(confidence * 100).toFixed(1)}%
         </p>
-        {confidence !== undefined && (
-          <p className="mb-6 text-gray-500 text-sm">
-            Face match confidence: {(confidence * 100).toFixed(1)}%
-          </p>
-        )}
-        <Link href="/browse">
-          <Button>Go to Browse</Button>
-        </Link>
-      </CardContent>
-    </Card>
-  );
-}
+      )}
+      <Link href="/browse">
+        <Button>Go to Browse</Button>
+      </Link>
+    </CardContent>
+  </Card>
+);
 
 // ID Photo card
-function IdPhotoCard({
+const IdPhotoCard = ({
   preview,
   onSelect,
   onClear,
@@ -131,58 +126,58 @@ function IdPhotoCard({
   onSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onClear: () => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
-}) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <CreditCard className="h-5 w-5" />
-          ID Photo
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <input
-          accept="image/*"
-          className="hidden"
-          onChange={onSelect}
-          ref={inputRef}
-          type="file"
-        />
-        {preview ? (
-          <div className="relative">
-            <Image
-              alt="ID preview"
-              className="h-48 w-full rounded-lg object-cover"
-              height={192}
-              src={preview}
-              width={320}
-            />
-            <button
-              className="absolute top-2 right-2 rounded-full bg-white p-1 shadow-md hover:bg-gray-100"
-              onClick={onClear}
-              type="button"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        ) : (
+}) => (
+  <Card>
+    <CardHeader>
+      <CardTitle className="flex items-center gap-2 text-lg">
+        <CreditCard className="h-5 w-5" />
+        ID Photo
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <input
+        accept="image/*"
+        className="hidden"
+        onChange={onSelect}
+        ref={inputRef}
+        type="file"
+      />
+      {preview !== null && preview !== "" ? (
+        <div className="relative">
+          <Image
+            alt="ID preview"
+            className="h-48 w-full rounded-lg object-cover"
+            height={192}
+            src={preview}
+            width={320}
+          />
           <button
-            className="flex h-48 w-full flex-col items-center justify-center rounded-lg border-2 border-gray-300 border-dashed transition-colors hover:border-red-400 hover:bg-red-50"
-            onClick={() => inputRef.current?.click()}
+            className="hover:bg-muted absolute top-2 right-2 rounded-full bg-white p-1 shadow-md"
+            onClick={onClear}
             type="button"
           >
-            <Upload className="mb-2 h-8 w-8 text-gray-400" />
-            <span className="text-gray-600 text-sm">Upload ID photo</span>
-            <span className="text-gray-400 text-xs">JPG, PNG up to 10MB</span>
+            <X className="h-4 w-4" />
           </button>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
+        </div>
+      ) : (
+        <button
+          className="border-border hover:border-brand/70 hover:bg-brand/5 flex h-48 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors"
+          onClick={() => inputRef.current?.click()}
+          type="button"
+        >
+          <Upload className="text-muted-foreground/70 mb-2 h-8 w-8" />
+          <span className="text-muted-foreground text-sm">Upload ID photo</span>
+          <span className="text-muted-foreground/70 text-xs">
+            JPG, PNG up to 10MB
+          </span>
+        </button>
+      )}
+    </CardContent>
+  </Card>
+);
 
 // Selfie card
-function SelfieCard({
+const SelfieCard = ({
   showCamera,
   preview,
   videoRef,
@@ -198,7 +193,7 @@ function SelfieCard({
   onCapture: () => void;
   onStopCamera: () => void;
   onClear: () => void;
-}) {
+}) => {
   const renderContent = () => {
     if (showCamera) {
       return (
@@ -222,7 +217,7 @@ function SelfieCard({
         </div>
       );
     }
-    if (preview) {
+    if (preview !== null && preview !== "") {
       return (
         <div className="relative">
           <Image
@@ -233,7 +228,7 @@ function SelfieCard({
             width={320}
           />
           <button
-            className="absolute top-2 right-2 rounded-full bg-white p-1 shadow-md hover:bg-gray-100"
+            className="hover:bg-muted absolute top-2 right-2 rounded-full bg-white p-1 shadow-md"
             onClick={onClear}
             type="button"
           >
@@ -244,13 +239,15 @@ function SelfieCard({
     }
     return (
       <button
-        className="flex h-48 w-full flex-col items-center justify-center rounded-lg border-2 border-gray-300 border-dashed transition-colors hover:border-red-400 hover:bg-red-50"
+        className="border-border hover:border-brand/70 hover:bg-brand/5 flex h-48 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors"
         onClick={onStartCamera}
         type="button"
       >
-        <Camera className="mb-2 h-8 w-8 text-gray-400" />
-        <span className="text-gray-600 text-sm">Take a selfie</span>
-        <span className="text-gray-400 text-xs">Click to open camera</span>
+        <Camera className="text-muted-foreground/70 mb-2 h-8 w-8" />
+        <span className="text-muted-foreground text-sm">Take a selfie</span>
+        <span className="text-muted-foreground/70 text-xs">
+          Click to open camera
+        </span>
       </button>
     );
   };
@@ -266,10 +263,10 @@ function SelfieCard({
       <CardContent>{renderContent()}</CardContent>
     </Card>
   );
-}
+};
 
 // Verify button
-function VerifyButton({
+const VerifyButton = ({
   disabled,
   isVerifying,
   modelsLoaded,
@@ -279,7 +276,7 @@ function VerifyButton({
   isVerifying: boolean;
   modelsLoaded: boolean;
   onClick: () => void;
-}) {
+}) => {
   const getButtonContent = () => {
     if (isVerifying) {
       return (
@@ -310,9 +307,9 @@ function VerifyButton({
       {getButtonContent()}
     </Button>
   );
-}
+};
 
-export default function VerifyPage() {
+const VerifyPage = () => {
   const profile = useQuery(api.profiles.getMyProfile);
   const updateVerification = useMutation(api.profiles.updateVerification);
 
@@ -367,7 +364,8 @@ export default function VerifyPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setIdPhoto(file);
-        setIdPreview(reader.result as string);
+        // readAsDataURL yields a string, or null when the read fails.
+        setIdPreview(typeof reader.result === "string" ? reader.result : null);
       };
       reader.readAsDataURL(file);
     },
@@ -381,8 +379,8 @@ export default function VerifyPage() {
       });
       setStream(mediaStream);
       setShowCamera(true);
-    } catch (err) {
-      setError(getCameraErrorMessage(err));
+    } catch (error_) {
+      setError(getCameraErrorMessage(error_));
     }
   };
 
@@ -438,7 +436,7 @@ export default function VerifyPage() {
         confidence: result?.confidence,
       });
 
-      if (result?.verified) {
+      if (result?.verified === true) {
         await updateVerification({ verified: true });
         setState("success");
       } else {
@@ -448,18 +446,18 @@ export default function VerifyPage() {
           `Face match failed. Similarity: ${(confidence * 100).toFixed(1)}% (minimum 40% required)`
         );
       }
-    } catch (err) {
+    } catch (error_) {
       posthog.capture("verification_attempted", {
         verified: false,
         error:
-          err instanceof Error
-            ? err.message
+          error_ instanceof Error
+            ? error_.message
             : "Verification failed. Please try again.",
       });
       setState("failed");
       setError(
-        err instanceof Error
-          ? err.message
+        error_ instanceof Error
+          ? error_.message
           : "Verification failed. Please try again."
       );
     }
@@ -477,17 +475,21 @@ export default function VerifyPage() {
     stopCamera();
   };
 
+  // The local error wins; an empty one falls through to the hook error.
+  const displayError =
+    error !== null && error !== "" ? error : verificationError;
+
   if (profile === undefined) {
     return <LoadingState />;
   }
 
-  if (profile?.verified) {
+  if (profile?.verified === true) {
     return <AlreadyVerifiedState />;
   }
 
   if (state === "success") {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="bg-muted/50 min-h-screen py-8">
         <div className="mx-auto max-w-2xl px-4">
           <SuccessState confidence={verificationResult?.confidence} />
         </div>
@@ -496,12 +498,12 @@ export default function VerifyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="bg-muted/50 min-h-screen py-8">
       <div className="mx-auto max-w-2xl px-4">
         {/* Back/Skip link at top */}
         <div className="mb-6">
           <Link
-            className="inline-flex items-center gap-1 text-gray-600 text-sm hover:text-gray-900"
+            className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
             href="/browse"
           >
             <svg
@@ -523,18 +525,18 @@ export default function VerifyPage() {
         </div>
 
         <div className="mb-8 text-center">
-          <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-            <ShieldCheck className="h-8 w-8 text-blue-600" />
+          <div className="bg-info/10 mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full">
+            <ShieldCheck className="text-info h-8 w-8" />
           </div>
-          <h1 className="font-bold text-3xl text-gray-900">
+          <h1 className="text-foreground text-3xl font-bold">
             Verify Your Identity
           </h1>
-          <p className="mx-auto mt-2 max-w-md text-gray-600">
+          <p className="text-muted-foreground mx-auto mt-2 max-w-md">
             Help build trust in our community by verifying your identity. This
             is optional but highly recommended.
           </p>
           {!modelsLoaded && (
-            <p className="mt-2 text-amber-600 text-sm">
+            <p className="text-gold-strong mt-2 text-sm">
               <Loader2 className="mr-1 inline h-4 w-4 animate-spin" />
               Loading face detection models...
             </p>
@@ -546,9 +548,9 @@ export default function VerifyPage() {
             <CardTitle className="text-lg">How it works</CardTitle>
           </CardHeader>
           <CardContent>
-            <ol className="space-y-3 text-gray-600 text-sm">
+            <ol className="text-muted-foreground space-y-3 text-sm">
               <li className="flex items-start gap-3">
-                <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-red-100 font-medium text-red-600 text-xs">
+                <span className="bg-brand/10 text-brand flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-medium">
                   1
                 </span>
                 <span>
@@ -557,13 +559,13 @@ export default function VerifyPage() {
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-red-100 font-medium text-red-600 text-xs">
+                <span className="bg-brand/10 text-brand flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-medium">
                   2
                 </span>
                 <span>Take a live selfie using your camera</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-red-100 font-medium text-red-600 text-xs">
+                <span className="bg-brand/10 text-brand flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-medium">
                   3
                 </span>
                 <span>
@@ -590,7 +592,9 @@ export default function VerifyPage() {
               setSelfie(null);
               setSelfiePreview(null);
             }}
-            onStartCamera={startCamera}
+            onStartCamera={() => {
+              void startCamera();
+            }}
             onStopCamera={stopCamera}
             preview={selfiePreview}
             showCamera={showCamera}
@@ -598,11 +602,11 @@ export default function VerifyPage() {
           />
         </div>
 
-        {(error || verificationError) && (
-          <div className="mt-6 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
-            <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
-            <p className="whitespace-pre-line text-red-700 text-sm">
-              {error || verificationError}
+        {displayError !== null && displayError !== "" && (
+          <div className="border-destructive/20 bg-destructive/5 mt-6 flex items-start gap-3 rounded-lg border p-4">
+            <AlertCircle className="text-destructive mt-0.5 h-5 w-5 flex-shrink-0" />
+            <p className="text-destructive-strong text-sm whitespace-pre-line">
+              {displayError}
             </p>
           </div>
         )}
@@ -618,21 +622,23 @@ export default function VerifyPage() {
               disabled={!(idPhoto && selfie) || isVerifying || !modelsLoaded}
               isVerifying={isVerifying}
               modelsLoaded={modelsLoaded}
-              onClick={handleVerify}
+              onClick={() => {
+                void handleVerify();
+              }}
             />
           </div>
           <Link href="/browse">
-            <Button className="text-gray-500" variant="ghost">
-              Skip for now
-            </Button>
+            <Button variant="ghost-muted">Skip for now</Button>
           </Link>
         </div>
 
-        <p className="mt-6 text-center text-gray-500 text-xs">
+        <p className="text-muted-foreground mt-6 text-center text-xs">
           Your photos are processed locally in your browser and are not uploaded
           to any server. We only save whether verification was successful.
         </p>
       </div>
     </div>
   );
-}
+};
+
+export default VerifyPage;

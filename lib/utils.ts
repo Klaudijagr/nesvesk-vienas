@@ -1,29 +1,26 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
 /**
  * Get the URL for a user's profile.
  * Prefers /people/[username] if username exists, falls back to /profile/[id]
  */
-export function getProfileUrl(profile: {
+export const getProfileUrl = (profile: {
   userId: string;
   username?: string | null;
-}): string {
-  if (profile.username) {
+}): string => {
+  if (
+    profile.username !== null &&
+    profile.username !== undefined &&
+    profile.username !== ""
+  ) {
     return `/people/${profile.username}`;
   }
   return `/profile/${profile.userId}`;
-}
+};
 
 /**
  * Format a timestamp as relative time (e.g., "Active 2h ago", "Active 3d ago")
  */
-export function formatRelativeTime(timestamp: number | undefined): string {
-  if (!timestamp) {
+export const formatRelativeTime = (timestamp: number | undefined): string => {
+  if (timestamp === undefined || timestamp === 0 || Number.isNaN(timestamp)) {
     return "";
   }
 
@@ -51,4 +48,4 @@ export function formatRelativeTime(timestamp: number | undefined): string {
     return `Active ${weeks}w ago`;
   }
   return "Active 30+ days ago";
-}
+};

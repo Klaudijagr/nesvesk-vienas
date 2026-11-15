@@ -3,20 +3,21 @@
 import { motion } from "framer-motion";
 import { Check, HelpCircle, X } from "lucide-react";
 import { memo, useCallback } from "react";
+
 import type { HolidayDate, UserRole } from "@/lib/types";
 import { HOLIDAY_DATES } from "@/lib/types";
 
 type IconType = "check" | "question" | "x";
 type ColorType = "green" | "amber" | "red";
 
-type PreferenceOption = {
+interface PreferenceOption {
   id: string;
   title: string;
   description: string;
   iconType: IconType;
   colorType: ColorType;
   showDates: boolean;
-};
+}
 
 const HOSTING_OPTIONS: PreferenceOption[] = [
   {
@@ -74,38 +75,38 @@ const GUEST_OPTIONS: PreferenceOption[] = [
 
 const COLOR_SCHEMES = {
   green: {
-    border: "border-green-500",
-    bg: "bg-green-50",
-    iconBg: "bg-green-600",
-    title: "text-green-900",
-    desc: "text-green-700",
-    dateSelected: "bg-green-600 text-white border-green-600",
+    border: "border-success",
+    bg: "bg-success/5",
+    iconBg: "bg-success",
+    title: "text-success-strong",
+    desc: "text-success-strong",
+    dateSelected: "bg-success text-white border-success",
     dateUnselected:
-      "bg-white border-green-300 text-green-700 hover:bg-green-50 hover:border-green-400",
+      "bg-white border-success/40 text-success-strong hover:bg-success/5 hover:border-success/70",
   },
   amber: {
-    border: "border-amber-500",
-    bg: "bg-amber-50",
-    iconBg: "bg-amber-500",
-    title: "text-amber-900",
-    desc: "text-amber-700",
-    dateSelected: "bg-amber-500 text-white border-amber-500",
+    border: "border-gold-rich",
+    bg: "bg-gold-soft/50",
+    iconBg: "bg-gold-rich",
+    title: "text-gold-deep",
+    desc: "text-gold-deep",
+    dateSelected: "bg-gold-rich text-white border-gold-rich",
     dateUnselected:
-      "bg-white border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400",
+      "bg-white border-gold/80 text-gold-deep hover:bg-gold-soft/50 hover:border-gold",
   },
   red: {
-    border: "border-red-500",
-    bg: "bg-red-50",
-    iconBg: "bg-red-600",
-    title: "text-red-900",
-    desc: "text-red-700",
-    dateSelected: "bg-red-600 text-white border-red-600",
+    border: "border-destructive",
+    bg: "bg-destructive/5",
+    iconBg: "bg-destructive",
+    title: "text-destructive-strong",
+    desc: "text-destructive-strong",
+    dateSelected: "bg-destructive text-white border-destructive",
     dateUnselected:
-      "bg-white border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400",
+      "bg-white border-destructive/40 text-destructive-strong hover:bg-destructive/5 hover:border-destructive/70",
   },
 } as const;
 
-const IconBadge = memo(function IconBadgeInner({
+const IconBadgeInner = ({
   type,
   colorType,
   isSelected,
@@ -113,8 +114,10 @@ const IconBadge = memo(function IconBadgeInner({
   type: IconType;
   colorType: ColorType;
   isSelected: boolean;
-}) {
-  const bgColor = isSelected ? COLOR_SCHEMES[colorType].iconBg : "bg-gray-400";
+}) => {
+  const bgColor = isSelected
+    ? COLOR_SCHEMES[colorType].iconBg
+    : "bg-muted-foreground/60";
 
   return (
     <div className={`rounded-full p-2 ${bgColor} transition-colors`}>
@@ -127,25 +130,27 @@ const IconBadge = memo(function IconBadgeInner({
       {type === "x" && <X className="h-4 w-4 text-white" strokeWidth={3} />}
     </div>
   );
-});
+};
 
-const DateButton = memo(function DateButtonInner({
+const IconBadge = memo(IconBadgeInner);
+
+const DateButtonInner = ({
   date,
   isSelected,
   colorType,
   onToggle,
 }: {
-  date: string;
+  date: HolidayDate;
   isSelected: boolean;
   colorType: ColorType;
-  onToggle: (date: string) => void;
-}) {
+  onToggle: (date: HolidayDate) => void;
+}) => {
   const c = COLOR_SCHEMES[colorType];
 
   return (
     <motion.button
       animate={{ opacity: 1, scale: 1 }}
-      className={`rounded-md border px-2 py-1 font-medium text-xs transition-colors ${
+      className={`rounded-md border px-2 py-1 text-xs font-medium transition-colors ${
         isSelected ? c.dateSelected : c.dateUnselected
       }`}
       initial={{ opacity: 0, scale: 0.8 }}
@@ -160,9 +165,11 @@ const DateButton = memo(function DateButtonInner({
       {date}
     </motion.button>
   );
-});
+};
 
-const PreferenceCard = memo(function PreferenceCardInner({
+const DateButton = memo(DateButtonInner);
+
+const PreferenceCardInner = ({
   option,
   isSelected,
   onSelect,
@@ -172,9 +179,9 @@ const PreferenceCard = memo(function PreferenceCardInner({
   option: PreferenceOption;
   isSelected: boolean;
   onSelect: (id: string) => void;
-  selectedDates: string[];
-  onToggleDate: (date: string) => void;
-}) {
+  selectedDates: HolidayDate[];
+  onToggleDate: (date: HolidayDate) => void;
+}) => {
   const c = COLOR_SCHEMES[option.colorType];
   const showDates = isSelected && option.showDates;
 
@@ -187,7 +194,7 @@ const PreferenceCard = memo(function PreferenceCardInner({
       className={`relative overflow-hidden rounded-xl border-2 transition-colors duration-200 ${
         isSelected
           ? `${c.border} ${c.bg} shadow-md`
-          : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+          : "border-border hover:border-muted-foreground/30 bg-white hover:shadow-sm"
       }`}
     >
       <button
@@ -203,13 +210,15 @@ const PreferenceCard = memo(function PreferenceCardInner({
           />
         </div>
         <h3
-          className={`mb-0.5 font-bold text-sm ${
-            isSelected ? c.title : "text-gray-800"
+          className={`mb-0.5 text-sm font-bold ${
+            isSelected ? c.title : "text-foreground"
           }`}
         >
           {option.title}
         </h3>
-        <p className={`text-xs ${isSelected ? c.desc : "text-gray-500"}`}>
+        <p
+          className={`text-xs ${isSelected ? c.desc : "text-muted-foreground"}`}
+        >
           {option.description}
         </p>
       </button>
@@ -226,7 +235,7 @@ const PreferenceCard = memo(function PreferenceCardInner({
             initial={{ y: -10, opacity: 0 }}
             transition={{ delay: 0.1, duration: 0.2 }}
           >
-            <p className={`mb-2 pt-2 font-medium text-xs ${c.title}`}>
+            <p className={`mb-2 pt-2 text-xs font-medium ${c.title}`}>
               Select dates:
             </p>
             <div className="flex flex-wrap gap-1">
@@ -251,20 +260,24 @@ const PreferenceCard = memo(function PreferenceCardInner({
       )}
     </div>
   );
-});
+};
 
-type PreferenceCardsProps = {
+const PreferenceCard = memo(PreferenceCardInner);
+
+interface PreferenceCardsProps {
   role: UserRole;
   availableDates: HolidayDate[];
   onRoleChange: (role: UserRole) => void;
   onDatesChange: (dates: HolidayDate[]) => void;
-};
+}
 
 // Helper to convert role to hosting/guest status
-function roleToStatuses(role: UserRole): {
+const roleToStatuses = (
+  role: UserRole
+): {
   hostingStatus: string;
   guestStatus: string;
-} {
+} => {
   if (role === "host") {
     return { hostingStatus: "can-host", guestStatus: "not-looking" };
   }
@@ -273,10 +286,13 @@ function roleToStatuses(role: UserRole): {
   }
   // both
   return { hostingStatus: "can-host", guestStatus: "looking" };
-}
+};
 
 // Helper to convert statuses back to role
-function statusesToRole(hostingStatus: string, guestStatus: string): UserRole {
+const statusesToRole = (
+  hostingStatus: string,
+  guestStatus: string
+): UserRole => {
   const isHost = hostingStatus === "can-host" || hostingStatus === "may-host";
   const isGuest = guestStatus === "looking" || guestStatus === "maybe-guest";
 
@@ -287,14 +303,14 @@ function statusesToRole(hostingStatus: string, guestStatus: string): UserRole {
     return "host";
   }
   return "guest";
-}
+};
 
-export function PreferenceCards({
+export const PreferenceCards = ({
   role,
   availableDates,
   onRoleChange,
   onDatesChange,
-}: PreferenceCardsProps) {
+}: PreferenceCardsProps) => {
   const { hostingStatus, guestStatus } = roleToStatuses(role);
 
   const handleHostingSelect = useCallback(
@@ -314,11 +330,10 @@ export function PreferenceCards({
   );
 
   const toggleDate = useCallback(
-    (date: string) => {
-      const holidayDate = date as HolidayDate;
-      const newDates = availableDates.includes(holidayDate)
-        ? availableDates.filter((d) => d !== holidayDate)
-        : [...availableDates, holidayDate];
+    (date: HolidayDate) => {
+      const newDates = availableDates.includes(date)
+        ? availableDates.filter((d) => d !== date)
+        : [...availableDates, date];
       onDatesChange(newDates);
     },
     [availableDates, onDatesChange]
@@ -328,7 +343,7 @@ export function PreferenceCards({
     <div className="space-y-6">
       {/* Hosting Section */}
       <div className="space-y-2">
-        <h3 className="font-semibold text-sm">Are you open to hosting?</h3>
+        <h3 className="text-sm font-semibold">Are you open to hosting?</h3>
         <div className="grid grid-cols-1 items-start gap-2 sm:grid-cols-3">
           {HOSTING_OPTIONS.map((option) => (
             <PreferenceCard
@@ -345,7 +360,7 @@ export function PreferenceCards({
 
       {/* Guest Section */}
       <div className="space-y-2">
-        <h3 className="font-semibold text-sm">
+        <h3 className="text-sm font-semibold">
           Are you looking to be a guest?
         </h3>
         <div className="grid grid-cols-1 items-start gap-2 sm:grid-cols-3">
@@ -363,4 +378,4 @@ export function PreferenceCards({
       </div>
     </div>
   );
-}
+};

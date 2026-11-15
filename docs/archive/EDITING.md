@@ -32,6 +32,7 @@ This guide explains how to make changes to the website content, translations, an
 ### Update Gemini CLI (First Time Setup)
 
 In the terminal, type:
+
 ```
 update gemini cli
 ```
@@ -49,11 +50,13 @@ Type `gemini` in the terminal and press Enter. You're now ready to give editing 
 ### Edit Landing Page Text
 
 Tell Gemini or Cursor:
+
 ```
 Change the hero headline on the landing page to say "Celebrate Together This Season"
 ```
 
 Or point to the file directly:
+
 ```
 In src/pages/LandingPage.tsx, update the hero title to say "..."
 ```
@@ -61,6 +64,7 @@ In src/pages/LandingPage.tsx, update the hero title to say "..."
 ### Edit with a Reference Image
 
 You can share images for reference:
+
 ```
 I want the landing page to look similar to this design [paste screenshot or describe]
 Make it have a warmer color scheme and add more holiday imagery
@@ -71,11 +75,13 @@ Make it have a warmer color scheme and add more holiday imagery
 All translations are in a single file: `src/lib/i18n.ts`
 
 Tell the AI:
+
 ```
 Update the Lithuanian translation for "heroTitle" to say "Šventės kartu"
 ```
 
 Or:
+
 ```
 Add a new translation key called "welcomeMessage" with text in all 4 languages:
 - Lithuanian: "Sveiki atvykę"
@@ -123,11 +129,13 @@ Commit my changes and push to GitHub with the message "Updated landing page text
 Or use these commands separately:
 
 1. **Stage changes:**
+
    ```
    git add .
    ```
 
 2. **Commit:**
+
    ```
    git commit -m "Updated landing page text"
    ```
@@ -138,6 +146,7 @@ Or use these commands separately:
    ```
 
 If there are any errors, tell Gemini:
+
 ```
 Fix the errors and try pushing again
 ```
@@ -146,15 +155,15 @@ Fix the errors and try pushing again
 
 ## 6. Key Files Reference
 
-| What to Edit | File Location |
-|--------------|---------------|
-| Landing page content | `src/pages/LandingPage.tsx` |
-| All translations (4 languages) | `src/lib/i18n.ts` |
-| Navigation/Sidebar | `src/components/AppSidebar.tsx` |
-| Top navigation bar | `src/components/Navbar.tsx` |
-| Global styles | `src/index.css` |
-| Settings page | `src/pages/SettingsPage.tsx` |
-| Browse page | `src/pages/BrowsePage.tsx` |
+| What to Edit                   | File Location                   |
+| ------------------------------ | ------------------------------- |
+| Landing page content           | `src/pages/LandingPage.tsx`     |
+| All translations (4 languages) | `src/lib/i18n.ts`               |
+| Navigation/Sidebar             | `src/components/AppSidebar.tsx` |
+| Top navigation bar             | `src/components/Navbar.tsx`     |
+| Global styles                  | `src/index.css`                 |
+| Settings page                  | `src/pages/SettingsPage.tsx`    |
+| Browse page                    | `src/pages/BrowsePage.tsx`      |
 
 ---
 
@@ -163,17 +172,19 @@ Fix the errors and try pushing again
 The language selector component is at `src/components/LanguageSelector.tsx`
 
 It supports:
+
 - **LT** - Lithuanian (default)
 - **EN** - English
 - **UA** - Ukrainian
 - **RU** - Russian
 
 To add it to a page, use:
+
 ```jsx
-import { LanguageSelector } from '@/components/LanguageSelector';
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 // In your component:
-<LanguageSelector />
+<LanguageSelector />;
 ```
 
 ---
@@ -192,6 +203,7 @@ import { LanguageSelector } from '@/components/LanguageSelector';
 ### "Command not found: gemini"
 
 Run in terminal:
+
 ```
 update gemini cli
 ```
@@ -205,6 +217,7 @@ update gemini cli
 ### Push failed
 
 Tell Gemini:
+
 ```
 There was an error pushing. Please fix it and try again.
 ```

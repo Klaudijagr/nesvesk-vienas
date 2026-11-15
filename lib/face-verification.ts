@@ -7,14 +7,18 @@
  * Uses dynamic imports to avoid SSR issues with TextEncoder.
  */
 
-// Configuration
-const _COSINE_THRESHOLD = 0.4; // Higher = stricter matching
-const L2_THRESHOLD = 0.6; // Lower = stricter matching (face-api uses 0.6 as default)
+import type * as FaceApi from "@vladmandic/face-api";
 
-let faceapi: typeof import("@vladmandic/face-api") | null = null;
+// Configuration
+// Higher = stricter matching
+const _COSINE_THRESHOLD = 0.4;
+// Lower = stricter matching (face-api uses 0.6 as default)
+const L2_THRESHOLD = 0.6;
+
+let faceapi: typeof FaceApi | null = null;
 let modelsLoaded = false;
 
-export type FaceDetectionResult = {
+export interface FaceDetectionResult {
   faceFound: boolean;
   box?: {
     x: number;
@@ -24,9 +28,9 @@ export type FaceDetectionResult = {
   };
   confidence?: number;
   descriptor?: Float32Array;
-};
+}
 
-export type VerificationResult = {
+export interface VerificationResult {
   verified: boolean;
   confidence: number;
   details: {
@@ -34,12 +38,12 @@ export type VerificationResult = {
     threshold: number;
     matchL2: boolean;
   };
-};
+}
 
 /**
  * Dynamically load face-api module (client-side only)
  */
-async function getFaceApi() {
+const getFaceApi = async () => {
   if (faceapi) {
     return faceapi;
   }
@@ -47,13 +51,13 @@ async function getFaceApi() {
   // Dynamic import to avoid SSR issues
   faceapi = await import("@vladmandic/face-api");
   return faceapi;
-}
+};
 
 /**
  * Load face-api.js models from the public directory.
  * Models should be placed in /public/models/
  */
-export async function loadModels(modelPath = "/models"): Promise<void> {
+export const loadModels = async (modelPath = "/models"): Promise<void> => {
   if (modelsLoaded) {
     return;
   }
@@ -67,21 +71,19 @@ export async function loadModels(modelPath = "/models"): Promise<void> {
   ]);
 
   modelsLoaded = true;
-}
+};
 
 /**
  * Check if models are loaded
  */
-export function areModelsLoaded(): boolean {
-  return modelsLoaded;
-}
+export const areModelsLoaded = (): boolean => modelsLoaded;
 
 /**
  * Detect a face in an image and extract its descriptor (embedding).
  */
-export async function detectFace(
+export const detectFace = async (
   input: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement
-): Promise<FaceDetectionResult> {
+): Promise<FaceDetectionResult> => {
   if (!modelsLoaded) {
     throw new Error("Models not loaded. Call loadModels() first.");
   }
@@ -109,15 +111,15 @@ export async function detectFace(
     confidence: detection.detection.score,
     descriptor: detection.descriptor,
   };
-}
+};
 
 /**
  * Compare two face descriptors and determine if they match.
  */
-export async function compareDescriptors(
+export const compareDescriptors = async (
   descriptor1: Float32Array,
   descriptor2: Float32Array
-): Promise<VerificationResult> {
+): Promise<VerificationResult> => {
   const api = await getFaceApi();
 
   // Euclidean distance (L2) - face-api.js uses this by default
@@ -127,25 +129,26 @@ export async function compareDescriptors(
 
   return {
     verified: matchL2,
-    confidence: Math.max(0, 1 - distance), // Convert distance to similarity score
+    // Convert distance to similarity score
+    confidence: Math.max(0, 1 - distance),
     details: {
       euclideanDistance: distance,
       threshold: L2_THRESHOLD,
       matchL2,
     },
   };
-}
+};
 
 /**
  * Verify if two images contain the same person.
  */
-export async function verifyFaces(
+export const verifyFaces = async (
   image1: HTMLImageElement | HTMLCanvasElement,
   image2: HTMLImageElement | HTMLCanvasElement
 ): Promise<
   | { success: true; result: VerificationResult }
   | { success: false; error: string; image?: "image1" | "image2" }
-> {
+> => {
   if (!modelsLoaded) {
     await loadModels();
   }
@@ -174,42 +177,42 @@ export async function verifyFaces(
   );
 
   return { success: true, result };
-}
+};
+
+// Load and decode an image element; `decode()` settles once the image is usable.
+const loadImage = async (
+  src: string,
+  errorMessage: string
+): Promise<HTMLImageElement> => {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = src;
+  try {
+    await img.decode();
+  } catch {
+    throw new Error(errorMessage);
+  }
+  return img;
+};
 
 /**
  * Create an HTMLImageElement from a File or Blob.
  */
-export function createImageFromBlob(blob: Blob): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    const url = URL.createObjectURL(blob);
-
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      resolve(img);
-    };
-
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error("Failed to load image"));
-    };
-
-    img.src = url;
-  });
-}
+export const createImageFromBlob = async (
+  blob: Blob
+): Promise<HTMLImageElement> => {
+  const url = URL.createObjectURL(blob);
+  try {
+    return await loadImage(url, "Failed to load image");
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+};
 
 /**
  * Create an HTMLImageElement from a URL.
  */
-export function createImageFromUrl(url: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Failed to load image from URL"));
-
-    img.src = url;
-  });
-}
+export const createImageFromUrl = async (
+  url: string
+): Promise<HTMLImageElement> =>
+  await loadImage(url, "Failed to load image from URL");

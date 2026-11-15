@@ -15,7 +15,7 @@ Nešvęsk vienas helps people find companions for holiday celebrations. Hosts ca
 - **Auth**: [Clerk](https://clerk.com)
 - **Email**: Maileroo (transactional emails)
 - **Face Verification**: [@vladmandic/face-api](https://github.com/vladmandic/face-api)
-- **Linting**: [Biome](https://biomejs.dev) via [Ultracite](https://github.com/haydenbleasel/ultracite)
+- **Linting**: [Oxlint](https://oxc.rs/docs/guide/usage/linter) and [Oxfmt](https://oxc.rs/docs/guide/usage/formatter) via [Ultracite](https://github.com/haydenbleasel/ultracite)
 
 ## Features
 
@@ -156,7 +156,7 @@ bun typecheck    # TypeScript only
 
 ## Code Quality
 
-This project uses Ultracite (Biome) for linting and formatting:
+This project uses Ultracite (Oxlint + Oxfmt) for linting and formatting:
 
 ```bash
 # Fix formatting and lint issues
@@ -189,20 +189,23 @@ This section is **not legal advice**. It documents how this repo behaves today a
 - **Vercel Analytics + Speed Insights (analytics/performance)**: mounted only after analytics consent via [`AnalyticsGate`](components/analytics-gate.tsx:12).
 
 If you add a new third-party service that can access personal data, update the legal pages:
-- [`PrivacyPage`](app/(legal)/privacy/page.tsx:369)
-- [`CookiesPage`](app/(legal)/cookies/page.tsx:197)
+
+- [`PrivacyPage`](<app/(legal)/privacy/page.tsx:369>)
+- [`CookiesPage`](<app/(legal)/cookies/page.tsx:197>)
 
 ### Consent records (audit trail)
 
 This repo **already records user consent** in Convex via [`api.consents.recordConsent`](convex/consents.ts:23) / [`api.consents.recordMultipleConsents`](convex/consents.ts:64).
 
 When you materially change Terms/Privacy/Cookies:
+
 - Update the policy version in [`CURRENT_POLICY_VERSION`](convex/consents.ts:6)
 - Consider requiring users to re-accept on next login/onboarding
 
 ### Data retention (recommended operational behavior)
 
 The legal pages describe retention as best-practice ranges. Operationally, keep to these defaults:
+
 - **Account/profile data**: retained while account active; delete/anonymize within ~30 days after deletion request.
 - **Messages/invitations**: retain while account active; remove within ~30–90 days after deletion.
 - **Consent records**: keep as long as needed to demonstrate compliance (audit trail).

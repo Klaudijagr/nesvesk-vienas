@@ -6,11 +6,13 @@ import { Gift, Home, Menu, MessageCircle, Settings, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+
 import { useLocale } from "@/contexts/locale-context";
 import { api } from "@/convex/_generated/api";
+
 import { LanguageSelector } from "./language-selector";
 
-export function DashboardNavbar() {
+export const DashboardNavbar = () => {
   const pathname = usePathname();
   const { t } = useLocale();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -34,16 +36,16 @@ export function DashboardNavbar() {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 border-gray-200 border-b bg-white shadow-sm">
+    <nav className="border-border sticky top-0 z-50 border-b bg-white shadow-sm">
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Left: Logo */}
           <Link className="flex items-center gap-3" href="/browse">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500">
+            <div className="bg-brand flex h-10 w-10 items-center justify-center rounded-xl">
               <Gift className="h-6 w-6 text-white" />
             </div>
             <div className="hidden flex-col sm:flex">
-              <span className="font-bold text-foreground text-lg leading-tight">
+              <span className="text-foreground text-lg leading-tight font-bold">
                 {t.appName}
               </span>
               <span className="text-muted-foreground text-xs">
@@ -56,18 +58,18 @@ export function DashboardNavbar() {
           <div className="hidden h-full items-center gap-1 md:flex">
             {navItems.map((item) => (
               <Link
-                className={`flex h-16 flex-col items-center justify-center gap-1 px-5 font-medium text-xs transition-colors ${
+                className={`flex h-16 flex-col items-center justify-center gap-1 px-5 text-xs font-medium transition-colors ${
                   isActive(item.url)
-                    ? "border-red-500 border-b-2 text-red-600"
-                    : "border-transparent border-b-2 text-gray-600 hover:bg-gray-50 hover:text-red-500"
+                    ? "border-brand text-brand border-b-2"
+                    : "text-muted-foreground hover:bg-muted hover:text-brand border-b-2 border-transparent"
                 }`}
                 href={item.url}
                 key={item.url}
               >
                 <div className="relative">
                   <item.icon className="h-5 w-5" />
-                  {item.badge ? (
-                    <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 font-medium text-[10px] text-white">
+                  {item.badge !== undefined && item.badge !== 0 ? (
+                    <span className="bg-brand text-2xs absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-medium text-white">
                       {item.badge > 9 ? "9+" : item.badge}
                     </span>
                   ) : null}
@@ -91,8 +93,10 @@ export function DashboardNavbar() {
             />
             {/* Mobile menu button */}
             <button
-              className="text-gray-600 md:hidden"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-muted-foreground md:hidden"
+              onClick={() => {
+                setIsMobileMenuOpen(!isMobileMenuOpen);
+              }}
               type="button"
             >
               {isMobileMenuOpen ? (
@@ -107,23 +111,25 @@ export function DashboardNavbar() {
 
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
-        <div className="border-gray-100 border-t bg-white md:hidden">
+        <div className="border-border/60 border-t bg-white md:hidden">
           <div className="space-y-1 px-4 py-3">
             {navItems.map((item) => (
               <Link
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm ${
+                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${
                   isActive(item.url)
-                    ? "bg-red-50 text-red-600"
-                    : "text-gray-700 hover:bg-gray-50"
+                    ? "bg-brand/5 text-brand"
+                    : "text-foreground/80 hover:bg-muted"
                 }`}
                 href={item.url}
                 key={item.url}
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                }}
               >
                 <div className="relative">
                   <item.icon className="h-5 w-5" />
-                  {item.badge ? (
-                    <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 font-medium text-[10px] text-white">
+                  {item.badge !== undefined && item.badge !== 0 ? (
+                    <span className="bg-brand text-2xs absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-medium text-white">
                       {item.badge > 9 ? "9+" : item.badge}
                     </span>
                   ) : null}
@@ -131,7 +137,7 @@ export function DashboardNavbar() {
                 <span>{item.title}</span>
               </Link>
             ))}
-            <div className="border-gray-100 border-t pt-3 sm:hidden">
+            <div className="border-border/60 border-t pt-3 sm:hidden">
               <LanguageSelector />
             </div>
           </div>
@@ -139,4 +145,4 @@ export function DashboardNavbar() {
       )}
     </nav>
   );
-}
+};

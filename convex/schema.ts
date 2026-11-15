@@ -162,21 +162,29 @@ export default defineSchema({
     userId: v.id("users"),
 
     // Username for /people/[username] route
-    username: v.optional(v.string()), // Unique, lowercase, alphanumeric + hyphens
+    // Unique, lowercase, alphanumeric + hyphens
+    username: v.optional(v.string()),
 
     // Basic info
-    role: userRole, // Derived from hostingStatus + guestStatus for backwards compat
-    hostingStatus: v.optional(hostingStatus), // "can-host" | "may-host" | "cant-host"
-    guestStatus: v.optional(guestStatus), // "looking" | "maybe-guest" | "not-looking"
+    // Derived from hostingStatus + guestStatus for backwards compat
+    role: userRole,
+    // "can-host" | "may-host" | "cant-host"
+    hostingStatus: v.optional(hostingStatus),
+    // "looking" | "maybe-guest" | "not-looking"
+    guestStatus: v.optional(guestStatus),
     firstName: v.string(),
     lastName: v.optional(v.string()),
-    age: v.number(), // Required, must be 18+
+    // Required, must be 18+
+    age: v.number(),
     city,
     bio: v.string(),
-    photoUrl: v.optional(v.string()), // Main/primary photo (first in gallery)
-    photos: v.optional(v.array(v.string())), // Additional photos (up to 5 total)
+    // Main/primary photo (first in gallery)
+    photoUrl: v.optional(v.string()),
+    // Additional photos (up to 5 total)
+    photos: v.optional(v.array(v.string())),
     verified: v.boolean(),
-    isVisible: v.optional(v.boolean()), // Whether profile appears in search
+    // Whether profile appears in search
+    isVisible: v.optional(v.boolean()),
 
     // Contact (hidden until match)
     phone: v.optional(v.string()),
@@ -184,9 +192,12 @@ export default defineSchema({
 
     // Preferences
     languages: v.array(language),
-    availableDates: v.array(holidayDate), // Combined dates for backwards compat
-    hostingDates: v.optional(v.array(holidayDate)), // Dates when user can host
-    guestDates: v.optional(v.array(holidayDate)), // Dates when user wants to be a guest
+    // Combined dates for backwards compat
+    availableDates: v.array(holidayDate),
+    // Dates when user can host
+    hostingDates: v.optional(v.array(holidayDate)),
+    // Dates when user wants to be a guest
+    guestDates: v.optional(v.array(holidayDate)),
     dietaryInfo: v.array(v.string()),
 
     // Host-specific
@@ -206,11 +217,16 @@ export default defineSchema({
     lastActive: v.optional(v.number()),
 
     // Notification preferences (all default to true if not set)
-    emailNotifications: v.optional(v.boolean()), // Master toggle for email notifications
-    notifyOnInvitation: v.optional(v.boolean()), // New invitation alerts
-    notifyOnMessage: v.optional(v.boolean()), // New message notifications
-    notifyOnMatch: v.optional(v.boolean()), // Match confirmations
-    marketingEmails: v.optional(v.boolean()), // Marketing/promotional emails (default false)
+    // Master toggle for email notifications
+    emailNotifications: v.optional(v.boolean()),
+    // New invitation alerts
+    notifyOnInvitation: v.optional(v.boolean()),
+    // New message notifications
+    notifyOnMessage: v.optional(v.boolean()),
+    // Match confirmations
+    notifyOnMatch: v.optional(v.boolean()),
+    // Marketing/promotional emails (default false)
+    marketingEmails: v.optional(v.boolean()),
   })
     .index("by_userId", ["userId"])
     .index("by_username", ["username"])
@@ -303,14 +319,17 @@ export default defineSchema({
   // Banned words for content moderation (regex first pass)
   bannedWords: defineTable({
     word: v.string(),
-    category: v.string(), // profanity, spam, harassment, etc.
+    // profanity, spam, harassment, etc.
+    category: v.string(),
     isRegex: v.optional(v.boolean()),
   }).index("by_category", ["category"]),
 
   // Blocked users
   blocks: defineTable({
-    blockerId: v.id("users"), // User who blocked
-    blockedId: v.id("users"), // User who was blocked
+    // User who blocked
+    blockerId: v.id("users"),
+    // User who was blocked
+    blockedId: v.id("users"),
     createdAt: v.number(),
   })
     .index("by_blocker", ["blockerId"])
@@ -344,14 +363,22 @@ export default defineSchema({
   // User consent records for GDPR compliance audit trail
   userConsents: defineTable({
     userId: v.id("users"),
-    purpose: consentPurpose, // What they consented to
-    policyVersion: v.string(), // e.g., "2024-12-01" - version of T&Cs at consent time
-    status: consentStatus, // active or withdrawn
-    consentMethod, // How consent was given (checkbox, button, etc.)
-    consentTimestamp: v.number(), // When consent was given
-    withdrawnAt: v.optional(v.number()), // When consent was withdrawn (if applicable)
-    ipAddress: v.optional(v.string()), // IP at time of consent (for audit)
-    userAgent: v.optional(v.string()), // Browser info (for audit)
+    // What they consented to
+    purpose: consentPurpose,
+    // e.g., "2024-12-01" - version of T&Cs at consent time
+    policyVersion: v.string(),
+    // active or withdrawn
+    status: consentStatus,
+    // How consent was given (checkbox, button, etc.)
+    consentMethod,
+    // When consent was given
+    consentTimestamp: v.number(),
+    // When consent was withdrawn (if applicable)
+    withdrawnAt: v.optional(v.number()),
+    // IP at time of consent (for audit)
+    ipAddress: v.optional(v.string()),
+    // Browser info (for audit)
+    userAgent: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_userId", ["userId"])

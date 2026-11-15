@@ -1,13 +1,17 @@
 "use client";
 
 import Link from "next/link";
+
 import { useLocale } from "@/contexts/locale-context";
 
-type FooterProps = {
+interface FooterProps {
   variant?: "dark" | "light";
-};
+}
 
-export function Footer({ variant = "dark" }: FooterProps) {
+// Resolved once per module load so render stays pure.
+const CURRENT_YEAR = new Date().getFullYear();
+
+export const Footer = ({ variant = "dark" }: FooterProps) => {
   const { t } = useLocale();
 
   const isDark = variant === "dark";
@@ -16,30 +20,32 @@ export function Footer({ variant = "dark" }: FooterProps) {
     <footer
       className={
         isDark
-          ? "border-white/10 border-t bg-slate-950 py-6"
-          : "border-gray-200 border-t bg-gray-50 py-6"
+          ? "bg-night-deep border-t border-white/10 py-6"
+          : "border-border bg-muted/50 border-t py-6"
       }
     >
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6 lg:px-8">
         <span
           className={
-            isDark ? "text-blue-100/40 text-sm" : "text-gray-500 text-sm"
+            isDark
+              ? "text-night-foreground/40 text-sm"
+              : "text-muted-foreground text-sm"
           }
         >
-          &copy; {new Date().getFullYear()} {t.appName}
+          &copy; {CURRENT_YEAR} {t.appName}
         </span>
         <nav
           className={
             isDark
-              ? "flex gap-6 text-blue-100/50 text-sm"
-              : "flex gap-6 text-gray-500 text-sm"
+              ? "text-night-foreground/50 flex gap-6 text-sm"
+              : "text-muted-foreground flex gap-6 text-sm"
           }
         >
           <Link
             className={
               isDark
-                ? "transition-colors hover:text-amber-400"
-                : "transition-colors hover:text-green-600"
+                ? "hover:text-gold transition-colors"
+                : "hover:text-success transition-colors"
             }
             href="/safety"
           >
@@ -48,8 +54,8 @@ export function Footer({ variant = "dark" }: FooterProps) {
           <Link
             className={
               isDark
-                ? "transition-colors hover:text-amber-400"
-                : "transition-colors hover:text-green-600"
+                ? "hover:text-gold transition-colors"
+                : "hover:text-success transition-colors"
             }
             href="/terms"
           >
@@ -58,8 +64,8 @@ export function Footer({ variant = "dark" }: FooterProps) {
           <Link
             className={
               isDark
-                ? "transition-colors hover:text-amber-400"
-                : "transition-colors hover:text-green-600"
+                ? "hover:text-gold transition-colors"
+                : "hover:text-success transition-colors"
             }
             href="/privacy"
           >
@@ -69,4 +75,4 @@ export function Footer({ variant = "dark" }: FooterProps) {
       </div>
     </footer>
   );
-}
+};

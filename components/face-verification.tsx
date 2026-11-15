@@ -1,18 +1,20 @@
 "use client";
 
-import posthog from "posthog-js";
+import Image from "next/image";
+import { posthog } from "posthog-js";
 import { useCallback, useRef, useState } from "react";
+
 import { useFaceVerification } from "@/hooks/use-face-verification";
 
-type FaceVerificationProps = {
+interface FaceVerificationProps {
   onVerificationComplete?: (verified: boolean, confidence: number) => void;
   onError?: (error: string) => void;
-};
+}
 
-export function FaceVerification({
+export const FaceVerification = ({
   onVerificationComplete,
   onError,
-}: FaceVerificationProps) {
+}: FaceVerificationProps) => {
   const {
     isLoading,
     modelsLoaded,
@@ -63,7 +65,7 @@ export function FaceVerification({
         threshold: result.details.threshold,
       });
       onVerificationComplete?.(result.verified, result.confidence);
-    } else if (error) {
+    } else if (error !== null && error !== "") {
       onError?.(error);
     }
   }, [
@@ -97,12 +99,12 @@ export function FaceVerification({
   return (
     <div className="space-y-6 p-4">
       <div className="text-center">
-        <h2 className="font-semibold text-xl">Face Verification</h2>
-        <p className="text-gray-600 text-sm">
+        <h2 className="text-xl font-semibold">Face Verification</h2>
+        <p className="text-muted-foreground text-sm">
           Upload two photos to verify they are the same person
         </p>
         {!modelsLoaded && (
-          <p className="text-amber-600 text-sm">
+          <p className="text-gold-strong text-sm">
             Loading face detection models...
           </p>
         )}
@@ -111,27 +113,30 @@ export function FaceVerification({
       <div className="grid grid-cols-2 gap-4">
         {/* Image 1 */}
         <div className="space-y-2">
-          <span className="block font-medium text-sm">ID Document</span>
-          <div className="relative h-48 rounded-lg border-2 border-gray-300 border-dashed bg-gray-50">
-            {image1Preview ? (
-              <img
+          <span className="block text-sm font-medium">ID Document</span>
+          <div className="border-border bg-muted/50 relative h-48 rounded-lg border-2 border-dashed">
+            {image1Preview === null ? (
+              <div className="flex h-full items-center justify-center">
+                <span className="text-muted-foreground/70">
+                  Click to upload
+                </span>
+              </div>
+            ) : (
+              <Image
                 alt="ID document preview"
                 className="h-full w-full rounded-lg object-contain"
                 height={192}
                 src={image1Preview}
+                unoptimized
                 width={192}
               />
-            ) : (
-              <div className="flex h-full items-center justify-center">
-                <span className="text-gray-400">Click to upload</span>
-              </div>
             )}
             <input
               accept="image/jpeg,image/png,image/webp"
               className="absolute inset-0 cursor-pointer opacity-0"
-              onChange={(e) =>
-                handleImageChange(e, setImage1, setImage1Preview)
-              }
+              onChange={(e) => {
+                handleImageChange(e, setImage1, setImage1Preview);
+              }}
               ref={input1Ref}
               type="file"
             />
@@ -140,27 +145,30 @@ export function FaceVerification({
 
         {/* Image 2 */}
         <div className="space-y-2">
-          <span className="block font-medium text-sm">Selfie</span>
-          <div className="relative h-48 rounded-lg border-2 border-gray-300 border-dashed bg-gray-50">
-            {image2Preview ? (
-              <img
+          <span className="block text-sm font-medium">Selfie</span>
+          <div className="border-border bg-muted/50 relative h-48 rounded-lg border-2 border-dashed">
+            {image2Preview === null ? (
+              <div className="flex h-full items-center justify-center">
+                <span className="text-muted-foreground/70">
+                  Click to upload
+                </span>
+              </div>
+            ) : (
+              <Image
                 alt="Selfie"
                 className="h-full w-full rounded-lg object-contain"
                 height={192}
                 src={image2Preview}
+                unoptimized
                 width={192}
               />
-            ) : (
-              <div className="flex h-full items-center justify-center">
-                <span className="text-gray-400">Click to upload</span>
-              </div>
             )}
             <input
               accept="image/jpeg,image/png,image/webp"
               className="absolute inset-0 cursor-pointer opacity-0"
-              onChange={(e) =>
-                handleImageChange(e, setImage2, setImage2Preview)
-              }
+              onChange={(e) => {
+                handleImageChange(e, setImage2, setImage2Preview);
+              }}
               ref={input2Ref}
               type="file"
             />
@@ -169,8 +177,8 @@ export function FaceVerification({
       </div>
 
       {/* Error display */}
-      {error && (
-        <div className="rounded-md bg-red-50 p-3 text-red-700 text-sm">
+      {error !== null && error !== "" && (
+        <div className="bg-destructive/5 text-destructive-strong rounded-md p-3 text-sm">
           {error}
         </div>
       )}
@@ -180,8 +188,8 @@ export function FaceVerification({
         <div
           className={`rounded-md p-4 ${
             verificationResult.verified
-              ? "bg-green-50 text-green-800"
-              : "bg-red-50 text-red-800"
+              ? "bg-success/5 text-success-strong"
+              : "bg-destructive/5 text-destructive-strong"
           }`}
         >
           <div className="font-semibold">
@@ -200,15 +208,17 @@ export function FaceVerification({
       {/* Actions */}
       <div className="flex gap-3">
         <button
-          className="flex-1 rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+          className="bg-info hover:bg-info-strong disabled:bg-border flex-1 rounded-md px-4 py-2 font-medium text-white transition-colors disabled:cursor-not-allowed"
           disabled={!(image1 && image2) || isLoading || !modelsLoaded}
-          onClick={handleVerify}
+          onClick={() => {
+            void handleVerify();
+          }}
           type="button"
         >
           {isLoading ? "Verifying..." : "Verify Faces"}
         </button>
         <button
-          className="rounded-md border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50"
+          className="border-border text-foreground/80 hover:bg-muted rounded-md border px-4 py-2 transition-colors"
           onClick={handleReset}
           type="button"
         >
@@ -217,4 +227,4 @@ export function FaceVerification({
       </div>
     </div>
   );
-}
+};

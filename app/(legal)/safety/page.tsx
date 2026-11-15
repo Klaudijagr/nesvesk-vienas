@@ -11,16 +11,18 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
+
 import { Navbar } from "@/components/navbar";
 import { useLocale } from "@/contexts/locale-context";
+import type { Locale } from "@/lib/i18n";
 
-type SafetyTip = {
-  icon: string;
+interface SafetyTip {
+  icon: "eye" | "alert" | "mappin" | "message" | "users" | "shield";
   title: string;
   content: string;
-};
+}
 
-type SafetyContentItem = {
+interface SafetyContentItem {
   title: string;
   subtitle: string;
   intro: string;
@@ -29,9 +31,9 @@ type SafetyContentItem = {
   reportContent: string;
   emergencyTitle: string;
   emergencyContent: string;
-};
+}
 
-type SafetyContent = Record<string, SafetyContentItem>;
+type SafetyContent = Record<Locale, SafetyContentItem>;
 
 const safetyContent: SafetyContent = {
   lt: {
@@ -240,7 +242,10 @@ const safetyContent: SafetyContent = {
   },
 };
 
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+const iconMap: Record<
+  SafetyTip["icon"],
+  React.ComponentType<{ className?: string }>
+> = {
   eye: Eye,
   alert: AlertTriangle,
   mappin: MapPin,
@@ -251,14 +256,14 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export default function SafetyPage() {
   const { t, locale } = useLocale();
-  const c = safetyContent[locale] || safetyContent.lt;
+  const c = safetyContent[locale];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-muted/50 min-h-screen">
       <Navbar />
       <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
         <Link
-          className="mb-8 inline-flex items-center text-green-700 transition-colors hover:text-green-800 active:scale-95"
+          className="text-success-strong hover:text-success-strong mb-8 inline-flex items-center transition-colors active:scale-95"
           href="/"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -267,47 +272,51 @@ export default function SafetyPage() {
 
         <div className="rounded-lg bg-white p-8 shadow-sm">
           <div className="mb-8 flex items-center gap-3">
-            <Shield className="h-10 w-10 text-green-600" />
+            <Shield className="text-success h-10 w-10" />
             <div>
-              <h1 className="font-bold text-3xl text-gray-900">{c.title}</h1>
-              <p className="text-gray-600">{c.subtitle}</p>
+              <h1 className="text-foreground text-3xl font-bold">{c.title}</h1>
+              <p className="text-muted-foreground">{c.subtitle}</p>
             </div>
           </div>
 
-          <p className="mb-8 text-gray-600 text-lg">{c.intro}</p>
+          <p className="text-muted-foreground mb-8 text-lg">{c.intro}</p>
 
           <div className="grid gap-6 md:grid-cols-2">
             {c.tips.map((tip) => {
-              const IconComponent = iconMap[tip.icon] || ShieldCheck;
+              const IconComponent = iconMap[tip.icon];
               return (
                 <div
-                  className="rounded-lg border border-gray-100 bg-gray-50 p-6"
+                  className="border-border/60 bg-muted/50 rounded-lg border p-6"
                   key={tip.title}
                 >
                   <div className="mb-3 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
-                      <IconComponent className="h-5 w-5 text-green-600" />
+                    <div className="bg-success/10 flex h-10 w-10 items-center justify-center rounded-full">
+                      <IconComponent className="text-success h-5 w-5" />
                     </div>
-                    <h3 className="font-semibold text-gray-900">{tip.title}</h3>
+                    <h3 className="text-foreground font-semibold">
+                      {tip.title}
+                    </h3>
                   </div>
-                  <p className="text-gray-600 text-sm">{tip.content}</p>
+                  <p className="text-muted-foreground text-sm">{tip.content}</p>
                 </div>
               );
             })}
           </div>
 
-          <div className="mt-8 rounded-lg bg-amber-50 p-6">
-            <h2 className="mb-2 font-semibold text-amber-800 text-lg">
+          <div className="bg-gold-soft/50 mt-8 rounded-lg p-6">
+            <h2 className="text-gold-deep mb-2 text-lg font-semibold">
               {c.reportTitle}
             </h2>
-            <p className="text-amber-700">{c.reportContent}</p>
+            <p className="text-gold-deep">{c.reportContent}</p>
           </div>
 
-          <div className="mt-6 rounded-lg bg-red-50 p-6">
-            <h2 className="mb-2 font-semibold text-lg text-red-800">
+          <div className="bg-destructive/5 mt-6 rounded-lg p-6">
+            <h2 className="text-destructive-strong mb-2 text-lg font-semibold">
               {c.emergencyTitle}
             </h2>
-            <p className="font-medium text-red-700">{c.emergencyContent}</p>
+            <p className="text-destructive-strong font-medium">
+              {c.emergencyContent}
+            </p>
           </div>
         </div>
       </div>

@@ -1,16 +1,18 @@
 import { v } from "convex/values";
+
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { getCurrentUserId } from "./lib/auth";
+import { isNonEmptyString } from "./lib/helpers";
 
 // Helper to check if messaging is blocked between users
-async function isMessagingBlocked(
+const isMessagingBlocked = async (
   ctx: MutationCtx,
   userId: Id<"users">,
   otherId: Id<"users">
-): Promise<boolean> {
+): Promise<boolean> => {
   const blockedByMe = await ctx.db
     .query("blocks")
     .withIndex("by_blocker", (q) => q.eq("blockerId", userId))
@@ -23,14 +25,14 @@ async function isMessagingBlocked(
     .filter((q) => q.eq(q.field("blockedId"), userId))
     .first();
 
-  return !!(blockedByMe || blockedMe);
-}
+  return blockedByMe !== null || blockedMe !== null;
+};
 
 // Helper to validate conversation status for messaging
-function canSendMessageInConversation(
+const canSendMessageInConversation = (
   conversation: Doc<"conversations">,
   userId: Id<"users">
-): { allowed: boolean; error?: string } {
+): { allowed: boolean; error?: string } => {
   const isDeclined = conversation.status === "declined";
   const isRequested = conversation.status === "requested";
   const isHost = conversation.hostId === userId;
@@ -40,16 +42,21 @@ function canSendMessageInConversation(
   }
   // For requested status, only host can respond (but should use accept/decline)
   if (isRequested && !isHost) {
-    return { allowed: true }; // Guest can't send but won't throw
+    // Guest can't send but won't throw
+    return { allowed: true };
   }
   return { allowed: true };
-}
+};
 
 // Helper to get user email and check notification preferences
-async function shouldSendMessageEmail(
+const shouldSendMessageEmail = async (
   ctx: MutationCtx,
   userId: Id<"users">
-): Promise<{ shouldSend: boolean; email: string | null; firstName: string }> {
+): Promise<{
+  shouldSend: boolean;
+  email: string | null;
+  firstName: string;
+}> => {
   const user = await ctx.db.get(userId);
   const profile = await ctx.db
     .query("profiles")
@@ -60,12 +67,16 @@ async function shouldSendMessageEmail(
   const wantsNotifications =
     profile?.emailNotifications !== false && profile?.notifyOnMessage !== false;
 
+  const email = isNonEmptyString(user?.email) ? user.email : null;
+
   return {
-    shouldSend: wantsNotifications && !!user?.email,
-    email: user?.email || null,
-    firstName: profile?.firstName || "Someone",
+    shouldSend: wantsNotifications && email !== null,
+    email,
+    firstName: isNonEmptyString(profile?.firstName)
+      ? profile.firstName
+      : "Someone",
   };
-}
+};
 
 // Get messages for a specific conversation
 export const getConversationMessages = query({
@@ -92,7 +103,7 @@ export const getConversationMessages = query({
       )
       .collect();
 
-    return messages.sort((a, b) => a.createdAt - b.createdAt);
+    return messages.toSorted((a, b) => a.createdAt - b.createdAt);
   },
 });
 
@@ -168,11 +179,13 @@ export const getMyConversations = query({
         return {
           conversation: conv,
           otherUserId: otherId,
-          oderId: otherId, // Alias for frontend compatibility
+          // Alias for frontend compatibility
+          oderId: otherId,
           profile,
           lastMessage,
           unreadCount,
-          isHost, // Whether current user is the host in this conversation
+          // Whether current user is the host in this conversation
+          isHost,
         };
       })
     );
@@ -180,7 +193,7 @@ export const getMyConversations = query({
     // Filter out nulls (blocked conversations) and sort by last message time
     return summaries
       .filter((s) => s !== null)
-      .sort(
+      .toSorted(
         (a, b) =>
           (b.conversation.lastMessageAt ?? b.conversation.createdAt) -
           (a.conversation.lastMessageAt ?? a.conversation.createdAt)
@@ -189,37 +202,41 @@ export const getMyConversations = query({
 });
 
 // Helper to check banned words
-async function checkBannedWords(
+const checkBannedWords = async (
   ctx: {
     db: {
       query: (table: "bannedWords") => {
         collect: () => Promise<
-          Array<{ word: string; category: string; isRegex?: boolean }>
+          { word: string; category: string; isRegex?: boolean }[]
         >;
       };
     };
   },
   content: string
-): Promise<{ flagged: boolean; category?: string }> {
+): Promise<{ flagged: boolean; category?: string }> => {
   const bannedWords = await ctx.db.query("bannedWords").collect();
   const lowerContent = content.toLowerCase();
 
   for (const banned of bannedWords) {
-    if (banned.isRegex) {
+    if (banned.isRegex === true) {
       try {
-        const regex = new RegExp(banned.word, "i");
+        const regex = new RegExp(banned.word, "iu");
         if (regex.test(content)) {
           return { flagged: true, category: banned.category };
         }
-      } catch {
-        // Invalid regex, skip
+      } catch (error) {
+        console.error(
+          "Skipping invalid banned-word pattern",
+          banned.word,
+          error
+        );
       }
     } else if (lowerContent.includes(banned.word.toLowerCase())) {
       return { flagged: true, category: banned.category };
     }
   }
   return { flagged: false };
-}
+};
 
 // Send a message in a conversation
 export const sendMessage = mutation({
@@ -258,7 +275,7 @@ export const sendMessage = mutation({
 
     // Check conversation status
     const statusCheck = canSendMessageInConversation(conversation, userId);
-    if (!statusCheck.allowed && statusCheck.error) {
+    if (!statusCheck.allowed && isNonEmptyString(statusCheck.error)) {
       throw new Error(statusCheck.error);
     }
 
@@ -297,7 +314,11 @@ export const sendMessage = mutation({
       .first();
 
     const recipientCheck = await shouldSendMessageEmail(ctx, otherId);
-    if (recipientCheck.shouldSend && recipientCheck.email && senderProfile) {
+    if (
+      recipientCheck.shouldSend &&
+      recipientCheck.email !== null &&
+      senderProfile
+    ) {
       await ctx.scheduler.runAfter(0, internal.email.sendEmail, {
         to: recipientCheck.email,
         type: "newMessage" as const,
@@ -336,13 +357,18 @@ export const markAsRead = mutation({
       .collect();
 
     // Mark messages as read
-    await Promise.all(messages.map((m) => ctx.db.patch(m._id, { read: true })));
+    await Promise.all(
+      messages.map(async (m) => {
+        await ctx.db.patch(m._id, { read: true });
+      })
+    );
 
     // Reset the user's unread count to 0
     const isHost = conversation.hostId === userId;
-    await ctx.db.patch(args.conversationId, {
-      ...(isHost ? { unreadCountForHost: 0 } : { unreadCountForGuest: 0 }),
-    });
+    await ctx.db.patch(
+      args.conversationId,
+      isHost ? { unreadCountForHost: 0 } : { unreadCountForGuest: 0 }
+    );
   },
 });
 
@@ -405,7 +431,8 @@ export const requestToJoin = mutation({
       .first();
 
     if (existing) {
-      return existing._id; // Return existing conversation
+      // Return existing conversation
+      return existing._id;
     }
 
     const now = Date.now();
@@ -507,7 +534,7 @@ export const getPendingRequests = query({
       .collect();
 
     // Get profiles for each requester
-    return Promise.all(
+    return await Promise.all(
       pending.map(async (conv) => {
         const profile = await ctx.db
           .query("profiles")
@@ -545,17 +572,12 @@ export const archiveConversation = mutation({
     }
 
     const now = Date.now();
-    if (isGuest) {
-      await ctx.db.patch(args.conversationId, {
-        isArchivedByGuest: true,
-        archivedByGuestAt: now,
-      });
-    } else {
-      await ctx.db.patch(args.conversationId, {
-        isArchivedByHost: true,
-        archivedByHostAt: now,
-      });
-    }
+    await ctx.db.patch(
+      args.conversationId,
+      isGuest
+        ? { isArchivedByGuest: true, archivedByGuestAt: now }
+        : { isArchivedByHost: true, archivedByHostAt: now }
+    );
 
     return { success: true };
   },
@@ -582,17 +604,12 @@ export const unarchiveConversation = mutation({
       throw new Error("Not authorized");
     }
 
-    if (isGuest) {
-      await ctx.db.patch(args.conversationId, {
-        isArchivedByGuest: false,
-        archivedByGuestAt: undefined,
-      });
-    } else {
-      await ctx.db.patch(args.conversationId, {
-        isArchivedByHost: false,
-        archivedByHostAt: undefined,
-      });
-    }
+    await ctx.db.patch(
+      args.conversationId,
+      isGuest
+        ? { isArchivedByGuest: false, archivedByGuestAt: undefined }
+        : { isArchivedByHost: false, archivedByHostAt: undefined }
+    );
 
     return { success: true };
   },
@@ -643,9 +660,9 @@ export const getArchivedConversations = query({
           .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
           .collect();
 
-        const lastMessage = messages.sort(
+        const [lastMessage] = messages.toSorted(
           (a, b) => b.createdAt - a.createdAt
-        )[0];
+        );
 
         return {
           type: "archived" as const,
@@ -665,7 +682,9 @@ export const getArchivedConversations = query({
     );
 
     // Sort by archived date (most recent first)
-    return summaries.sort((a, b) => (b.archivedAt ?? 0) - (a.archivedAt ?? 0));
+    return summaries.toSorted(
+      (a, b) => (b.archivedAt ?? 0) - (a.archivedAt ?? 0)
+    );
   },
 });
 
@@ -707,7 +726,7 @@ export const getConversation = query({
       )
       .collect();
 
-    return messages.sort((a, b) => a.createdAt - b.createdAt);
+    return messages.toSorted((a, b) => a.createdAt - b.createdAt);
   },
 });
 
@@ -718,39 +737,39 @@ export const backfillUnreadCounts = internalMutation({
   args: {},
   handler: async (ctx) => {
     const conversations = await ctx.db.query("conversations").collect();
-    let updated = 0;
-
-    for (const conv of conversations) {
-      // Count unread messages for guest (messages from host that are unread)
-      const unreadForGuest = await ctx.db
-        .query("messages")
-        .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
-        .filter((q) =>
-          q.and(
-            q.eq(q.field("senderId"), conv.hostId),
-            q.eq(q.field("read"), false)
+    await Promise.all(
+      conversations.map(async (conv) => {
+        // Count unread messages for guest (messages from host that are unread)
+        const unreadForGuest = await ctx.db
+          .query("messages")
+          .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
+          .filter((q) =>
+            q.and(
+              q.eq(q.field("senderId"), conv.hostId),
+              q.eq(q.field("read"), false)
+            )
           )
-        )
-        .collect();
+          .collect();
 
-      // Count unread messages for host (messages from guest that are unread)
-      const unreadForHost = await ctx.db
-        .query("messages")
-        .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
-        .filter((q) =>
-          q.and(
-            q.eq(q.field("senderId"), conv.guestId),
-            q.eq(q.field("read"), false)
+        // Count unread messages for host (messages from guest that are unread)
+        const unreadForHost = await ctx.db
+          .query("messages")
+          .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
+          .filter((q) =>
+            q.and(
+              q.eq(q.field("senderId"), conv.guestId),
+              q.eq(q.field("read"), false)
+            )
           )
-        )
-        .collect();
+          .collect();
 
-      await ctx.db.patch(conv._id, {
-        unreadCountForGuest: unreadForGuest.length,
-        unreadCountForHost: unreadForHost.length,
-      });
-      updated++;
-    }
+        await ctx.db.patch(conv._id, {
+          unreadCountForGuest: unreadForGuest.length,
+          unreadCountForHost: unreadForHost.length,
+        });
+      })
+    );
+    const updated = conversations.length;
 
     return {
       updated,

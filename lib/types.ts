@@ -12,7 +12,7 @@ export type ConnectionStatus =
 
 // Slim profile type matching what listProfiles returns
 // Excludes large arrays like photos, amenities, houseRules for bandwidth efficiency
-export type SlimProfile = {
+export interface SlimProfile {
   _id: Id<"profiles">;
   _creationTime?: number;
   userId: Id<"users">;
@@ -41,7 +41,7 @@ export type SlimProfile = {
   hasPets: boolean;
   // Optional connection status (only present when viewing other profiles)
   connectionStatus?: ConnectionStatus;
-};
+}
 
 export type City =
   | "Vilnius"

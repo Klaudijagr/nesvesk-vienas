@@ -1,13 +1,16 @@
 import { fetchQuery } from "convex/nextjs";
 import type { Metadata } from "next";
+
 import { api } from "@/convex/_generated/api";
 
-type Props = {
+interface Props {
   params: Promise<{ username: string }>;
   children: React.ReactNode;
-};
+}
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export const generateMetadata = async ({
+  params,
+}: Props): Promise<Metadata> => {
   const { username } = await params;
 
   try {
@@ -22,6 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       };
     }
 
+    const photoUrl = profile.photoUrl ?? "";
     const title = `${profile.firstName}${profile.city ? ` from ${profile.city}` : ""}`;
     const description = profile.bio
       ? profile.bio.slice(0, 160)
@@ -34,24 +38,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: `${title} | Nešvęsk vienas`,
         description,
         type: "profile",
-        ...(profile.photoUrl && {
-          images: [
-            {
-              url: profile.photoUrl,
-              width: 400,
-              height: 400,
-              alt: `${profile.firstName}'s profile photo`,
-            },
-          ],
-        }),
+        ...(photoUrl === ""
+          ? {}
+          : {
+              images: [
+                {
+                  url: photoUrl,
+                  width: 400,
+                  height: 400,
+                  alt: `${profile.firstName}'s profile photo`,
+                },
+              ],
+            }),
       },
       twitter: {
         card: "summary",
         title: `${title} | Nešvęsk vienas`,
         description,
-        ...(profile.photoUrl && {
-          images: [profile.photoUrl],
-        }),
+        ...(photoUrl === "" ? {} : { images: [photoUrl] }),
       },
     };
   } catch {
@@ -60,8 +64,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: "View this profile on Nešvęsk vienas.",
     };
   }
-}
+};
 
-export default function ProfileLayout({ children }: Props) {
-  return children;
-}
+const ProfileLayout = ({ children }: Props) => children;
+
+export default ProfileLayout;

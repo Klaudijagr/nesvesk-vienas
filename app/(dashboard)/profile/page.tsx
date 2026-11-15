@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { Loader2 } from "lucide-react";
 import { redirect } from "next/navigation";
 import { useEffect } from "react";
+
 import { api } from "@/convex/_generated/api";
 
 /**
@@ -16,9 +17,10 @@ export default function MyProfilePage() {
   useEffect(() => {
     if (myProfile?.userId) {
       // Redirect to the public profile view - prefer username route if available
-      const url = myProfile.username
-        ? `/people/${myProfile.username}`
-        : `/profile/${myProfile.userId}`;
+      const url =
+        myProfile.username === undefined || myProfile.username === ""
+          ? `/profile/${myProfile.userId}`
+          : `/people/${myProfile.username}`;
       redirect(url);
     }
   }, [myProfile?.userId, myProfile?.username]);
@@ -27,7 +29,7 @@ export default function MyProfilePage() {
   if (myProfile === undefined) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -40,7 +42,7 @@ export default function MyProfilePage() {
   // This shouldn't render, redirect should happen
   return (
     <div className="flex min-h-[400px] items-center justify-center">
-      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
     </div>
   );
 }

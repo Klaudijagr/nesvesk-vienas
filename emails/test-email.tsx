@@ -1,70 +1,44 @@
 import { Heading, Section, Text } from "@react-email/components";
-import {
-  BaseLayout,
-  colors,
-  getTranslations,
-  type Locale,
-} from "./base-layout";
 
-type TestEmailProps = {
+import { BaseLayout } from "./base-layout";
+import { colors, styles } from "./styles";
+import { getTranslations } from "./translations";
+import type { Locale } from "./translations";
+
+interface TestEmailProps {
+  /** Send time as an ISO timestamp, shown as is. */
+  sentAt: string;
+  /** Copyright year shown in the footer. */
+  year: number;
   locale?: Locale;
-};
+}
 
-export const TestEmail = ({ locale = "lt" }: TestEmailProps) => {
+export const TestEmail = ({ sentAt, year, locale = "lt" }: TestEmailProps) => {
   const t = getTranslations(locale);
 
   return (
-    <BaseLayout locale={locale} preview={t.testSuccess}>
-      <Section style={iconContainer}>
-        <Text style={iconText}>✅</Text>
+    <BaseLayout locale={locale} preview={t.testSuccess} year={year}>
+      <Section style={styles.iconContainer}>
+        <Text style={styles.iconText}>✅</Text>
       </Section>
-
-      <Heading style={heading}>{t.testSuccess}</Heading>
-
-      <Text style={paragraph}>{t.testMessage}</Text>
-
-      <Text style={paragraph}>{t.testWorking}</Text>
-
-      <Text style={timestamp}>
-        {t.sentAt} {new Date().toISOString()}
+      <Heading style={{ ...styles.heading, color: colors.green }}>
+        {t.testSuccess}
+      </Heading>
+      <Text style={styles.paragraphCenter}>{t.testMessage}</Text>
+      <Text style={styles.paragraphCenter}>{t.testWorking}</Text>
+      <Text style={styles.timestamp}>
+        {t.sentAt} {sentAt}
       </Text>
     </BaseLayout>
   );
 };
 
-// Styles - Dark theme
-const iconContainer = {
-  textAlign: "center" as const,
-  marginBottom: "16px",
-};
-
-const iconText = {
-  fontSize: "56px",
-  margin: "0",
-};
-
-const heading = {
-  color: colors.green,
-  fontSize: "28px",
-  fontWeight: "bold" as const,
-  textAlign: "center" as const,
-  margin: "0 0 24px",
-  fontFamily: "Georgia, serif",
-};
-
-const paragraph = {
-  color: colors.text,
-  fontSize: "16px",
-  lineHeight: "28px",
-  margin: "0 0 16px",
-  textAlign: "center" as const,
-};
-
-const timestamp = {
-  color: colors.textMuted,
-  fontSize: "12px",
-  textAlign: "center" as const,
-  margin: "24px 0 0",
-};
+// Sample data for React Email's preview (`bun run email`).
+const previewSentAt = new Date();
+TestEmail.PreviewProps = {
+  locale: "lt",
+  sentAt: previewSentAt.toISOString(),
+  year: previewSentAt.getFullYear(),
+} satisfies TestEmailProps;
 
 export default TestEmail;

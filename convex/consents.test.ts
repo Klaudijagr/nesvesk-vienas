@@ -1,11 +1,12 @@
 import { convexTest } from "convex-test";
-import { describe, expect, test } from "vitest";
+import { describe, expect, it } from "vitest";
+
 import { api } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
 import schema from "./schema";
 
 describe("consents", () => {
-  test("recordMultipleConsents records terms and privacy", async () => {
+  it("recordMultipleConsents records terms and privacy", async () => {
     const t = convexTest(schema);
 
     // Create a test user first
@@ -41,10 +42,10 @@ describe("consents", () => {
     );
     expect(
       consents.every((c: Doc<"userConsents">) => c.status === "active")
-    ).toBe(true);
+    ).toBeTruthy();
   });
 
-  test("recordMultipleConsents with marketing consent", async () => {
+  it("recordMultipleConsents with marketing consent", async () => {
     const t = convexTest(schema);
 
     // Create a test user
@@ -76,7 +77,7 @@ describe("consents", () => {
     );
   });
 
-  test("withdrawConsent changes status to withdrawn", async () => {
+  it("withdrawConsent changes status to withdrawn", async () => {
     const t = convexTest(schema);
 
     // Create a test user
@@ -112,7 +113,7 @@ describe("consents", () => {
     expect(marketingConsent?.withdrawnAt).toBeDefined();
   });
 
-  test("hasActiveConsent returns correct status", async () => {
+  it("hasActiveConsent returns correct status", async () => {
     const t = convexTest(schema);
 
     // Create a test user
@@ -132,7 +133,7 @@ describe("consents", () => {
     const beforeConsent = await asUser.query(api.consents.hasActiveConsent, {
       purpose: "terms_of_service",
     });
-    expect(beforeConsent).toBe(false);
+    expect(beforeConsent).toBeFalsy();
 
     // Record consent
     await asUser.mutation(api.consents.recordMultipleConsents, {
@@ -143,10 +144,10 @@ describe("consents", () => {
     const afterConsent = await asUser.query(api.consents.hasActiveConsent, {
       purpose: "terms_of_service",
     });
-    expect(afterConsent).toBe(true);
+    expect(afterConsent).toBeTruthy();
   });
 
-  test("getCurrentPolicyVersion returns version string", async () => {
+  it("getCurrentPolicyVersion returns version string", async () => {
     const t = convexTest(schema);
 
     const version = await t.query(api.consents.getCurrentPolicyVersion, {});

@@ -3,7 +3,7 @@ name: Bug Report
 about: Report a bug or unexpected behavior
 title: "[Bug]: "
 labels: bug
-assignees: ''
+assignees: ""
 ---
 
 ## Bug Description
@@ -12,9 +12,9 @@ assignees: ''
 
 ## Steps to Reproduce
 
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 ## Expected Behavior
 
@@ -26,9 +26,9 @@ assignees: ''
 
 ## Environment
 
-- Browser: 
-- Device: 
-- Language: 
+- Browser:
+- Device:
+- Language:
 
 ## Screenshots
 

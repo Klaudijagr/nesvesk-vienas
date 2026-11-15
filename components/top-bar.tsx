@@ -4,12 +4,14 @@ import { UserButton } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { Bell } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+
 import { useLocale } from "@/contexts/locale-context";
 import { api } from "@/convex/_generated/api";
+
 import { LanguageSelector } from "./language-selector";
 import { Button } from "./ui/button";
 
-export function TopBar() {
+export const TopBar = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { t } = useLocale();
@@ -44,10 +46,10 @@ export function TopBar() {
   const pageTitle = getPageTitle();
 
   return (
-    <header className="shrink-0 border-b bg-background">
+    <header className="bg-background shrink-0 border-b">
       <div className="flex h-14 items-center gap-4 px-6">
         {/* Page Title */}
-        <h1 className="font-semibold text-lg">{pageTitle}</h1>
+        <h1 className="text-lg font-semibold">{pageTitle}</h1>
 
         {/* Spacer to push content to the right */}
         <div className="flex-1" />
@@ -59,13 +61,15 @@ export function TopBar() {
           {/* Notifications */}
           <Button
             className="relative"
-            onClick={() => router.push("/messages")}
+            onClick={() => {
+              router.push("/messages");
+            }}
             size="icon"
             variant="ghost"
           >
             <Bell className="h-5 w-5" />
             {totalNotifications > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 font-medium text-white text-xs">
+              <span className="bg-brand absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-xs font-medium text-white">
                 {totalNotifications > 9 ? "9+" : totalNotifications}
               </span>
             )}
@@ -83,4 +87,4 @@ export function TopBar() {
       </div>
     </header>
   );
-}
+};

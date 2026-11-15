@@ -2,22 +2,24 @@
 
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+
 import { Navbar } from "@/components/navbar";
 import { useLocale } from "@/contexts/locale-context";
+import type { Locale } from "@/lib/i18n";
 
-type Section = {
+interface Section {
   title: string;
   content: string | string[];
-};
+}
 
-type TermsContentItem = {
+interface TermsContentItem {
   title: string;
   lastUpdated: string;
   intro: string;
   sections: Section[];
-};
+}
 
-type TermsContent = Record<string, TermsContentItem>;
+type TermsContent = Record<Locale, TermsContentItem>;
 
 const termsContent: TermsContent = {
   lt: {
@@ -328,14 +330,14 @@ const termsContent: TermsContent = {
 
 export default function TermsPage() {
   const { t, locale } = useLocale();
-  const c = termsContent[locale] || termsContent.lt;
+  const c = termsContent[locale];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-muted/50 min-h-screen">
       <Navbar />
       <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
         <Link
-          className="mb-8 inline-flex items-center text-green-700 transition-colors hover:text-green-800 active:scale-95"
+          className="text-success-strong hover:text-success-strong mb-8 inline-flex items-center transition-colors active:scale-95"
           href="/"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -343,24 +345,24 @@ export default function TermsPage() {
         </Link>
 
         <div className="rounded-lg bg-white p-8 shadow-sm">
-          <h1 className="mb-2 font-bold text-3xl text-gray-900">{c.title}</h1>
-          <p className="mb-6 text-gray-500 text-sm">{c.lastUpdated}</p>
+          <h1 className="text-foreground mb-2 text-3xl font-bold">{c.title}</h1>
+          <p className="text-muted-foreground mb-6 text-sm">{c.lastUpdated}</p>
 
-          <div className="mb-8 rounded-md bg-amber-50 p-4">
-            <p className="font-medium text-amber-800 text-sm">{c.intro}</p>
+          <div className="bg-gold-soft/50 mb-8 rounded-md p-4">
+            <p className="text-gold-deep text-sm font-medium">{c.intro}</p>
           </div>
 
           <div className="space-y-8">
             {c.sections.map((section) => (
               <div key={section.title}>
-                <h2 className="mb-3 font-semibold text-gray-900 text-xl">
+                <h2 className="text-foreground mb-3 text-xl font-semibold">
                   {section.title}
                 </h2>
                 {Array.isArray(section.content) ? (
                   <div className="space-y-3">
                     {section.content.map((paragraph, index) => (
                       <p
-                        className="text-gray-600 leading-relaxed"
+                        className="text-muted-foreground leading-relaxed"
                         key={`${section.title}-${index}`}
                       >
                         {paragraph}
@@ -368,7 +370,7 @@ export default function TermsPage() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="text-muted-foreground leading-relaxed">
                     {section.content}
                   </p>
                 )}

@@ -6,7 +6,7 @@ export default {
       // Hardcoding a dev Clerk instance here will break auth in production.
       domain: (() => {
         const domain = process.env.CLERK_ISSUER_DOMAIN;
-        if (!domain) {
+        if (domain === undefined || domain === "") {
           throw new Error(
             "CLERK_ISSUER_DOMAIN is not configured (expected something like https://<instance>.clerk.accounts.dev or your Clerk issuer domain)."
           );

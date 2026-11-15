@@ -1,6 +1,6 @@
 "use client";
 
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { Show, UserButton } from "@clerk/nextjs";
 import { useConvexAuth } from "convex/react";
 import {
   ArrowRight,
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+
 import { Footer } from "@/components/footer";
 import {
   Sheet,
@@ -35,22 +36,24 @@ const languages: { code: Locale; label: string }[] = [
   { code: "ru", label: "RU" },
 ];
 
-function MagicLanguageSelector({ compact = false }: { compact?: boolean }) {
+const MagicLanguageSelector = ({ compact = false }: { compact?: boolean }) => {
   const { locale, setLocale } = useLocale();
 
   return (
     <div
-      className={`flex gap-0.5 rounded-md border border-amber-200/20 bg-slate-900/50 p-0.5 backdrop-blur-sm ${compact ? "" : "md:gap-1 md:rounded-lg md:p-1"}`}
+      className={`border-gold-soft/20 bg-night/50 flex gap-0.5 rounded-md border p-0.5 backdrop-blur-sm ${compact ? "" : "md:gap-1 md:rounded-lg md:p-1"}`}
     >
       {languages.map((lang) => (
         <button
-          className={`rounded px-1.5 py-0.5 font-medium text-[10px] transition-all md:min-w-7 md:px-2 md:py-1 md:text-xs ${
+          className={`text-2xs rounded px-1.5 py-0.5 font-medium transition-all md:min-w-7 md:px-2 md:py-1 md:text-xs ${
             locale === lang.code
-              ? "bg-amber-400 text-slate-900"
-              : "text-amber-100/70 hover:bg-amber-400/10 hover:text-amber-100"
+              ? "bg-gold text-gold-foreground"
+              : "text-gold-soft/70 hover:bg-gold/10 hover:text-gold-soft"
           }`}
           key={lang.code}
-          onClick={() => setLocale(lang.code)}
+          onClick={() => {
+            setLocale(lang.code);
+          }}
           type="button"
         >
           {lang.label}
@@ -58,35 +61,35 @@ function MagicLanguageSelector({ compact = false }: { compact?: boolean }) {
       ))}
     </div>
   );
-}
+};
 
-export default function LandingPage() {
+const scrollToSection = (id: string, delay = 0) => {
+  const doScroll = () => {
+    const element = document.querySelector(`#${id}`);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+  if (delay > 0) {
+    setTimeout(doScroll, delay);
+  } else {
+    doScroll();
+  }
+};
+
+const LandingPage = () => {
   const { isAuthenticated: isSignedIn } = useConvexAuth();
   const { t } = useLocale();
 
-  const scrollToSection = (id: string, delay = 0) => {
-    const doScroll = () => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      }
-    };
-    if (delay > 0) {
-      setTimeout(doScroll, delay);
-    } else {
-      doScroll();
-    }
-  };
-
   return (
-    <div className="flex min-h-screen flex-col bg-[#0F172A] text-white">
+    <div className="bg-night flex min-h-screen flex-col text-white">
       {/* Navbar */}
-      <nav className="relative z-20 border-white/10 border-b bg-[#0F172A]/80 backdrop-blur-md">
+      <nav className="bg-night/80 relative z-20 border-b border-white/10 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-8">
           {/* Logo */}
           <Link className="flex items-center gap-1.5 sm:gap-2" href="/">
-            <Gift className="h-5 w-5 text-amber-400 sm:h-6 sm:w-6" />
-            <span className="font-bold font-serif text-amber-100 text-base sm:text-lg">
+            <Gift className="text-gold h-5 w-5 sm:h-6 sm:w-6" />
+            <span className="text-gold-soft font-serif text-base font-bold sm:text-lg">
               {t.appName}
             </span>
           </Link>
@@ -94,15 +97,19 @@ export default function LandingPage() {
           {/* Center nav links - desktop */}
           <div className="hidden items-center gap-6 md:flex lg:gap-8">
             <button
-              className="font-medium text-amber-100/80 text-sm transition-colors hover:text-amber-100"
-              onClick={() => scrollToSection("how-it-works")}
+              className="text-gold-soft/80 hover:text-gold-soft text-sm font-medium transition-colors"
+              onClick={() => {
+                scrollToSection("how-it-works");
+              }}
               type="button"
             >
               {t.howItWorks}
             </button>
             <button
-              className="font-medium text-amber-100/80 text-sm transition-colors hover:text-amber-100"
-              onClick={() => scrollToSection("about")}
+              className="text-gold-soft/80 hover:text-gold-soft text-sm font-medium transition-colors"
+              onClick={() => {
+                scrollToSection("about");
+              }}
               type="button"
             >
               {t.about}
@@ -112,23 +119,23 @@ export default function LandingPage() {
           {/* Right side - desktop */}
           <div className="hidden items-center gap-2 md:flex lg:gap-3">
             <MagicLanguageSelector />
-            <SignedOut>
+            <Show when="signed-out">
               <Link
-                className="rounded-full border border-amber-200/30 px-3 py-1.5 font-medium text-amber-100 text-sm backdrop-blur-sm transition-all hover:bg-amber-200/10 lg:px-4 lg:py-2"
+                className="border-gold-soft/30 text-gold-soft hover:bg-gold-soft/10 rounded-full border px-3 py-1.5 text-sm font-medium backdrop-blur-sm transition-all lg:px-4 lg:py-2"
                 href="/sign-in"
               >
                 {t.signIn}
               </Link>
               <Link
-                className="rounded-full bg-amber-400 px-3 py-1.5 font-medium text-slate-900 text-sm transition-all hover:bg-amber-300 lg:px-4 lg:py-2"
+                className="bg-gold text-gold-foreground hover:bg-gold-bright rounded-full px-3 py-1.5 text-sm font-medium transition-all lg:px-4 lg:py-2"
                 href="/sign-up"
               >
                 {t.signUp}
               </Link>
-            </SignedOut>
-            <SignedIn>
+            </Show>
+            <Show when="signed-in">
               <Link
-                className="rounded-full bg-amber-400 px-3 py-1.5 font-medium text-slate-900 text-sm transition-all hover:bg-amber-300 lg:px-4 lg:py-2"
+                className="bg-gold text-gold-foreground hover:bg-gold-bright rounded-full px-3 py-1.5 text-sm font-medium transition-all lg:px-4 lg:py-2"
                 href="/browse"
               >
                 {t.goToApp}
@@ -140,7 +147,7 @@ export default function LandingPage() {
                   },
                 }}
               />
-            </SignedIn>
+            </Show>
           </div>
 
           {/* Mobile: language + menu */}
@@ -148,17 +155,17 @@ export default function LandingPage() {
             <MagicLanguageSelector compact />
             <Sheet>
               <SheetTrigger asChild>
-                <button className="p-1 text-amber-100" type="button">
+                <button className="text-gold-soft p-1" type="button">
                   <Menu className="h-5 w-5" />
                 </button>
               </SheetTrigger>
               <SheetContent
-                className="w-[300px] border-slate-700/50 bg-linear-to-b from-slate-900 to-slate-950 p-0"
+                className="border-night-border/50 from-night to-night-deep w-[300px] bg-linear-to-b p-0"
                 side="right"
               >
-                <SheetHeader className="border-slate-700/50 border-b p-4">
-                  <SheetTitle className="flex items-center gap-2 text-amber-100">
-                    <Gift className="h-5 w-5 text-amber-400" />
+                <SheetHeader className="border-night-border/50 border-b p-4">
+                  <SheetTitle className="text-gold-soft flex items-center gap-2">
+                    <Gift className="text-gold h-5 w-5" />
                     {t.appName}
                   </SheetTitle>
                 </SheetHeader>
@@ -167,39 +174,43 @@ export default function LandingPage() {
                   {/* Navigation buttons */}
                   <SheetClose asChild>
                     <button
-                      className="flex w-full items-center justify-between rounded-lg px-4 py-3 text-left transition-colors hover:bg-slate-800/50"
-                      onClick={() => scrollToSection("how-it-works", 300)}
+                      className="hover:bg-night-raised/50 flex w-full items-center justify-between rounded-lg px-4 py-3 text-left transition-colors"
+                      onClick={() => {
+                        scrollToSection("how-it-works", 300);
+                      }}
                       type="button"
                     >
-                      <span className="font-medium text-amber-100/90">
+                      <span className="text-gold-soft/90 font-medium">
                         {t.howItWorks}
                       </span>
-                      <ChevronRight className="h-4 w-4 text-amber-100/40" />
+                      <ChevronRight className="text-gold-soft/40 h-4 w-4" />
                     </button>
                   </SheetClose>
 
                   <SheetClose asChild>
                     <button
-                      className="flex w-full items-center justify-between rounded-lg px-4 py-3 text-left transition-colors hover:bg-slate-800/50"
-                      onClick={() => scrollToSection("about", 300)}
+                      className="hover:bg-night-raised/50 flex w-full items-center justify-between rounded-lg px-4 py-3 text-left transition-colors"
+                      onClick={() => {
+                        scrollToSection("about", 300);
+                      }}
                       type="button"
                     >
-                      <span className="font-medium text-amber-100/90">
+                      <span className="text-gold-soft/90 font-medium">
                         {t.about}
                       </span>
-                      <ChevronRight className="h-4 w-4 text-amber-100/40" />
+                      <ChevronRight className="text-gold-soft/40 h-4 w-4" />
                     </button>
                   </SheetClose>
 
-                  <div className="mx-4 my-2 h-px bg-slate-700/50" />
+                  <div className="bg-night-border/50 mx-4 my-2 h-px" />
 
                   {/* Auth buttons */}
                   <div className="p-4">
-                    <SignedOut>
+                    <Show when="signed-out">
                       <div className="flex gap-3">
                         <SheetClose asChild>
                           <Link
-                            className="flex-1 rounded-lg border border-amber-200/30 py-2.5 text-center font-medium text-amber-100 text-sm transition-colors hover:bg-amber-200/10"
+                            className="border-gold-soft/30 text-gold-soft hover:bg-gold-soft/10 flex-1 rounded-lg border py-2.5 text-center text-sm font-medium transition-colors"
                             href="/sign-in"
                           >
                             {t.signIn}
@@ -207,24 +218,24 @@ export default function LandingPage() {
                         </SheetClose>
                         <SheetClose asChild>
                           <Link
-                            className="flex-1 rounded-lg bg-amber-400 py-2.5 text-center font-medium text-slate-900 text-sm transition-colors hover:bg-amber-300"
+                            className="bg-gold text-gold-foreground hover:bg-gold-bright flex-1 rounded-lg py-2.5 text-center text-sm font-medium transition-colors"
                             href="/sign-up"
                           >
                             {t.signUp}
                           </Link>
                         </SheetClose>
                       </div>
-                    </SignedOut>
-                    <SignedIn>
+                    </Show>
+                    <Show when="signed-in">
                       <SheetClose asChild>
                         <Link
-                          className="block w-full rounded-lg bg-amber-400 py-2.5 text-center font-medium text-slate-900 text-sm transition-colors hover:bg-amber-300"
+                          className="bg-gold text-gold-foreground hover:bg-gold-bright block w-full rounded-lg py-2.5 text-center text-sm font-medium transition-colors"
                           href="/browse"
                         >
                           {t.goToApp}
                         </Link>
                       </SheetClose>
-                    </SignedIn>
+                    </Show>
                   </div>
                 </div>
               </SheetContent>
@@ -244,35 +255,35 @@ export default function LandingPage() {
             priority
             src="/magic-window.png"
           />
-          <div className="absolute inset-0 bg-linear-to-t from-[#0F172A] via-[#0F172A]/60 to-transparent" />
-          <div className="absolute inset-0 bg-linear-to-b from-[#0F172A]/40 to-transparent" />
+          <div className="from-night via-night/60 absolute inset-0 bg-linear-to-t to-transparent" />
+          <div className="from-night/40 absolute inset-0 bg-linear-to-b to-transparent" />
         </div>
 
         {/* Hero Content */}
         <div className="relative z-10 mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 md:py-32 lg:px-8 lg:py-40">
           {/* Constrained text container for mobile */}
           <div className="mx-auto max-w-sm sm:mx-0 sm:max-w-2xl">
-            <h1 className="mb-4 text-center font-bold font-serif text-3xl text-amber-100 tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] sm:mb-6 sm:text-left sm:text-4xl md:text-5xl lg:text-7xl">
+            <h1 className="text-gold-soft drop-shadow-text mb-4 text-center font-serif text-3xl font-bold tracking-tight sm:mb-6 sm:text-left sm:text-4xl md:text-5xl lg:text-7xl">
               {t.heroTitle}
               <br />
-              <span className="text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.3)]">
+              <span className="text-gold drop-shadow-glow">
                 {t.heroHighlight}
               </span>
             </h1>
-            <p className="mb-6 text-center text-blue-100/90 text-sm leading-relaxed drop-shadow-md sm:mb-8 sm:text-left sm:text-base md:text-lg lg:text-xl">
+            <p className="text-night-foreground/80 mb-6 text-center text-sm leading-relaxed drop-shadow-md sm:mb-8 sm:text-left sm:text-base md:text-lg lg:text-xl">
               {t.heroDescription}
             </p>
             {/* Mobile: side-by-side centered buttons */}
             <div className="flex justify-center gap-3 sm:justify-start sm:gap-4">
               <Link
-                className="group relative overflow-hidden rounded-full bg-amber-400 px-4 py-2.5 font-semibold text-slate-900 text-sm shadow-amber-400/20 shadow-lg transition-all hover:scale-105 hover:shadow-amber-400/40 sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base lg:text-lg"
+                className="group bg-gold text-gold-foreground shadow-gold/20 hover:shadow-gold/40 relative overflow-hidden rounded-full px-4 py-2.5 text-sm font-semibold shadow-lg transition-all hover:scale-105 sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base lg:text-lg"
                 href={isSignedIn ? "/onboarding" : "/sign-in"}
               >
                 <span className="relative z-10">{t.inviteGuests}</span>
                 <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
               </Link>
               <Link
-                className="rounded-full border-2 border-amber-200/30 px-4 py-2.5 font-semibold text-amber-100 text-sm backdrop-blur-sm transition-all hover:border-amber-200/60 hover:bg-amber-200/10 sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base lg:text-lg"
+                className="border-gold-soft/30 text-gold-soft hover:border-gold-soft/60 hover:bg-gold-soft/10 rounded-full border-2 px-4 py-2.5 text-sm font-semibold backdrop-blur-sm transition-all sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base lg:text-lg"
                 href={isSignedIn ? "/browse" : "/sign-in"}
               >
                 {t.becomeGuest}
@@ -282,14 +293,14 @@ export default function LandingPage() {
         </div>
 
         {/* Decorative glow */}
-        <div className="pointer-events-none absolute bottom-0 left-1/2 h-32 w-[300px] -translate-x-1/2 translate-y-1/2 rounded-full bg-amber-500/10 blur-[80px] sm:h-64 sm:w-[600px] sm:blur-[100px]" />
+        <div className="bg-gold-rich/10 blur-4xl sm:blur-5xl pointer-events-none absolute bottom-0 left-1/2 h-32 w-[300px] -translate-x-1/2 translate-y-1/2 rounded-full sm:h-64 sm:w-[600px]" />
 
         {/* Divider between hero and how it works */}
         <div className="relative z-10 mx-auto max-w-xs px-4 sm:max-w-md">
           <div className="flex items-center gap-4">
-            <div className="h-px flex-1 bg-linear-to-r from-transparent to-amber-400/30" />
-            <div className="h-1.5 w-1.5 rounded-full bg-amber-400/50" />
-            <div className="h-px flex-1 bg-linear-to-l from-transparent to-amber-400/30" />
+            <div className="to-gold/30 h-px flex-1 bg-linear-to-r from-transparent" />
+            <div className="bg-gold/50 h-1.5 w-1.5 rounded-full" />
+            <div className="to-gold/30 h-px flex-1 bg-linear-to-l from-transparent" />
           </div>
         </div>
 
@@ -300,45 +311,45 @@ export default function LandingPage() {
         >
           <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div className="mx-auto mb-8 max-w-xs text-center sm:mb-12 sm:max-w-none md:mb-16">
-              <h2 className="mb-2 font-bold font-serif text-2xl text-amber-100 sm:mb-4 sm:text-3xl md:text-4xl">
+              <h2 className="text-gold-soft mb-2 font-serif text-2xl font-bold sm:mb-4 sm:text-3xl md:text-4xl">
                 {t.howItWorks}
               </h2>
-              <p className="mx-auto max-w-2xl text-blue-100/70 text-sm sm:text-base">
+              <p className="text-night-foreground/65 mx-auto max-w-2xl text-sm sm:text-base">
                 {t.howItWorksSubtitle}
               </p>
             </div>
 
             <div className="mx-auto grid max-w-xs grid-cols-1 gap-6 sm:max-w-none sm:gap-8 md:grid-cols-3 md:gap-12">
               <div className="flex flex-col items-center text-center">
-                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-amber-400/20 bg-slate-900/60 shadow-amber-500/10 shadow-lg backdrop-blur-sm sm:mb-4 sm:h-16 sm:w-16 md:mb-6 md:h-20 md:w-20">
-                  <Users className="h-7 w-7 text-amber-400 sm:h-8 sm:w-8 md:h-10 md:w-10" />
+                <div className="border-gold/20 bg-night/60 shadow-gold-rich/10 mb-3 flex h-14 w-14 items-center justify-center rounded-full border shadow-lg backdrop-blur-sm sm:mb-4 sm:h-16 sm:w-16 md:mb-6 md:h-20 md:w-20">
+                  <Users className="text-gold h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10" />
                 </div>
-                <h3 className="mb-2 font-bold text-amber-100 text-base sm:mb-3 sm:text-lg md:text-xl">
+                <h3 className="text-gold-soft mb-2 text-base font-bold sm:mb-3 sm:text-lg md:text-xl">
                   1. {t.step1Title}
                 </h3>
-                <p className="text-blue-100/60 text-xs sm:text-sm">
+                <p className="text-night-foreground/55 text-xs sm:text-sm">
                   {t.step1Description}
                 </p>
               </div>
               <div className="flex flex-col items-center text-center">
-                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-emerald-400/20 bg-slate-900/60 shadow-emerald-500/10 shadow-lg backdrop-blur-sm sm:mb-4 sm:h-16 sm:w-16 md:mb-6 md:h-20 md:w-20">
-                  <Calendar className="h-7 w-7 text-emerald-400 sm:h-8 sm:w-8 md:h-10 md:w-10" />
+                <div className="border-holly/20 bg-night/60 shadow-holly/10 mb-3 flex h-14 w-14 items-center justify-center rounded-full border shadow-lg backdrop-blur-sm sm:mb-4 sm:h-16 sm:w-16 md:mb-6 md:h-20 md:w-20">
+                  <Calendar className="text-holly h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10" />
                 </div>
-                <h3 className="mb-2 font-bold text-amber-100 text-base sm:mb-3 sm:text-lg md:text-xl">
+                <h3 className="text-gold-soft mb-2 text-base font-bold sm:mb-3 sm:text-lg md:text-xl">
                   2. {t.step2Title}
                 </h3>
-                <p className="text-blue-100/60 text-xs sm:text-sm">
+                <p className="text-night-foreground/55 text-xs sm:text-sm">
                   {t.step2Description}
                 </p>
               </div>
               <div className="flex flex-col items-center text-center">
-                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-rose-400/20 bg-slate-900/60 shadow-lg shadow-rose-500/10 backdrop-blur-sm sm:mb-4 sm:h-16 sm:w-16 md:mb-6 md:h-20 md:w-20">
-                  <Heart className="h-7 w-7 text-rose-400 sm:h-8 sm:w-8 md:h-10 md:w-10" />
+                <div className="border-berry/20 bg-night/60 shadow-berry/10 mb-3 flex h-14 w-14 items-center justify-center rounded-full border shadow-lg backdrop-blur-sm sm:mb-4 sm:h-16 sm:w-16 md:mb-6 md:h-20 md:w-20">
+                  <Heart className="text-berry h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10" />
                 </div>
-                <h3 className="mb-2 font-bold text-amber-100 text-base sm:mb-3 sm:text-lg md:text-xl">
+                <h3 className="text-gold-soft mb-2 text-base font-bold sm:mb-3 sm:text-lg md:text-xl">
                   3. {t.step3Title}
                 </h3>
-                <p className="text-blue-100/60 text-xs sm:text-sm">
+                <p className="text-night-foreground/55 text-xs sm:text-sm">
                   {t.step3Description}
                 </p>
               </div>
@@ -350,16 +361,16 @@ export default function LandingPage() {
       {/* Separator before Founder section */}
       <div className="mx-auto max-w-xs px-4 py-8 sm:max-w-md sm:py-12">
         <div className="flex items-center gap-4">
-          <div className="h-px flex-1 bg-linear-to-r from-transparent to-amber-400/30" />
-          <div className="h-1.5 w-1.5 rounded-full bg-amber-400/50" />
-          <div className="h-px flex-1 bg-linear-to-l from-transparent to-amber-400/30" />
+          <div className="to-gold/30 h-px flex-1 bg-linear-to-r from-transparent" />
+          <div className="bg-gold/50 h-1.5 w-1.5 rounded-full" />
+          <div className="to-gold/30 h-px flex-1 bg-linear-to-l from-transparent" />
         </div>
       </div>
 
       {/* Story Section - Founder Card */}
       <div className="relative px-4 pb-12 sm:pb-16 md:pb-24" id="about">
         <div className="mx-auto max-w-5xl sm:px-6 lg:px-8">
-          <div className="overflow-hidden rounded-xl border border-amber-200/10 bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm sm:rounded-2xl">
+          <div className="border-gold-soft/10 from-night-raised/50 to-night/50 overflow-hidden rounded-xl border bg-linear-to-br backdrop-blur-sm sm:rounded-2xl">
             <div className="flex flex-col md:flex-row">
               {/* Image - taller on mobile */}
               <div className="relative h-64 w-full sm:h-72 md:h-auto md:w-2/5">
@@ -376,23 +387,23 @@ export default function LandingPage() {
               <div className="flex flex-1 flex-col">
                 {/* Quote section */}
                 <div className="p-4 sm:p-6 md:p-8">
-                  <h3 className="mb-3 font-bold font-serif text-amber-100 text-lg sm:text-xl md:text-2xl">
+                  <h3 className="text-gold-soft mb-3 font-serif text-lg font-bold sm:text-xl md:text-2xl">
                     {t.originStoryTitle}
                   </h3>
-                  <p className="mb-3 text-amber-200/80 text-sm italic leading-relaxed sm:text-base">
-                    "{t.originStoryQuote}"
+                  <p className="text-gold-soft/80 mb-3 text-sm leading-relaxed italic sm:text-base">
+                    &quot;{t.originStoryQuote}&quot;
                   </p>
-                  <p className="text-amber-100/60 text-xs sm:text-sm">
+                  <p className="text-gold-soft/60 text-xs sm:text-sm">
                     — {t.originStoryAuthor}
                   </p>
                 </div>
 
                 {/* Separator */}
-                <div className="mx-4 h-px bg-amber-200/10 sm:mx-6 md:mx-8" />
+                <div className="bg-gold-soft/10 mx-4 h-px sm:mx-6 md:mx-8" />
 
                 {/* Highlighted footer section */}
-                <div className="bg-slate-800/30 p-4 sm:p-6 md:p-8">
-                  <p className="text-center text-blue-100/70 text-xs leading-relaxed sm:text-left sm:text-sm">
+                <div className="bg-night-raised/30 p-4 sm:p-6 md:p-8">
+                  <p className="text-night-foreground/65 text-center text-xs leading-relaxed sm:text-left sm:text-sm">
                     {t.originStoryDescription}
                   </p>
                 </div>
@@ -405,20 +416,20 @@ export default function LandingPage() {
       {/* Separator before Safety */}
       <div className="mx-auto max-w-xs px-4 py-8 sm:max-w-md sm:py-12">
         <div className="flex items-center gap-4">
-          <div className="h-px flex-1 bg-linear-to-r from-transparent to-amber-400/30" />
-          <div className="h-1.5 w-1.5 rounded-full bg-amber-400/50" />
-          <div className="h-px flex-1 bg-linear-to-l from-transparent to-amber-400/30" />
+          <div className="to-gold/30 h-px flex-1 bg-linear-to-r from-transparent" />
+          <div className="bg-gold/50 h-1.5 w-1.5 rounded-full" />
+          <div className="to-gold/30 h-px flex-1 bg-linear-to-l from-transparent" />
         </div>
       </div>
 
       {/* Safety Section */}
-      <div className="relative bg-slate-900/50 px-4 pb-12 sm:pb-16 md:pb-24">
+      <div className="bg-night/50 relative px-4 pb-12 sm:pb-16 md:pb-24">
         <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="mx-auto mb-8 max-w-xs text-center sm:mb-12 sm:max-w-none md:mb-16">
-            <h2 className="mb-2 font-bold font-serif text-2xl text-amber-100 sm:mb-4 sm:text-3xl md:text-4xl">
+            <h2 className="text-gold-soft mb-2 font-serif text-2xl font-bold sm:mb-4 sm:text-3xl md:text-4xl">
               {t.safetyTitle}
             </h2>
-            <p className="mx-auto max-w-2xl text-blue-100/70 text-sm sm:text-base">
+            <p className="text-night-foreground/65 mx-auto max-w-2xl text-sm sm:text-base">
               {t.howItWorksSubtitle}
             </p>
           </div>
@@ -426,27 +437,27 @@ export default function LandingPage() {
           {/* Safety cards - centered and smaller on mobile */}
           <div className="mx-auto flex max-w-xs flex-col gap-4 sm:max-w-none sm:flex-row sm:justify-center sm:gap-6 md:gap-8">
             {/* Card 1 */}
-            <div className="rounded-xl border border-amber-200/10 bg-linear-to-br from-slate-800/30 to-slate-900/30 p-4 text-center backdrop-blur-sm sm:w-72 sm:rounded-2xl sm:p-5 sm:text-left md:w-80 md:p-6">
-              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-amber-400/10 sm:mx-0 sm:mb-4 sm:h-12 sm:w-12 md:h-14 md:w-14">
-                <Star className="h-5 w-5 text-amber-400 sm:h-6 sm:w-6 md:h-7 md:w-7" />
+            <div className="border-gold-soft/10 from-night-raised/30 to-night/30 rounded-xl border bg-linear-to-br p-4 text-center backdrop-blur-sm sm:w-72 sm:rounded-2xl sm:p-5 sm:text-left md:w-80 md:p-6">
+              <div className="bg-gold/10 mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full sm:mx-0 sm:mb-4 sm:h-12 sm:w-12 md:h-14 md:w-14">
+                <Star className="text-gold h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7" />
               </div>
-              <h3 className="mb-1.5 font-semibold text-amber-100 text-base sm:mb-2 sm:text-lg">
+              <h3 className="text-gold-soft mb-1.5 text-base font-semibold sm:mb-2 sm:text-lg">
                 {t.identityVerification}
               </h3>
-              <p className="text-blue-100/60 text-xs leading-relaxed sm:text-sm">
+              <p className="text-night-foreground/55 text-xs leading-relaxed sm:text-sm">
                 {t.identityVerificationDesc}
               </p>
             </div>
 
             {/* Card 2 */}
-            <div className="rounded-xl border border-amber-200/10 bg-linear-to-br from-slate-800/30 to-slate-900/30 p-4 text-center backdrop-blur-sm sm:w-72 sm:rounded-2xl sm:p-5 sm:text-left md:w-80 md:p-6">
-              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-rose-400/10 sm:mx-0 sm:mb-4 sm:h-12 sm:w-12 md:h-14 md:w-14">
-                <MessageCircle className="h-5 w-5 text-rose-400 sm:h-6 sm:w-6 md:h-7 md:w-7" />
+            <div className="border-gold-soft/10 from-night-raised/30 to-night/30 rounded-xl border bg-linear-to-br p-4 text-center backdrop-blur-sm sm:w-72 sm:rounded-2xl sm:p-5 sm:text-left md:w-80 md:p-6">
+              <div className="bg-berry/10 mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full sm:mx-0 sm:mb-4 sm:h-12 sm:w-12 md:h-14 md:w-14">
+                <MessageCircle className="text-berry h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7" />
               </div>
-              <h3 className="mb-1.5 font-semibold text-amber-100 text-base sm:mb-2 sm:text-lg">
+              <h3 className="text-gold-soft mb-1.5 text-base font-semibold sm:mb-2 sm:text-lg">
                 {t.mutualConsent}
               </h3>
-              <p className="text-blue-100/60 text-xs leading-relaxed sm:text-sm">
+              <p className="text-night-foreground/55 text-xs leading-relaxed sm:text-sm">
                 {t.mutualConsentDesc}
               </p>
             </div>
@@ -456,29 +467,29 @@ export default function LandingPage() {
 
       {/* CTA */}
       <div className="relative overflow-hidden pt-8 pb-12 sm:pt-12 sm:pb-16 md:pt-16 md:pb-24">
-        <div className="absolute inset-0 bg-linear-to-br from-amber-600/20 via-rose-600/10 to-amber-600/20" />
-        <div className="pointer-events-none absolute top-0 left-1/2 h-32 w-[400px] -translate-x-1/2 rounded-full bg-amber-500/20 blur-[80px] sm:h-64 sm:w-[800px] sm:blur-[120px]" />
+        <div className="from-gold-strong/20 via-berry/10 to-gold-strong/20 absolute inset-0 bg-linear-to-br" />
+        <div className="bg-gold-rich/20 blur-4xl sm:blur-6xl pointer-events-none absolute top-0 left-1/2 h-32 w-[400px] -translate-x-1/2 rounded-full sm:h-64 sm:w-[800px]" />
 
         {/* Separator at top of CTA */}
         <div className="relative mx-auto mb-8 max-w-xs px-4 sm:mb-12 sm:max-w-md">
           <div className="flex items-center gap-4">
-            <div className="h-px flex-1 bg-linear-to-r from-transparent to-amber-400/30" />
-            <div className="h-1.5 w-1.5 rounded-full bg-amber-400/50" />
-            <div className="h-px flex-1 bg-linear-to-l from-transparent to-amber-400/30" />
+            <div className="to-gold/30 h-px flex-1 bg-linear-to-r from-transparent" />
+            <div className="bg-gold/50 h-1.5 w-1.5 rounded-full" />
+            <div className="to-gold/30 h-px flex-1 bg-linear-to-l from-transparent" />
           </div>
         </div>
 
         <div className="relative mx-auto max-w-xs px-4 text-center sm:max-w-4xl">
-          <Flame className="mx-auto mb-4 h-8 w-8 text-amber-400 sm:mb-6 sm:h-10 sm:w-10 md:h-12 md:w-12" />
-          <h2 className="mb-2 font-bold font-serif text-2xl text-amber-100 sm:mb-4 sm:text-3xl md:text-4xl">
+          <Flame className="text-gold mx-auto mb-4 h-8 w-8 sm:mb-6 sm:h-10 sm:w-10 md:h-12 md:w-12" />
+          <h2 className="text-gold-soft mb-2 font-serif text-2xl font-bold sm:mb-4 sm:text-3xl md:text-4xl">
             {t.finalCtaTitle}
           </h2>
-          <p className="mx-auto mb-6 max-w-xl text-blue-100/70 text-sm sm:mb-8 sm:text-base">
+          <p className="text-night-foreground/65 mx-auto mb-6 max-w-xl text-sm sm:mb-8 sm:text-base">
             {t.finalCtaDescription}
           </p>
           <div className="flex justify-center gap-3 sm:gap-4">
             <Link
-              className="group relative flex items-center justify-center gap-1.5 overflow-hidden rounded-full bg-amber-400 px-4 py-2.5 font-semibold text-slate-900 text-sm shadow-amber-400/20 shadow-lg transition-all hover:scale-105 hover:shadow-amber-400/40 sm:gap-2 sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base"
+              className="group bg-gold text-gold-foreground shadow-gold/20 hover:shadow-gold/40 relative flex items-center justify-center gap-1.5 overflow-hidden rounded-full px-4 py-2.5 text-sm font-semibold shadow-lg transition-all hover:scale-105 sm:gap-2 sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base"
               href={isSignedIn ? "/onboarding" : "/sign-in"}
             >
               <span className="relative z-10">{t.getStarted}</span>
@@ -486,7 +497,7 @@ export default function LandingPage() {
               <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
             </Link>
             <Link
-              className="flex items-center justify-center rounded-full border-2 border-amber-200/30 px-4 py-2.5 font-semibold text-amber-100 text-sm backdrop-blur-sm transition-all hover:border-amber-200/60 hover:bg-amber-200/10 sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base"
+              className="border-gold-soft/30 text-gold-soft hover:border-gold-soft/60 hover:bg-gold-soft/10 flex items-center justify-center rounded-full border-2 px-4 py-2.5 text-sm font-semibold backdrop-blur-sm transition-all sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base"
               href="/browse"
             >
               {t.browseHosts}
@@ -498,4 +509,6 @@ export default function LandingPage() {
       <Footer />
     </div>
   );
-}
+};
+
+export default LandingPage;

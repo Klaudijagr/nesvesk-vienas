@@ -1,6 +1,8 @@
 import { v } from "convex/values";
+
 import { mutation, query } from "./_generated/server";
 import { getCurrentUserId } from "./lib/auth";
+import { mapSequential } from "./lib/helpers";
 
 // Current policy version - update this when T&Cs change
 const CURRENT_POLICY_VERSION = "2024-12-01";
@@ -79,35 +81,36 @@ export const recordMultipleConsents = mutation({
 
     const now = Date.now();
     const version = args.policyVersion ?? CURRENT_POLICY_VERSION;
-    const insertedIds: string[] = [];
+    // Sequential on purpose: a purpose repeated in the same call must see the
+    // record inserted for its earlier occurrence.
+    const insertedIds: string[] = await mapSequential(
+      args.consents,
+      async (consent) => {
+        // Check if consent already exists
+        const existing = await ctx.db
+          .query("userConsents")
+          .withIndex("by_purpose", (q) =>
+            q.eq("userId", userId).eq("purpose", consent.purpose)
+          )
+          .first();
 
-    for (const consent of args.consents) {
-      // Check if consent already exists
-      const existing = await ctx.db
-        .query("userConsents")
-        .withIndex("by_purpose", (q) =>
-          q.eq("userId", userId).eq("purpose", consent.purpose)
-        )
-        .first();
+        if (existing && existing.status === "active") {
+          // Already have active consent
+          return existing._id;
+        }
 
-      if (existing && existing.status === "active") {
-        // Already have active consent
-        insertedIds.push(existing._id);
-        continue;
+        // Record new consent
+        return await ctx.db.insert("userConsents", {
+          userId,
+          purpose: consent.purpose,
+          policyVersion: version,
+          status: "active",
+          consentMethod: consent.consentMethod,
+          consentTimestamp: now,
+          createdAt: now,
+        });
       }
-
-      // Record new consent
-      const id = await ctx.db.insert("userConsents", {
-        userId,
-        purpose: consent.purpose,
-        policyVersion: version,
-        status: "active",
-        consentMethod: consent.consentMethod,
-        consentTimestamp: now,
-        createdAt: now,
-      });
-      insertedIds.push(id);
-    }
+    );
 
     return insertedIds;
   },
@@ -136,7 +139,8 @@ export const withdrawConsent = mutation({
     }
 
     if (existing.status === "withdrawn") {
-      return existing._id; // Already withdrawn
+      // Already withdrawn
+      return existing._id;
     }
 
     await ctx.db.patch(existing._id, {
