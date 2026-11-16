@@ -1,31 +1,11 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
-
-/** Pages and files anyone may load without signing in. */
-const PUBLIC_PATHS = new Set([
-  "/",
-  "/safety",
-  "/terms",
-  "/privacy",
-  "/cookies",
-  "/robots.txt",
-  "/sitemap.xml",
-]);
+import { offlineResponse } from "@/lib/offline-page";
 
 /**
- * Path prefixes that stay public: Clerk's own sign-in and sign-up flows,
- * signed webhooks, and the PostHog proxy that signed-out visitors also use.
+ * The site is offline: every page, API route and the PostHog proxy answer
+ * with the offline notice. Static files under `public/` and `_next` still load.
+ * To reopen, revert the commit that introduced this file's current contents.
  */
-const PUBLIC_PREFIXES = ["/sign-in", "/sign-up", "/api/webhooks", "/ingest"];
-
-const isPublicPath = (pathname: string): boolean =>
-  PUBLIC_PATHS.has(pathname) ||
-  PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-
-export const proxy = clerkMiddleware(async (auth, request) => {
-  if (!isPublicPath(request.nextUrl.pathname)) {
-    await auth.protect();
-  }
-});
+export const proxy = (): Response => offlineResponse();
 
 export const config = {
   matcher: [
